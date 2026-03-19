@@ -46,14 +46,12 @@ WORKDIR /app
 # Copy application from builder
 COPY --from=builder /app /app
 
-# Make console executable
-RUN chmod +x /app/bin/console
+# Make console executable and var directory writable by any user
+RUN chmod +x /app/bin/console && \
+    chmod -R 777 /app/var
 
-# Create non-root user for security
-RUN adduser -D -u 1000 phpquality && \
-    chown -R phpquality:phpquality /app
-
-USER phpquality
+# Set production environment
+ENV APP_ENV=prod
 
 # Set entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
