@@ -83,10 +83,10 @@ Chaque type définit :
 
 ```bash
 # Construire l'image
-docker build -t amoifr/phpquality -f docker/Dockerfile .
+docker build -t amoifr13/phpquality -f docker/Dockerfile .
 
-# Ou utiliser l'image pré-construite (quand disponible)
-docker pull amoifr/phpquality
+# Ou utiliser l'image pré-construite
+docker pull amoifr13/phpquality
 ```
 
 ### Analyse rapide
@@ -96,7 +96,7 @@ docker pull amoifr/phpquality
 docker run --rm \
   -v $(pwd):/project \
   -v $(pwd)/reports:/reports \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/src --report-html=/reports
 ```
 
@@ -107,25 +107,25 @@ docker run --rm \
 docker run --rm \
   -v $(pwd):/project \
   -v $(pwd)/reports:/reports \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/src --type=symfony --report-html=/reports
 
 # Projet PrestaShop
 docker run --rm \
   -v $(pwd):/project \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/modules/mymodule --type=prestashop
 
 # Projet WordPress
 docker run --rm \
   -v $(pwd):/project \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/wp-content/plugins/myplugin --type=wordpress
 
 # Projet Magento 2
 docker run --rm \
   -v $(pwd):/project \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/app/code/Vendor/Module --type=magento
 ```
 
@@ -134,7 +134,7 @@ docker run --rm \
 ```bash
 docker run --rm \
   -v $(pwd):/project \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/src --no-html
 ```
 
@@ -144,14 +144,14 @@ docker run --rm \
 docker run --rm \
   -v $(pwd):/project \
   -v $(pwd)/reports:/reports \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/src --json=/reports/metrics.json
 ```
 
 ### Lister les types disponibles
 
 ```bash
-docker run --rm amoifr/phpquality analyze --list-types
+docker run --rm amoifr13/phpquality analyze --list-types
 ```
 
 ### Mode CI (échouer si violations)
@@ -159,7 +159,7 @@ docker run --rm amoifr/phpquality analyze --list-types
 ```bash
 docker run --rm \
   -v $(pwd):/project \
-  amoifr/phpquality \
+  amoifr13/phpquality \
   analyze --source=/project/src --type=symfony --fail-on-violation
 ```
 

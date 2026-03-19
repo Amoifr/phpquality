@@ -2,7 +2,7 @@
 set -e
 
 # PhpQuality Docker Entrypoint
-# Usage: docker run amoifr/phpquality analyze --source=/project/src
+# Usage: docker run amoifr13/phpquality analyze --source=/project/src
 
 # If first argument starts with -, assume it's an option for analyze
 if [ "${1#-}" != "$1" ]; then
