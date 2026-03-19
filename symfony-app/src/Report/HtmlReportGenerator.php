@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Report;
 
+use App\Analyzer\GitBlameAnalyzer;
 use App\Analyzer\Result\ProjectResult;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -21,6 +22,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         private readonly Environment $twig,
         private readonly Filesystem $filesystem,
         private readonly TranslatorInterface $translator,
+        private readonly GitBlameAnalyzer $gitBlameAnalyzer,
     ) {}
 
     public function generate(ProjectResult $result, mixed $outputPath, string $lang = 'en'): void
@@ -105,6 +107,14 @@ class HtmlReportGenerator implements ReportGeneratorInterface
                 'dependencies' => $result->dependencies,
             ]), $lang);
         }
+
+        // Generate analysis.html (cross-dimension charts)
+        $authorStats = $this->gitBlameAnalyzer->analyze($result);
+        $this->generatePage($outputPath, 'analysis.html', 'report/analysis.html.twig', array_merge($commonData, [
+            'analysisData' => $this->prepareAnalysisData($result),
+            'treeData' => $this->prepareTreeData($result),
+            'authorStats' => $authorStats,
+        ]), $lang);
     }
 
     private function generatePage(string $outputPath, string $filename, string $template, array $data, string $lang): void
@@ -212,6 +222,239 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         }
 
         return $topOperators;
+    }
+
+    private function prepareAnalysisData(ProjectResult $result): array
+    {
+        $classes = $result->getAllClasses();
+        $data = [];
+
+        // Build a map of file path to halstead metrics
+        $halsteadByFile = [];
+        foreach ($result->files as $file) {
+            if (!$file->hasErrors && !empty($file->halstead)) {
+                $halsteadByFile[$file->path] = $file->halstead;
+            }
+        }
+
+        foreach ($classes as $class) {
+            // Get file-level Halstead metrics for this class
+            $halstead = $halsteadByFile[$class->filePath] ?? [];
+
+            $data[] = [
+                'name' => $class->name,
+                'fqn' => $class->getFullyQualifiedName(),
+                'loc' => $class->totalLoc,
+                'maxCcn' => $class->maxCcn,
+                'avgCcn' => $class->avgCcn,
+                'mi' => $class->mi,
+                'miRating' => $class->miRating,
+                'lcom' => $class->lcom,
+                'lcomRating' => $class->lcomRating,
+                'methodCount' => $class->methodCount,
+                'propertyCount' => $class->propertyCount,
+                'ccnRating' => $this->getCcnRating($class->maxCcn),
+                'halsteadVolume' => $halstead['volume'] ?? 0,
+                'halsteadDifficulty' => $halstead['difficulty'] ?? 0,
+                'halsteadBugs' => $halstead['bugs'] ?? 0,
+            ];
+        }
+
+        return $data;
+    }
+
+    private function getCcnRating(int $maxCcn): string
+    {
+        return match (true) {
+            $maxCcn <= 4 => 'A',
+            $maxCcn <= 7 => 'B',
+            $maxCcn <= 10 => 'C',
+            $maxCcn <= 15 => 'D',
+            default => 'F',
+        };
+    }
+
+    private function getMiRating(float $mi): string
+    {
+        return match (true) {
+            $mi >= 85 => 'A',
+            $mi >= 65 => 'B',
+            $mi >= 40 => 'C',
+            $mi >= 20 => 'D',
+            default => 'F',
+        };
+    }
+
+    private function prepareTreeData(ProjectResult $result): array
+    {
+        $tree = [];
+
+        foreach ($result->files as $file) {
+            $relativePath = $file->relativePath;
+            $parts = explode('/', $relativePath);
+            $filename = array_pop($parts);
+
+            // File metrics
+            $fileData = [
+                'name' => $filename,
+                'type' => 'file',
+                'path' => $relativePath,
+                'loc' => $file->loc['loc'] ?? 0,
+                'lloc' => $file->loc['lloc'] ?? 0,
+                'cloc' => $file->loc['cloc'] ?? 0,
+                'maxCcn' => $file->ccn['summary']['maxCcn'] ?? 0,
+                'avgCcn' => $file->ccn['summary']['averageCcn'] ?? 0,
+                'mi' => $file->mi,
+                'miRating' => $file->miRating,
+                'ccnRating' => $this->getCcnRating($file->ccn['summary']['maxCcn'] ?? 0),
+                'classCount' => count($file->classes),
+                'methodCount' => array_sum(array_map(fn($c) => $c->methodCount, $file->classes)),
+                'hasErrors' => $file->hasErrors,
+                'classes' => [],
+            ];
+
+            // Add classes as children
+            foreach ($file->classes as $class) {
+                $classData = [
+                    'name' => $class->name,
+                    'type' => 'class',
+                    'loc' => $class->totalLoc,
+                    'maxCcn' => $class->maxCcn,
+                    'avgCcn' => $class->avgCcn,
+                    'mi' => $class->mi,
+                    'miRating' => $class->miRating,
+                    'ccnRating' => $this->getCcnRating($class->maxCcn),
+                    'lcom' => $class->lcom,
+                    'lcomRating' => $class->lcomRating,
+                    'methodCount' => $class->methodCount,
+                    'propertyCount' => $class->propertyCount,
+                    'methods' => [],
+                ];
+
+                // Add methods as children of class
+                foreach ($class->methods as $method) {
+                    $classData['methods'][] = [
+                        'name' => $method->name,
+                        'type' => 'method',
+                        'loc' => $method->loc,
+                        'ccn' => $method->ccn,
+                        'ccnRating' => $method->ccnRating,
+                        'mi' => $method->mi ?? 0,
+                        'miRating' => $method->miRating ?? $this->getMiRating($method->mi ?? 100),
+                    ];
+                }
+
+                $fileData['classes'][] = $classData;
+            }
+
+            // Build directory structure
+            $current = &$tree;
+            foreach ($parts as $dir) {
+                if (!isset($current[$dir])) {
+                    $current[$dir] = [
+                        'name' => $dir,
+                        'type' => 'directory',
+                        'children' => [],
+                        'files' => [],
+                        // Aggregated metrics (will be calculated later)
+                        'loc' => 0,
+                        'maxCcn' => 0,
+                        'avgMi' => 0,
+                        'fileCount' => 0,
+                        'classCount' => 0,
+                    ];
+                }
+                $current = &$current[$dir]['children'];
+            }
+
+            // Add file to current directory level
+            $current['__files'][] = $fileData;
+        }
+
+        // Convert to array format and calculate aggregated metrics
+        return $this->buildTreeArray($tree);
+    }
+
+    private function buildTreeArray(array $tree): array
+    {
+        $result = [];
+
+        foreach ($tree as $key => $node) {
+            if ($key === '__files') {
+                continue;
+            }
+
+            $item = [
+                'name' => $node['name'],
+                'type' => 'directory',
+                'children' => [],
+                'loc' => 0,
+                'maxCcn' => 0,
+                'totalMi' => 0,
+                'miCount' => 0,
+                'fileCount' => 0,
+                'classCount' => 0,
+            ];
+
+            // Process subdirectories
+            if (!empty($node['children'])) {
+                $item['children'] = $this->buildTreeArray($node['children']);
+
+                // Aggregate metrics from subdirectories
+                foreach ($item['children'] as $child) {
+                    $item['loc'] += $child['loc'];
+                    $item['maxCcn'] = max($item['maxCcn'], $child['maxCcn']);
+                    if ($child['type'] === 'directory') {
+                        $item['totalMi'] += ($child['avgMi'] ?? 0) * ($child['miCount'] ?? 1);
+                        $item['miCount'] += $child['miCount'] ?? 1;
+                    } else {
+                        $item['totalMi'] += $child['mi'] ?? 0;
+                        $item['miCount']++;
+                    }
+                    $item['fileCount'] += $child['type'] === 'file' ? 1 : ($child['fileCount'] ?? 0);
+                    $item['classCount'] += $child['classCount'] ?? 0;
+                }
+            }
+
+            // Process files in this directory
+            if (isset($node['children']['__files'])) {
+                foreach ($node['children']['__files'] as $file) {
+                    $item['children'][] = $file;
+                    $item['loc'] += $file['loc'];
+                    $item['maxCcn'] = max($item['maxCcn'], $file['maxCcn']);
+                    $item['totalMi'] += $file['mi'];
+                    $item['miCount']++;
+                    $item['fileCount']++;
+                    $item['classCount'] += $file['classCount'];
+                }
+            }
+
+            // Calculate average MI
+            $item['avgMi'] = $item['miCount'] > 0 ? $item['totalMi'] / $item['miCount'] : 0;
+            $item['miRating'] = $this->getMiRating($item['avgMi']);
+            $item['ccnRating'] = $this->getCcnRating($item['maxCcn']);
+
+            // Clean up temporary fields
+            unset($item['totalMi']);
+
+            $result[] = $item;
+        }
+
+        // Add root-level files
+        if (isset($tree['__files'])) {
+            foreach ($tree['__files'] as $file) {
+                $result[] = $file;
+            }
+        }
+
+        // Sort: directories first, then files, alphabetically
+        usort($result, function ($a, $b) {
+            if ($a['type'] === 'directory' && $b['type'] !== 'directory') return -1;
+            if ($a['type'] !== 'directory' && $b['type'] === 'directory') return 1;
+            return strcasecmp($a['name'], $b['name']);
+        });
+
+        return $result;
     }
 
     private function prepareChartData(ProjectResult $result): array

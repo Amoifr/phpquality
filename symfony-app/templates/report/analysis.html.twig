@@ -10,8 +10,92 @@
         <p>{{ 'analysis.description'|trans }}</p>
     </div>
 
-    <!-- Bubble Charts Grid -->
+    <!-- CrossDimension Charts -->
     <section class="section">
+        <div class="grid grid-2">
+            <!-- Complexity vs Size (LOC x CCN, size=methods, color=MI) -->
+            <div class="card chart-card">
+                <h3>{{ 'analysis.complexity_vs_size'|trans }}</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                    {{ 'analysis.complexity_vs_size_desc'|trans }}
+                </p>
+                <div class="cross-chart-wrapper">
+                    <div class="cross-chart-container">
+                        <canvas id="chartComplexitySize"></canvas>
+                    </div>
+                </div>
+                <!-- Size Legend -->
+                <div class="size-legend">
+                    <span class="size-legend-title">{{ 'analysis.legend_size'|trans }}:</span>
+                    <div class="size-circles">
+                        <div class="size-circle size-circle-12"></div>
+                        <span class="size-label">1</span>
+                        <div class="size-circle size-circle-20"></div>
+                        <span class="size-label">5</span>
+                        <div class="size-circle size-circle-32"></div>
+                        <span class="size-label">15</span>
+                        <div class="size-circle size-circle-48"></div>
+                        <span class="size-label">30+</span>
+                    </div>
+                </div>
+                <!-- Color Legend -->
+                <div class="color-legend">
+                    <span class="color-legend-title">{{ 'analysis.legend_color'|trans }}:</span>
+                    <div class="color-gradient-wrapper">
+                        <div class="color-gradient"></div>
+                        <div class="color-labels">
+                            <span>F ({{ 'ratings.F'|trans }})</span>
+                            <span>D</span>
+                            <span>C</span>
+                            <span>B</span>
+                            <span>A ({{ 'ratings.A'|trans }})</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintainability vs Volume (MI x Halstead Volume, size=methods, color=Difficulty) -->
+            <div class="card chart-card">
+                <h3>{{ 'analysis.maintainability_vs_volume'|trans }}</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                    {{ 'analysis.maintainability_vs_volume_desc'|trans }}
+                </p>
+                <div class="cross-chart-wrapper">
+                    <div class="cross-chart-container">
+                        <canvas id="chartMaintainabilityVolume"></canvas>
+                    </div>
+                </div>
+                <div class="size-legend">
+                    <span class="size-legend-title">{{ 'tables.methods'|trans }}:</span>
+                    <div class="size-circles">
+                        <div class="size-circle size-circle-12"></div>
+                        <span class="size-label">1-3</span>
+                        <div class="size-circle size-circle-20"></div>
+                        <span class="size-label">4-8</span>
+                        <div class="size-circle size-circle-32"></div>
+                        <span class="size-label">9-15</span>
+                        <div class="size-circle size-circle-48"></div>
+                        <span class="size-label">16+</span>
+                    </div>
+                </div>
+                <div class="color-legend">
+                    <span class="color-legend-title">{{ 'halstead.difficulty'|trans }}:</span>
+                    <div class="color-gradient-wrapper">
+                        <div class="color-gradient" style="background: linear-gradient(to right, var(--color-a), var(--color-c), var(--color-f));"></div>
+                        <div class="color-labels">
+                            <span>{{ 'halstead.easy_understand'|trans }}</span>
+                            <span></span>
+                            <span>{{ 'halstead.very_difficult'|trans }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Correlation Bubble Charts Grid -->
+    <section class="section">
+        <h2>{{ 'analysis.correlation'|trans }}</h2>
         <div class="grid grid-2">
             <!-- CCN vs MI -->
             <div class="card chart-card">
@@ -51,10 +135,10 @@
         </div>
     </section>
 
-    <!-- Correlation Analysis -->
+    <!-- Correlation Coefficients -->
     <section class="section">
         <div class="card">
-            <h2>{{ 'analysis.correlation'|trans }}</h2>
+            <h2>{{ 'analysis.correlation_coefficient'|trans }}</h2>
             <div class="grid grid-3" style="margin-top: 1rem;">
                 <div class="correlation-card">
                     <div class="correlation-metrics">CCN ↔ MI</div>
@@ -82,27 +166,27 @@
             <p class="text-muted" style="margin-bottom: 1rem;">{{ 'analysis.quadrant_desc'|trans }}</p>
             <div class="grid grid-4">
                 <div class="quadrant-card quadrant-good">
-                    <div class="quadrant-icon">✓</div>
-                    <div class="quadrant-title">{{ 'analysis.quadrant_good'|trans }}</div>
-                    <div class="quadrant-desc">{{ 'analysis.quadrant_good_desc'|trans }}</div>
-                    <div class="quadrant-count" id="countGood">0</div>
+                    <div class="quadrant-icon">&#10003;</div>
+                    <div class="quadrant-title">{{ 'analysis.zone_safe'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.zone_safe_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countSafe">0</div>
                 </div>
                 <div class="quadrant-card quadrant-complex">
-                    <div class="quadrant-icon">⚠</div>
-                    <div class="quadrant-title">{{ 'analysis.quadrant_complex'|trans }}</div>
-                    <div class="quadrant-desc">{{ 'analysis.quadrant_complex_desc'|trans }}</div>
-                    <div class="quadrant-count" id="countComplex">0</div>
+                    <div class="quadrant-icon">&#9888;</div>
+                    <div class="quadrant-title">{{ 'analysis.zone_watch'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.zone_watch_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countWatch">0</div>
                 </div>
                 <div class="quadrant-card quadrant-large">
-                    <div class="quadrant-icon">📏</div>
-                    <div class="quadrant-title">{{ 'analysis.quadrant_large'|trans }}</div>
-                    <div class="quadrant-desc">{{ 'analysis.quadrant_large_desc'|trans }}</div>
-                    <div class="quadrant-count" id="countLarge">0</div>
+                    <div class="quadrant-icon">&#128207;</div>
+                    <div class="quadrant-title">{{ 'analysis.zone_risk'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.zone_risk_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countRisk">0</div>
                 </div>
                 <div class="quadrant-card quadrant-critical">
-                    <div class="quadrant-icon">✗</div>
-                    <div class="quadrant-title">{{ 'analysis.quadrant_critical'|trans }}</div>
-                    <div class="quadrant-desc">{{ 'analysis.quadrant_critical_desc'|trans }}</div>
+                    <div class="quadrant-icon">&#10007;</div>
+                    <div class="quadrant-title">{{ 'analysis.zone_critical'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.zone_critical_desc'|trans }}</div>
                     <div class="quadrant-count" id="countCritical">0</div>
                 </div>
             </div>
@@ -129,67 +213,147 @@
             </table>
         </div>
     </section>
-{% endblock %}
 
-{% block extra_styles %}
-.correlation-card {
-    text-align: center;
-    padding: 1.5rem;
-    background: var(--color-surface-hover);
-    border-radius: 0.5rem;
-}
-.correlation-metrics {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-.correlation-value {
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: monospace;
-}
-.correlation-value.positive { color: var(--color-danger); }
-.correlation-value.negative { color: var(--color-success); }
-.correlation-value.neutral { color: var(--color-text-muted); }
+    <!-- Code Tree -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'analysis.tree'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'analysis.tree_desc'|trans }}</p>
+            <div class="tree-controls">
+                <button class="tree-btn" onclick="expandAll()">{{ 'analysis.expand_all'|trans }}</button>
+                <button class="tree-btn" onclick="collapseAll()">{{ 'analysis.collapse_all'|trans }}</button>
+            </div>
+            <div class="tree-container" id="codeTree"></div>
+        </div>
+    </section>
 
-.quadrant-card {
-    text-align: center;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 2px solid var(--color-border);
-}
-.quadrant-icon {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-}
-.quadrant-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-.quadrant-desc {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    margin-bottom: 0.5rem;
-}
-.quadrant-count {
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-.quadrant-good { border-color: var(--color-success); }
-.quadrant-good .quadrant-icon { color: var(--color-success); }
-.quadrant-good .quadrant-count { color: var(--color-success); }
+    {% if authorStats|length > 0 %}
+    <!-- Hall of Fame / Hall of Shame -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'analysis.contributors'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'analysis.contributors_desc'|trans }}</p>
 
-.quadrant-complex { border-color: var(--color-warning); }
-.quadrant-complex .quadrant-icon { color: var(--color-warning); }
-.quadrant-complex .quadrant-count { color: var(--color-warning); }
+            <div class="grid grid-2">
+                <!-- Hall of Fame -->
+                <div class="hall-card hall-fame">
+                    <div class="hall-header">
+                        <span class="hall-icon">🏆</span>
+                        <h3>{{ 'analysis.hall_fame'|trans }}</h3>
+                    </div>
+                    <p class="hall-desc text-muted">{{ 'analysis.hall_fame_desc'|trans }}</p>
+                    <div class="hall-list">
+                        {% set topAuthors = authorStats|slice(0, 5) %}
+                        {% set rank = 1 %}
+                        {% for key, author in topAuthors %}
+                            <div class="hall-item hall-item-rank-{{ rank }}">
+                                <div class="hall-rank">
+                                    {% if rank == 1 %}🥇{% elseif rank == 2 %}🥈{% elseif rank == 3 %}🥉{% else %}{{ rank }}{% endif %}
+                                </div>
+                                <div class="hall-author">
+                                    <div class="hall-name">{{ author.name }}</div>
+                                    <div class="hall-email text-muted">{{ author.email }}</div>
+                                </div>
+                                <div class="hall-stats">
+                                    <div class="hall-score">
+                                        <span class="label label-{{ author.scoreRating }}">{{ author.score|round(1) }}</span>
+                                    </div>
+                                    <div class="hall-metrics">
+                                        <span title="LOC">📄 {{ author.loc }}</span>
+                                        <span title="{{ 'tables.files'|trans }}">📁 {{ author.files }}</span>
+                                        <span title="MI"><span class="label label-{{ author.miRating }}">MI {{ author.avgMi|round(0) }}</span></span>
+                                        <span title="CCN"><span class="label label-{{ author.ccnRating }}">CCN {{ author.avgCcn|round(1) }}</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% set rank = rank + 1 %}
+                        {% endfor %}
+                    </div>
+                </div>
 
-.quadrant-large { border-color: var(--color-info); }
-.quadrant-large .quadrant-icon { color: var(--color-info); }
-.quadrant-large .quadrant-count { color: var(--color-info); }
+                <!-- Hall of Shame -->
+                <div class="hall-card hall-shame">
+                    <div class="hall-header">
+                        <span class="hall-icon">⚠️</span>
+                        <h3>{{ 'analysis.hall_shame'|trans }}</h3>
+                    </div>
+                    <p class="hall-desc text-muted">{{ 'analysis.hall_shame_desc'|trans }}</p>
+                    <div class="hall-list">
+                        {% set bottomAuthors = authorStats|reverse|slice(0, 5) %}
+                        {% set rank = 1 %}
+                        {% for key, author in bottomAuthors %}
+                            {% if author.scoreRating in ['D', 'F'] or rank <= 3 %}
+                            <div class="hall-item hall-item-shame-{{ rank }}">
+                                <div class="hall-rank shame-rank">
+                                    {{ rank }}
+                                </div>
+                                <div class="hall-author">
+                                    <div class="hall-name">{{ author.name }}</div>
+                                    <div class="hall-email text-muted">{{ author.email }}</div>
+                                </div>
+                                <div class="hall-stats">
+                                    <div class="hall-score">
+                                        <span class="label label-{{ author.scoreRating }}">{{ author.score|round(1) }}</span>
+                                    </div>
+                                    <div class="hall-metrics">
+                                        <span title="LOC">📄 {{ author.loc }}</span>
+                                        <span title="{{ 'tables.files'|trans }}">📁 {{ author.files }}</span>
+                                        <span title="MI"><span class="label label-{{ author.miRating }}">MI {{ author.avgMi|round(0) }}</span></span>
+                                        <span title="CCN"><span class="label label-{{ author.ccnRating }}">CCN {{ author.avgCcn|round(1) }}</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% set rank = rank + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-.quadrant-critical { border-color: var(--color-danger); }
-.quadrant-critical .quadrant-icon { color: var(--color-danger); }
-.quadrant-critical .quadrant-count { color: var(--color-danger); }
+    <!-- All Contributors Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'analysis.all_contributors'|trans }}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ 'analysis.author'|trans }}</th>
+                        <th>{{ 'tables.files'|trans }}</th>
+                        <th>{{ 'tables.classes'|trans }}</th>
+                        <th>{{ 'tables.methods'|trans }}</th>
+                        <th>LOC</th>
+                        <th>{{ 'analysis.avg_mi'|trans }}</th>
+                        <th>{{ 'analysis.avg_ccn'|trans }}</th>
+                        <th>{{ 'analysis.score'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set rank = 1 %}
+                    {% for key, author in authorStats %}
+                    <tr>
+                        <td>{{ rank }}</td>
+                        <td>
+                            <div>{{ author.name }}</div>
+                            <small class="text-muted">{{ author.email }}</small>
+                        </td>
+                        <td>{{ author.files }}</td>
+                        <td>{{ author.classes }}</td>
+                        <td>{{ author.methods }}</td>
+                        <td>{{ author.loc }}</td>
+                        <td><span class="label label-{{ author.miRating }}">{{ author.avgMi|round(1) }}</span></td>
+                        <td><span class="label label-{{ author.ccnRating }}">{{ author.avgCcn|round(1) }}</span></td>
+                        <td><span class="label label-{{ author.scoreRating }}">{{ author.score|round(1) }}</span></td>
+                    </tr>
+                    {% set rank = rank + 1 %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -203,33 +367,274 @@
     const gridColor = isDarkMode ? '#334155' : '#e2e8f0';
     const textColor = isDarkMode ? '#94a3b8' : '#64748b';
 
-    // Color by rating
-    function getColor(rating, alpha = 0.7) {
-        const colors = {
-            'A': `rgba(22, 163, 74, ${alpha})`,
-            'B': `rgba(101, 163, 13, ${alpha})`,
-            'C': `rgba(202, 138, 4, ${alpha})`,
-            'D': `rgba(234, 88, 12, ${alpha})`,
-            'F': `rgba(220, 38, 38, ${alpha})`
+    // Rating colors
+    const ratingColors = {
+        'A': { bg: 'rgba(22, 163, 74, 0.75)', border: 'rgba(22, 163, 74, 1)' },
+        'B': { bg: 'rgba(101, 163, 13, 0.75)', border: 'rgba(101, 163, 13, 1)' },
+        'C': { bg: 'rgba(202, 138, 4, 0.75)', border: 'rgba(202, 138, 4, 1)' },
+        'D': { bg: 'rgba(234, 88, 12, 0.75)', border: 'rgba(234, 88, 12, 1)' },
+        'F': { bg: 'rgba(220, 38, 38, 0.75)', border: 'rgba(220, 38, 38, 1)' }
+    };
+
+    // Logarithmic bubble size scaling (12px min to 80px max diameter)
+    function calculateBubbleRadius(value, minVal, maxVal) {
+        if (maxVal === minVal || maxVal === 0) return 12;
+        const minR = 6;  // 12px diameter / 2
+        const maxR = 40; // 80px diameter / 2
+        const normalized = Math.max(0, Math.min(1, (value - minVal) / (maxVal - minVal)));
+        const logScaled = Math.log(1 + normalized * 9) / Math.log(10);
+        return minR + logScaled * (maxR - minR);
+    }
+
+    // Get color by rating
+    function getColorByRating(rating) {
+        return ratingColors[rating] || ratingColors['C'];
+    }
+
+    // Get color by continuous value (for difficulty)
+    function getColorByValue(value, min, max) {
+        if (max === min) return 'rgba(202, 138, 4, 0.75)';
+        const normalized = Math.min(1, Math.max(0, (value - min) / (max - min)));
+        // Green -> Yellow -> Red gradient
+        if (normalized < 0.5) {
+            const t = normalized * 2;
+            return `rgba(${Math.round(22 + (202-22)*t)}, ${Math.round(163 + (138-163)*t)}, ${Math.round(74 + (4-74)*t)}, 0.75)`;
+        } else {
+            const t = (normalized - 0.5) * 2;
+            return `rgba(${Math.round(202 + (220-202)*t)}, ${Math.round(138 + (38-138)*t)}, ${Math.round(4 + (38-4)*t)}, 0.75)`;
+        }
+    }
+
+    // Determine quadrant zone
+    function getZone(x, y, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter) {
+        const xGood = xHigherIsBetter ? x >= xThreshold : x <= xThreshold;
+        const yGood = yHigherIsBetter ? y >= yThreshold : y <= yThreshold;
+
+        if (xGood && yGood) return 'safe';
+        if (xGood && !yGood) return 'watch';
+        if (!xGood && yGood) return 'risk';
+        return 'critical';
+    }
+
+    // Quadrant background plugin for Chart.js
+    function createQuadrantPlugin(xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter) {
+        return {
+            id: 'quadrantBackground',
+            beforeDraw: (chart) => {
+                const { ctx, chartArea, scales } = chart;
+                if (!chartArea) return;
+
+                const xScale = scales.x;
+                const yScale = scales.y;
+
+                // Clamp threshold to visible range
+                const xMin = xScale.min;
+                const xMax = xScale.max;
+                const yMin = yScale.min;
+                const yMax = yScale.max;
+
+                const clampedXThreshold = Math.max(xMin, Math.min(xMax, xThreshold));
+                const clampedYThreshold = Math.max(yMin, Math.min(yMax, yThreshold));
+
+                const xThresholdPixel = xScale.getPixelForValue(clampedXThreshold);
+                const yThresholdPixel = yScale.getPixelForValue(clampedYThreshold);
+
+                ctx.save();
+                ctx.globalAlpha = isDarkMode ? 0.08 : 0.12;
+
+                const colors = {
+                    safe: '#22c55e',
+                    watch: '#eab308',
+                    risk: '#f97316',
+                    critical: '#ef4444'
+                };
+
+                // Calculate zones based on orientation
+                // Top-left quadrant (low X, high Y)
+                const topLeftZone = getZone(xMin, yMax, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[topLeftZone];
+                ctx.fillRect(chartArea.left, chartArea.top, xThresholdPixel - chartArea.left, yThresholdPixel - chartArea.top);
+
+                // Top-right quadrant (high X, high Y)
+                const topRightZone = getZone(xMax, yMax, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[topRightZone];
+                ctx.fillRect(xThresholdPixel, chartArea.top, chartArea.right - xThresholdPixel, yThresholdPixel - chartArea.top);
+
+                // Bottom-left quadrant (low X, low Y)
+                const bottomLeftZone = getZone(xMin, yMin, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[bottomLeftZone];
+                ctx.fillRect(chartArea.left, yThresholdPixel, xThresholdPixel - chartArea.left, chartArea.bottom - yThresholdPixel);
+
+                // Bottom-right quadrant (high X, low Y)
+                const bottomRightZone = getZone(xMax, yMin, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[bottomRightZone];
+                ctx.fillRect(xThresholdPixel, yThresholdPixel, chartArea.right - xThresholdPixel, chartArea.bottom - yThresholdPixel);
+
+                ctx.restore();
+            }
         };
-        return colors[rating] || `rgba(100, 116, 139, ${alpha})`;
     }
 
-    // Prepare bubble data
-    function prepareBubbleData(xKey, yKey, rKey, ratingKey) {
-        return classData.map(c => ({
-            x: c[xKey],
-            y: c[yKey],
-            r: Math.max(4, Math.min(25, Math.sqrt(c[rKey]) * 1.5)),
-            name: c.name,
-            rating: c[ratingKey],
-            backgroundColor: getColor(c[ratingKey]),
-            borderColor: getColor(c[ratingKey], 1)
-        }));
+    // CrossDimensionChart factory
+    function createCrossDimensionChart(config) {
+        const {
+            canvasId,
+            xKey, yKey, sizeKey, colorKey,
+            xLabel, yLabel,
+            xThreshold, yThreshold,
+            xHigherIsBetter = true,
+            yHigherIsBetter = true,
+            colorByRating = true,
+            colorMin = 0, colorMax = 100
+        } = config;
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+
+        // Calculate size range
+        const sizes = classData.map(c => c[sizeKey]).filter(s => s > 0);
+        const minSize = sizes.length > 0 ? Math.min(...sizes) : 1;
+        const maxSize = sizes.length > 0 ? Math.max(...sizes) : 1;
+
+        // Prepare data points
+        const dataPoints = classData.map(c => {
+            const colorVal = colorByRating ? c[colorKey] : c[colorKey];
+            const color = colorByRating
+                ? getColorByRating(colorVal)
+                : { bg: getColorByValue(colorVal, colorMin, colorMax), border: getColorByValue(colorVal, colorMin, colorMax) };
+
+            return {
+                x: c[xKey],
+                y: c[yKey],
+                r: calculateBubbleRadius(c[sizeKey], minSize, maxSize),
+                name: c.name,
+                fqn: c.fqn,
+                sizeValue: c[sizeKey],
+                colorValue: colorByRating ? colorVal : (typeof colorVal === 'number' ? colorVal.toFixed(1) : colorVal),
+                zone: getZone(c[xKey], c[yKey], xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter),
+                backgroundColor: color.bg,
+                borderColor: color.border,
+                raw: c
+            };
+        });
+
+        const quadrantPlugin = createQuadrantPlugin(xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+
+        return new Chart(ctx, {
+            type: 'bubble',
+            plugins: [quadrantPlugin],
+            data: {
+                datasets: [{
+                    data: dataPoints,
+                    backgroundColor: dataPoints.map(d => d.backgroundColor),
+                    borderColor: dataPoints.map(d => d.borderColor),
+                    borderWidth: 1.5,
+                    hoverBorderWidth: 2.5,
+                    hoverBorderColor: isDarkMode ? '#f1f5f9' : '#1e293b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            title: (items) => items[0]?.raw?.name || '',
+                            label: (context) => {
+                                const d = context.raw;
+                                return [
+                                    `${xLabel}: ${typeof d.x === 'number' ? d.x.toFixed(1) : d.x}`,
+                                    `${yLabel}: ${typeof d.y === 'number' ? d.y.toFixed(1) : d.y}`,
+                                    `{{ 'analysis.legend_size'|trans }}: ${d.sizeValue}`,
+                                    `{{ 'analysis.legend_color'|trans }}: ${d.colorValue}`
+                                ];
+                            },
+                            afterBody: (items) => {
+                                const zone = items[0]?.raw?.zone;
+                                const zoneLabels = {
+                                    safe: '{{ "analysis.zone_safe"|trans }}',
+                                    watch: '{{ "analysis.zone_watch"|trans }}',
+                                    risk: '{{ "analysis.zone_risk"|trans }}',
+                                    critical: '{{ "analysis.zone_critical"|trans }}'
+                                };
+                                return [`Zone: ${zoneLabels[zone] || zone}`];
+                            }
+                        },
+                        backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+                        titleColor: isDarkMode ? '#f1f5f9' : '#1e293b',
+                        bodyColor: isDarkMode ? '#94a3b8' : '#64748b',
+                        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: xLabel, color: textColor },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor }
+                    },
+                    y: {
+                        title: { display: true, text: yLabel, color: textColor },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
+            }
+        });
     }
 
-    // Create bubble chart
-    function createBubbleChart(canvasId, xLabel, yLabel, data, xReverse = false, yReverse = false) {
+    // Create CrossDimension charts
+
+    // 1. Complexity vs Size (LOC x CCN, size=methods, color=MI rating)
+    createCrossDimensionChart({
+        canvasId: 'chartComplexitySize',
+        xKey: 'loc',
+        yKey: 'maxCcn',
+        sizeKey: 'methodCount',
+        colorKey: 'miRating',
+        xLabel: 'LOC',
+        yLabel: 'CCN',
+        xThreshold: 300,
+        yThreshold: 10,
+        xHigherIsBetter: false,
+        yHigherIsBetter: false,
+        colorByRating: true
+    });
+
+    // 2. Maintainability vs Volume (MI x Halstead Volume, size=methods, color=difficulty)
+    const difficulties = classData.map(c => c.halsteadDifficulty).filter(d => d > 0);
+    const minDiff = difficulties.length > 0 ? Math.min(...difficulties) : 0;
+    const maxDiff = difficulties.length > 0 ? Math.max(...difficulties) : 30;
+
+    createCrossDimensionChart({
+        canvasId: 'chartMaintainabilityVolume',
+        xKey: 'mi',
+        yKey: 'halsteadVolume',
+        sizeKey: 'methodCount',
+        colorKey: 'halsteadDifficulty',
+        xLabel: 'MI',
+        yLabel: '{{ "halstead.volume"|trans }}',
+        xThreshold: 65,
+        yThreshold: 1000,
+        xHigherIsBetter: true,
+        yHigherIsBetter: false,
+        colorByRating: false,
+        colorMin: minDiff,
+        colorMax: maxDiff
+    });
+
+    // Simple bubble chart for correlation views
+    function createSimpleBubbleChart(canvasId, xLabel, yLabel, data) {
         const ctx = document.getElementById(canvasId).getContext('2d');
         return new Chart(ctx, {
             type: 'bubble',
@@ -248,43 +653,40 @@
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
-                                const d = context.raw;
-                                return `${d.name}: ${xLabel}=${d.x.toFixed(1)}, ${yLabel}=${d.y.toFixed(1)}`;
+                            label: (ctx) => {
+                                const d = ctx.raw;
+                                return `${d.name}: ${xLabel}=${typeof d.x === 'number' ? d.x.toFixed(1) : d.x}, ${yLabel}=${typeof d.y === 'number' ? d.y.toFixed(1) : d.y}`;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        title: { display: true, text: xLabel, color: textColor },
-                        grid: { color: gridColor },
-                        ticks: { color: textColor },
-                        reverse: xReverse
-                    },
-                    y: {
-                        title: { display: true, text: yLabel, color: textColor },
-                        grid: { color: gridColor },
-                        ticks: { color: textColor },
-                        reverse: yReverse
-                    }
+                    x: { title: { display: true, text: xLabel, color: textColor }, grid: { color: gridColor }, ticks: { color: textColor } },
+                    y: { title: { display: true, text: yLabel, color: textColor }, grid: { color: gridColor }, ticks: { color: textColor } }
                 }
             }
         });
     }
 
-    // Create charts
-    const dataCcnMi = prepareBubbleData('maxCcn', 'mi', 'loc', 'miRating');
-    createBubbleChart('chartCcnMi', 'CCN', 'MI', dataCcnMi);
+    // Prepare data for legacy charts
+    function prepareLegacyData(xKey, yKey, rKey, ratingKey) {
+        return classData.map(c => {
+            const color = getColorByRating(c[ratingKey]);
+            return {
+                x: c[xKey],
+                y: c[yKey],
+                r: Math.max(4, Math.min(25, Math.sqrt(c[rKey]) * 1.5)),
+                name: c.name,
+                backgroundColor: color.bg,
+                borderColor: color.border
+            };
+        });
+    }
 
-    const dataLcomMi = prepareBubbleData('lcom', 'mi', 'loc', 'miRating');
-    createBubbleChart('chartLcomMi', 'LCOM', 'MI', dataLcomMi);
-
-    const dataCcnLoc = prepareBubbleData('maxCcn', 'loc', 'methodCount', 'ccnRating');
-    createBubbleChart('chartCcnLoc', 'CCN', 'LOC', dataCcnLoc);
-
-    const dataLcomLoc = prepareBubbleData('lcom', 'loc', 'methodCount', 'lcomRating');
-    createBubbleChart('chartLcomLoc', 'LCOM', 'LOC', dataLcomLoc);
+    createSimpleBubbleChart('chartCcnMi', 'CCN', 'MI', prepareLegacyData('maxCcn', 'mi', 'loc', 'miRating'));
+    createSimpleBubbleChart('chartLcomMi', 'LCOM', 'MI', prepareLegacyData('lcom', 'mi', 'loc', 'miRating'));
+    createSimpleBubbleChart('chartCcnLoc', 'CCN', 'LOC', prepareLegacyData('maxCcn', 'loc', 'methodCount', 'ccnRating'));
+    createSimpleBubbleChart('chartLcomLoc', 'LCOM', 'LOC', prepareLegacyData('lcom', 'loc', 'methodCount', 'lcomRating'));
 
     // Calculate correlations
     function correlation(x, y) {
@@ -317,44 +719,43 @@
     displayCorrelation('corrLcomMi', correlation(lcomValues, miValues));
     displayCorrelation('corrCcnLoc', correlation(ccnValues, locValues));
 
-    // Quadrant analysis (based on CCN and MI thresholds)
+    // Calculate quadrant counts based on LOC and CCN
+    const locThreshold = 300;
     const ccnThreshold = 10;
-    const miThreshold = 65;
-    let good = 0, complex = 0, large = 0, critical = 0;
+    let countSafe = 0, countWatch = 0, countRisk = 0, countCritical = 0;
     const attentionClasses = [];
 
     classData.forEach(c => {
         const issues = [];
-        const isHighCcn = c.maxCcn > ccnThreshold;
-        const isLowMi = c.mi < miThreshold;
-        const isHighLcom = c.lcom > 0.7;
-        const isLargeLoc = c.loc > 300;
+        const miThreshold = 65;
+        const lcomThreshold = 0.7;
 
-        if (isHighCcn) issues.push('CCN');
-        if (isLowMi) issues.push('MI');
-        if (isHighLcom) issues.push('LCOM');
-        if (isLargeLoc) issues.push('LOC');
+        if (c.maxCcn > ccnThreshold) issues.push('CCN');
+        if (c.mi < miThreshold) issues.push('MI');
+        if (c.lcom > lcomThreshold) issues.push('LCOM');
+        if (c.loc > locThreshold) issues.push('LOC');
 
-        if (!isHighCcn && !isLowMi) good++;
-        else if (isHighCcn && !isLowMi) complex++;
-        else if (!isHighCcn && isLowMi) large++;
-        else critical++;
+        // Zone based on LOC (x, lower better) and CCN (y, lower better)
+        const zone = getZone(c.loc, c.maxCcn, locThreshold, ccnThreshold, false, false);
+        if (zone === 'safe') countSafe++;
+        else if (zone === 'watch') countWatch++;
+        else if (zone === 'risk') countRisk++;
+        else countCritical++;
 
         if (issues.length > 0) {
             attentionClasses.push({ ...c, issues });
         }
     });
 
-    document.getElementById('countGood').textContent = good;
-    document.getElementById('countComplex').textContent = complex;
-    document.getElementById('countLarge').textContent = large;
-    document.getElementById('countCritical').textContent = critical;
-
-    // Sort attention classes by number of issues (descending)
-    attentionClasses.sort((a, b) => b.issues.length - a.issues.length);
+    document.getElementById('countSafe').textContent = countSafe;
+    document.getElementById('countWatch').textContent = countWatch;
+    document.getElementById('countRisk').textContent = countRisk;
+    document.getElementById('countCritical').textContent = countCritical;
 
     // Populate attention table
+    attentionClasses.sort((a, b) => b.issues.length - a.issues.length);
     const tbody = document.getElementById('attentionBody');
+
     attentionClasses.slice(0, 20).forEach(c => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -371,5 +772,166 @@
     if (attentionClasses.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-muted" style="text-align: center;">{{ "analysis.no_issues"|trans }}</td></tr>';
     }
+
+    // ===== Code Tree =====
+    const treeData = {{ treeData|json_encode|raw }};
+
+    // SVG icons
+    const icons = {
+        folder: '<svg class="tree-icon tree-icon-folder" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
+        file: '<svg class="tree-icon tree-icon-file" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>',
+        class: '<svg class="tree-icon tree-icon-class" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+        method: '<svg class="tree-icon tree-icon-method" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
+        chevron: '<svg class="tree-toggle-icon" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>'
+    };
+
+    // Calculate severity based on worst rating
+    function getSeverity(node) {
+        const ratingOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'F': 5 };
+        let worstRating = 'A';
+
+        if (node.type === 'directory') {
+            // Use MI rating and CCN rating
+            const ratings = [node.miRating, node.ccnRating].filter(r => r);
+            for (const r of ratings) {
+                if (ratingOrder[r] > ratingOrder[worstRating]) {
+                    worstRating = r;
+                }
+            }
+        } else if (node.type === 'file') {
+            const ratings = [node.miRating, node.ccnRating].filter(r => r);
+            for (const r of ratings) {
+                if (ratingOrder[r] > ratingOrder[worstRating]) {
+                    worstRating = r;
+                }
+            }
+        } else if (node.type === 'class') {
+            const ratings = [node.miRating, node.ccnRating, node.lcomRating].filter(r => r);
+            for (const r of ratings) {
+                if (ratingOrder[r] > ratingOrder[worstRating]) {
+                    worstRating = r;
+                }
+            }
+        } else if (node.type === 'method') {
+            worstRating = node.ccnRating || 'A';
+        }
+
+        return worstRating;
+    }
+
+    function renderTreeNode(node, depth = 0) {
+        const hasChildren = (node.type === 'directory' && node.children && node.children.length > 0) ||
+                           (node.type === 'file' && node.classes && node.classes.length > 0) ||
+                           (node.type === 'class' && node.methods && node.methods.length > 0);
+
+        const isCollapsed = depth > 1; // Collapse by default after depth 1
+        const severity = getSeverity(node);
+
+        let html = `<div class="tree-node ${isCollapsed && hasChildren ? 'collapsed' : ''}" data-type="${node.type}">`;
+        html += `<div class="tree-node-header severity-${severity}" ${hasChildren ? 'onclick="toggleNode(this)"' : ''}>`;
+
+        // Toggle icon
+        html += `<span class="tree-toggle ${hasChildren ? 'has-children' : ''}">`;
+        if (hasChildren) {
+            html += icons.chevron;
+        }
+        html += '</span>';
+
+        // Type icon
+        if (node.type === 'directory') {
+            html += icons.folder;
+        } else if (node.type === 'file') {
+            html += icons.file;
+        } else if (node.type === 'class') {
+            html += icons.class;
+        } else if (node.type === 'method') {
+            html += icons.method;
+        }
+
+        // Name
+        html += `<span class="tree-name tree-name-${node.type}">${node.name}</span>`;
+
+        // Metrics
+        html += '<div class="tree-metrics">';
+
+        if (node.type === 'directory') {
+            html += `<span class="tree-stats">`;
+            html += `<span>${node.fileCount} {{ 'analysis.files'|trans }}</span>`;
+            html += `<span>${node.classCount} {{ 'analysis.classes'|trans }}</span>`;
+            html += `</span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.maxCcn}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">MI:</span><span class="tree-metric-rating rating-${node.miRating}">${Math.round(node.avgMi)}</span></span>`;
+        } else if (node.type === 'file') {
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.maxCcn}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">MI:</span><span class="tree-metric-rating rating-${node.miRating}">${Math.round(node.mi)}</span></span>`;
+        } else if (node.type === 'class') {
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.maxCcn}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">MI:</span><span class="tree-metric-rating rating-${node.miRating}">${Math.round(node.mi)}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">LCOM:</span><span class="tree-metric-rating rating-${node.lcomRating}">${node.lcom.toFixed(2)}</span></span>`;
+        } else if (node.type === 'method') {
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.ccn}</span></span>`;
+        }
+
+        html += '</div>'; // tree-metrics
+        html += '</div>'; // tree-node-header
+
+        // Children
+        if (hasChildren) {
+            html += '<div class="tree-node-children">';
+            if (node.type === 'directory' && node.children) {
+                for (const child of node.children) {
+                    html += renderTreeNode(child, depth + 1);
+                }
+            } else if (node.type === 'file' && node.classes) {
+                for (const cls of node.classes) {
+                    html += renderTreeNode(cls, depth + 1);
+                }
+            } else if (node.type === 'class' && node.methods) {
+                for (const method of node.methods) {
+                    html += renderTreeNode(method, depth + 1);
+                }
+            }
+            html += '</div>';
+        }
+
+        html += '</div>'; // tree-node
+        return html;
+    }
+
+    function renderTree() {
+        const container = document.getElementById('codeTree');
+        let html = '';
+        for (const node of treeData) {
+            html += renderTreeNode(node, 0);
+        }
+        container.innerHTML = html;
+    }
+
+    function toggleNode(header) {
+        const node = header.parentElement;
+        node.classList.toggle('collapsed');
+    }
+
+    function expandAll() {
+        document.querySelectorAll('.tree-node.collapsed').forEach(node => {
+            node.classList.remove('collapsed');
+        });
+    }
+
+    function collapseAll() {
+        document.querySelectorAll('.tree-node').forEach(node => {
+            const hasChildren = node.querySelector('.tree-node-children');
+            if (hasChildren) {
+                node.classList.add('collapsed');
+            }
+        });
+    }
+
+    // Render tree on page load
+    renderTree();
 </script>
 {% endblock %}

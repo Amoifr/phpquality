@@ -38,8 +38,8 @@ LABEL org.opencontainers.image.vendor="amoifr"
 LABEL org.opencontainers.image.source="https://github.com/amoifr/PhpQuality"
 LABEL org.opencontainers.image.authors="Pascal CESCON <contact@moi.ruedesjasses.fr>"
 
-# Install runtime dependencies only
-RUN apk add --no-cache libzip tini
+# Install runtime dependencies (including git for blame analysis)
+RUN apk add --no-cache libzip tini git
 
 WORKDIR /app
 
