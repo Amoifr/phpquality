@@ -1,0 +1,51 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+
+    App\Analyzer\Ast\AstParser: ~
+    App\Analyzer\FileAnalyzer: ~
+    App\Analyzer\ProjectAnalyzer: ~
+
+    App\Analyzer\ProjectType\ProjectTypeDetector:
+        arguments:
+            $projectTypes: !tagged_iterator app.project_type
+
+    App\Analyzer\ProjectType\PhpProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\SymfonyProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\LaravelProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\PrestashopProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\MagentoProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\WordpressProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\WooCommerceProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\DrupalProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\JoomlaProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\Typo3ProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\SuluProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\SyliusProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\CodeIgniterProjectType:
+        tags: ['app.project_type']
+    App\Analyzer\ProjectType\CakePHPProjectType:
+        tags: ['app.project_type']
+
+    App\Report\HtmlReportGenerator: ~
+    App\Report\ConsoleReportGenerator: ~

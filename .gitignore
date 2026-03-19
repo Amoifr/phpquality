@@ -1,0 +1,26 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated reports (examples)
+report/
+
+# Symfony
+symfony-app/var/
+symfony-app/vendor/
+symfony-app/.env.local
+
+# Composer
+composer.phar
+
+# Node
+node_modules/
+
+# Logs
+*.log

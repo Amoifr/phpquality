@@ -1,0 +1,22 @@
+{
+    "source": "./src",
+    "type": "auto",
+    "exclude": [
+        "vendor",
+        "node_modules",
+        "tests",
+        "var",
+        "cache"
+    ],
+    "report": {
+        "html": "./phpinsight-report",
+        "json": null,
+        "csv": null
+    },
+    "thresholds": {
+        "ccn": 10,
+        "lcom": 0.8,
+        "mi": 20
+    },
+    "failOnViolation": false
+}
