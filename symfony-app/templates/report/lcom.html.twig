@@ -1,0 +1,254 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'lcom.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_lcom %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'lcom.title'|trans }}</h1>
+        <p>{{ 'lcom.description'|trans }}</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card metric-card rating-{{ summary.ratings.lcom }}">
+                <div class="metric-label">{{ 'lcom.average_lcom'|trans }}</div>
+                <div class="metric-value">{{ summary.averageLcom }}</div>
+                <div><span class="rating rating-{{ summary.ratings.lcom }}">{{ summary.ratings.lcom }}</span></div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'mi.total_classes'|trans }}</div>
+                <div class="metric-value">{{ summary.totalClasses }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'summary.violations'|trans }} (&gt;{{ summary.thresholds.lcom }})</div>
+                <div class="metric-value {{ summary.violations.lcom > 0 ? 'text-danger' : 'text-success' }}">{{ summary.violations.lcom }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'lcom.cohesive_classes'|trans }}</div>
+                <div class="metric-value text-success">{{ cohesiveClasses }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explanation & Chart -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>{{ 'lcom.understanding'|trans }}</h3>
+                <div class="formula" style="text-align: center; padding: 1rem;">
+                    {{ 'lcom.formula'|trans }}
+                </div>
+                <p style="margin-top: 1rem;">{{ 'lcom.where'|trans }}:</p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li><strong>SUM</strong> = {{ 'lcom.sum_desc'|trans }}</li>
+                    <li><strong>M</strong> = {{ 'lcom.m_desc'|trans }}</li>
+                    <li><strong>A</strong> = {{ 'lcom.a_desc'|trans }}</li>
+                </ul>
+
+                <div class="info-box" style="margin-top: 1.5rem;">
+                    <strong>{{ 'lcom.low_lcom'|trans }}:</strong> {{ 'lcom.low_lcom_desc'|trans }}
+                </div>
+                <div class="warning-box">
+                    <strong>{{ 'lcom.high_lcom'|trans }}:</strong> {{ 'lcom.high_lcom_desc'|trans }}
+                </div>
+            </div>
+            <div class="card">
+                <h3>{{ 'distribution.lack_of_cohesion'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="lcomDistChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visual Scale -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'lcom.cohesion_scale'|trans }}</h3>
+            <div style="display: flex; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden;">
+                <div style="flex: 1; padding: 1rem; background: var(--color-a); text-align: center;">
+                    <div style="font-weight: bold;">0.0 - 0.2</div>
+                    <div style="font-size: 0.875rem;">{{ 'lcom.perfect_cohesion'|trans }}</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-b); text-align: center;">
+                    <div style="font-weight: bold;">0.2 - 0.4</div>
+                    <div style="font-size: 0.875rem;">{{ 'lcom.good_cohesion'|trans }}</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-c); text-align: center; color: black;">
+                    <div style="font-weight: bold;">0.4 - 0.6</div>
+                    <div style="font-size: 0.875rem;">{{ 'lcom.moderate_cohesion'|trans }}</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-d); text-align: center;">
+                    <div style="font-weight: bold;">0.6 - 0.8</div>
+                    <div style="font-size: 0.875rem;">{{ 'lcom.poor_cohesion'|trans }}</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-f); text-align: center;">
+                    <div style="font-weight: bold;">0.8 - 1.0</div>
+                    <div style="font-size: 0.875rem;">{{ 'lcom.no_cohesion'|trans }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classes Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'mi.all_classes'|trans }}</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="{{ 'mi.search_placeholder'|trans }}">
+                <select id="ratingFilter" class="filter-select">
+                    <option value="">{{ 'tables.all_ratings'|trans }}</option>
+                    <option value="A">{{ 'tables.rating'|trans }} A ({{ 'lcom.rating_cohesive'|trans }})</option>
+                    <option value="B">{{ 'tables.rating'|trans }} B</option>
+                    <option value="C">{{ 'tables.rating'|trans }} C</option>
+                    <option value="D">{{ 'tables.rating'|trans }} D</option>
+                    <option value="F">{{ 'tables.rating'|trans }} F ({{ 'lcom.rating_not_cohesive'|trans }})</option>
+                </select>
+            </div>
+            <table id="classesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">{{ 'tables.class'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)">{{ 'tables.category'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(2)" class="sorted">LCOM <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(3)">{{ 'tables.rating'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">{{ 'tables.methods'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(5)">{{ 'tables.properties'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th>{{ 'lcom.cohesion'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for class in classes %}
+                    <tr data-rating="{{ class.lcomRating }}">
+                        <td>
+                            <div>{{ class.name }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">{{ class.namespace }}</div>
+                        </td>
+                        <td class="text-muted">{{ class.category ?? '-' }}</td>
+                        <td data-sort="{{ class.lcom }}">{{ class.lcom }}</td>
+                        <td data-sort="{{ class.lcomRating }}"><span class="label label-{{ class.lcomRating }}">{{ class.lcomRating }}</span></td>
+                        <td data-sort="{{ class.methodCount }}">{{ class.methodCount }}</td>
+                        <td data-sort="{{ class.propertyCount }}">{{ class.propertyCount }}</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-{{ class.lcomRating }}" style="width: {{ (1 - class.lcom) * 100 }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">{{ 'tables.total'|trans }}: {{ classes|length }} {{ 'tables.classes'|trans|lower }}</p>
+        </div>
+    </section>
+
+    <!-- Tips -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'lcom.how_to_improve'|trans }}</h3>
+            <div class="grid grid-2" style="margin-top: 1rem;">
+                <div>
+                    <h4 style="color: var(--color-success);">{{ 'lcom.good_practices'|trans }}</h4>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>{{ 'lcom.practice_srp'|trans }}</li>
+                        <li>{{ 'lcom.practice_group'|trans }}</li>
+                        <li>{{ 'lcom.practice_composition'|trans }}</li>
+                        <li>{{ 'lcom.practice_extract'|trans }}</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: var(--color-danger);">{{ 'lcom.warning_signs'|trans }}</h4>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>{{ 'lcom.warning_no_properties'|trans }}</li>
+                        <li>{{ 'lcom.warning_single_method'|trans }}</li>
+                        <li>{{ 'lcom.warning_large_classes'|trans }}</li>
+                        <li>{{ 'lcom.warning_god_classes'|trans }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const chartData = {{ chartData|json_encode|raw }};
+
+    // LCOM Distribution Chart
+    new Chart(document.getElementById('lcomDistChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: chartData.lcomDistribution.labels,
+            datasets: [{
+                data: chartData.lcomDistribution.values,
+                backgroundColor: chartData.lcomDistribution.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const tbody = document.querySelector('#classesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const rating = ratingFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowRating = row.dataset.rating;
+            const matchesSearch = text.includes(search);
+            const matchesRating = !rating || rowRating === rating;
+            row.style.display = matchesSearch && matchesRating ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    ratingFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 2, asc: true };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('#classesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+{% endblock %}

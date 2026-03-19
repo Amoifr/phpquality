@@ -1,0 +1,245 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'metrics.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_metrics %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'metrics.title'|trans }}</h1>
+        <p>{{ 'metrics.description'|trans }}</p>
+    </div>
+
+    <!-- Quick Navigation -->
+    <section class="section">
+        <div class="grid grid-3">
+            <a href="#loc" class="card" style="text-decoration: none; color: inherit;">
+                <h3>LOC</h3>
+                <p class="text-muted">{{ 'summary.lines_of_code'|trans }}</p>
+            </a>
+            <a href="#ccn" class="card" style="text-decoration: none; color: inherit;">
+                <h3>CCN</h3>
+                <p class="text-muted">{{ 'distribution.cyclomatic_complexity'|trans }}</p>
+            </a>
+            <a href="#mi" class="card" style="text-decoration: none; color: inherit;">
+                <h3>MI</h3>
+                <p class="text-muted">{{ 'summary.maintainability_index'|trans }}</p>
+            </a>
+            <a href="#lcom" class="card" style="text-decoration: none; color: inherit;">
+                <h3>LCOM</h3>
+                <p class="text-muted">{{ 'distribution.lack_of_cohesion'|trans }}</p>
+            </a>
+            <a href="#halstead" class="card" style="text-decoration: none; color: inherit;">
+                <h3>Halstead</h3>
+                <p class="text-muted">{{ 'halstead.title'|trans }}</p>
+            </a>
+            <a href="#ratings" class="card" style="text-decoration: none; color: inherit;">
+                <h3>{{ 'metrics.ratings'|trans }}</h3>
+                <p class="text-muted">{{ 'metrics.scale_af'|trans }}</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- LOC Section -->
+    <section id="loc" class="doc-section">
+        <h2>LOC - {{ 'summary.lines_of_code'|trans }}</h2>
+        <div class="card">
+            <p>{{ 'metrics.loc_intro'|trans }}</p>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'metrics.loc_metrics'|trans }}</h3>
+            <table>
+                <tr>
+                    <td><strong>LOC</strong></td>
+                    <td>{{ 'metrics.loc_total'|trans }}</td>
+                </tr>
+                <tr>
+                    <td><strong>CLOC</strong></td>
+                    <td>{{ 'metrics.loc_cloc'|trans }}</td>
+                </tr>
+                <tr>
+                    <td><strong>LLOC</strong></td>
+                    <td>{{ 'metrics.loc_lloc'|trans }}</td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'metrics.loc_ratio'|trans }}</h3>
+            <div class="formula">{{ 'metrics.loc_ratio_formula'|trans }}</div>
+
+            <div class="info-box">
+                <strong>{{ 'common.info'|trans }}:</strong> {{ 'metrics.loc_interpretation'|trans }}
+            </div>
+        </div>
+    </section>
+
+    <!-- CCN Section -->
+    <section id="ccn" class="doc-section">
+        <h2>CCN - {{ 'distribution.cyclomatic_complexity'|trans }}</h2>
+        <div class="card">
+            <p>{{ 'metrics.ccn_intro'|trans }}</p>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'mi.formula'|trans }}</h3>
+            <div class="formula">{{ 'ccn.formula'|trans }}</div>
+
+            <p style="margin-top: 1rem;">{{ 'metrics.ccn_formula_alt'|trans }}</p>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'ccn.decision_points'|trans }}</h3>
+            <table>
+                <tr><td><span class="formula-inline">if</span>, <span class="formula-inline">elseif</span></td><td>{{ 'ccn.decision_if'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">for</span>, <span class="formula-inline">foreach</span>, <span class="formula-inline">while</span>, <span class="formula-inline">do</span></td><td>{{ 'ccn.decision_loops'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">case</span></td><td>{{ 'ccn.decision_case'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">catch</span></td><td>{{ 'ccn.decision_catch'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">&&</span>, <span class="formula-inline">||</span></td><td>{{ 'ccn.decision_boolean'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">?:</span></td><td>{{ 'ccn.decision_ternary'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">??</span></td><td>{{ 'ccn.decision_coalesce'|trans }}</td></tr>
+                <tr><td><span class="formula-inline">match</span></td><td>{{ 'ccn.decision_match'|trans }}</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'ratings.scale'|trans }}</h3>
+            <div class="rating-scale">
+                <div class="rating-item"><span class="rating rating-A">A</span> 1-4 : {{ 'ccn.simple_low_risk'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-B">B</span> 5-7 : {{ 'ccn.moderate_complexity'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-C">C</span> 8-10 : {{ 'ccn.complex_moderate_risk'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-D">D</span> 11-15 : {{ 'ccn.high_complexity'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-F">F</span> 16+ : {{ 'ccn.very_high_risk'|trans }}</div>
+            </div>
+
+            <div class="warning-box">
+                <strong>{{ 'common.warning'|trans }}:</strong> {{ 'metrics.ccn_why_matters'|trans }}
+            </div>
+        </div>
+    </section>
+
+    <!-- MI Section -->
+    <section id="mi" class="doc-section">
+        <h2>MI - {{ 'summary.maintainability_index'|trans }}</h2>
+        <div class="card">
+            <p>{{ 'metrics.mi_intro'|trans }}</p>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'mi.formula'|trans }}</h3>
+            <div class="formula">{{ 'mi.formula_text'|trans }}</div>
+
+            <table style="margin-top: 1rem;">
+                <tr><td><strong>V</strong></td><td>{{ 'metrics.mi_volume'|trans }}</td></tr>
+                <tr><td><strong>CCN</strong></td><td>{{ 'metrics.mi_ccn'|trans }}</td></tr>
+                <tr><td><strong>LOC</strong></td><td>{{ 'metrics.mi_loc'|trans }}</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'ratings.scale'|trans }}</h3>
+            <div class="rating-scale">
+                <div class="rating-item"><span class="rating rating-A">A</span> 85-100 : {{ 'mi.highly_maintainable'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-B">B</span> 65-84 : {{ 'mi.good_maintainability'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-C">C</span> 40-64 : {{ 'mi.moderate'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-D">D</span> 20-39 : {{ 'mi.difficult'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-F">F</span> 0-19 : {{ 'mi.unmaintainable'|trans }}</div>
+            </div>
+
+            <div class="info-box">
+                <strong>{{ 'common.info'|trans }}:</strong> {{ 'metrics.mi_interpretation'|trans }}
+            </div>
+        </div>
+    </section>
+
+    <!-- LCOM Section -->
+    <section id="lcom" class="doc-section">
+        <h2>LCOM - {{ 'distribution.lack_of_cohesion'|trans }}</h2>
+        <div class="card">
+            <p>{{ 'metrics.lcom_intro'|trans }}</p>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'mi.formula'|trans }} ({{ 'metrics.lcom_formula_variant'|trans }})</h3>
+            <div class="formula">{{ 'lcom.formula'|trans }}</div>
+
+            <p style="margin-top: 1rem;">{{ 'metrics.lcom_more_specific'|trans }}:</p>
+            <table style="margin-top: 1rem;">
+                <tr><td><strong>M</strong></td><td>{{ 'lcom.m_desc'|trans }}</td></tr>
+                <tr><td><strong>A</strong></td><td>{{ 'lcom.a_desc'|trans }}</td></tr>
+                <tr><td><strong>SUM</strong></td><td>{{ 'lcom.sum_desc'|trans }}</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'ratings.scale'|trans }}</h3>
+            <div class="rating-scale">
+                <div class="rating-item"><span class="rating rating-A">A</span> 0.0-0.2 : {{ 'lcom.perfect_cohesion'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-B">B</span> 0.2-0.4 : {{ 'lcom.good_cohesion'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-C">C</span> 0.4-0.6 : {{ 'lcom.moderate_cohesion'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-D">D</span> 0.6-0.8 : {{ 'lcom.poor_cohesion'|trans }}</div>
+                <div class="rating-item"><span class="rating rating-F">F</span> 0.8-1.0 : {{ 'lcom.no_cohesion'|trans }}</div>
+            </div>
+
+            <div class="warning-box">
+                <strong>{{ 'common.warning'|trans }}:</strong> {{ 'metrics.lcom_why_matters'|trans }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Halstead Section -->
+    <section id="halstead" class="doc-section">
+        <h2>{{ 'halstead.title'|trans }}</h2>
+        <div class="card">
+            <p>{{ 'metrics.halstead_intro'|trans }}</p>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'halstead.base_measures'|trans }}</h3>
+            <table>
+                <tr><td><strong>n1</strong></td><td>{{ 'halstead.distinct_operators'|trans }}</td></tr>
+                <tr><td><strong>n2</strong></td><td>{{ 'halstead.distinct_operands'|trans }}</td></tr>
+                <tr><td><strong>N1</strong></td><td>{{ 'halstead.total_operators'|trans }}</td></tr>
+                <tr><td><strong>N2</strong></td><td>{{ 'halstead.total_operands'|trans }}</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">{{ 'halstead.derived_metrics'|trans }}</h3>
+            <table>
+                <tr><td><strong>{{ 'halstead.vocabulary'|trans }}</strong></td><td><span class="formula-inline">n = n1 + n2</span></td></tr>
+                <tr><td><strong>{{ 'halstead.length'|trans }}</strong></td><td><span class="formula-inline">N = N1 + N2</span></td></tr>
+                <tr><td><strong>{{ 'halstead.volume'|trans }}</strong></td><td><span class="formula-inline">V = N * log2(n)</span></td></tr>
+                <tr><td><strong>{{ 'halstead.difficulty'|trans }}</strong></td><td><span class="formula-inline">D = (n1/2) * (N2/n2)</span></td></tr>
+                <tr><td><strong>{{ 'halstead.effort'|trans }}</strong></td><td><span class="formula-inline">E = D * V</span></td></tr>
+                <tr><td><strong>{{ 'halstead.bugs'|trans }}</strong></td><td><span class="formula-inline">B = V / 3000</span></td></tr>
+            </table>
+
+            <div class="info-box">
+                <strong>{{ 'common.info'|trans }}:</strong> {{ 'metrics.halstead_volume_interpretation'|trans }}
+            </div>
+        </div>
+    </section>
+
+    <!-- Ratings Section -->
+    <section id="ratings" class="doc-section">
+        <h2>{{ 'ratings.scale'|trans }}</h2>
+        <div class="card">
+            <p>{{ 'metrics.ratings_intro'|trans }}</p>
+
+            <div class="grid grid-2" style="margin-top: 1.5rem;">
+                <div>
+                    <h3>{{ 'metrics.ratings_meanings'|trans }}</h3>
+                    <table>
+                        <tr><td><span class="rating rating-A">A</span></td><td><strong>{{ 'ratings.A'|trans }}</strong> - {{ 'metrics.ratings_excellent'|trans }}</td></tr>
+                        <tr><td><span class="rating rating-B">B</span></td><td><strong>{{ 'ratings.B'|trans }}</strong> - {{ 'metrics.ratings_good'|trans }}</td></tr>
+                        <tr><td><span class="rating rating-C">C</span></td><td><strong>{{ 'ratings.C'|trans }}</strong> - {{ 'metrics.ratings_moderate'|trans }}</td></tr>
+                        <tr><td><span class="rating rating-D">D</span></td><td><strong>{{ 'ratings.D'|trans }}</strong> - {{ 'metrics.ratings_poor'|trans }}</td></tr>
+                        <tr><td><span class="rating rating-F">F</span></td><td><strong>{{ 'ratings.F'|trans }}</strong> - {{ 'metrics.ratings_critical'|trans }}</td></tr>
+                    </table>
+                </div>
+                <div>
+                    <h3>{{ 'metrics.ratings_thresholds'|trans }}</h3>
+                    <table>
+                        <tr><th>{{ 'violations.metric'|trans }}</th><th>A</th><th>B</th><th>C</th><th>D</th><th>F</th></tr>
+                        <tr><td>CCN</td><td>1-4</td><td>5-7</td><td>8-10</td><td>11-15</td><td>16+</td></tr>
+                        <tr><td>MI</td><td>85+</td><td>65-84</td><td>40-64</td><td>20-39</td><td>&lt;20</td></tr>
+                        <tr><td>LCOM</td><td>0-0.2</td><td>0.2-0.4</td><td>0.4-0.6</td><td>0.6-0.8</td><td>0.8+</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- References -->
+    <section class="doc-section">
+        <h2>{{ 'metrics.references'|trans }}</h2>
+        <div class="card">
+            <ul style="margin-left: 1.5rem;">
+                <li>McCabe, T.J. (1976). "A Complexity Measure". IEEE Transactions on Software Engineering.</li>
+                <li>Halstead, M.H. (1977). "Elements of Software Science". Elsevier North-Holland.</li>
+                <li>Oman, P. & Hagemeister, J. (1992). "Metrics for assessing a software system's maintainability".</li>
+                <li>Chidamber, S.R. & Kemerer, C.F. (1994). "A Metrics Suite for Object Oriented Design".</li>
+            </ul>
+        </div>
+    </section>
+{% endblock %}

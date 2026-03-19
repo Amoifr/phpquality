@@ -1,0 +1,274 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'loc.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_loc %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'loc.title'|trans }}</h1>
+        <p>{{ 'loc.description'|trans }}</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card">
+                <div class="metric-label">{{ 'loc.total_loc'|trans }}</div>
+                <div class="metric-value">{{ summary.totalLoc }}</div>
+                <div class="text-muted">{{ 'loc.all_lines'|trans }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'loc.logical_lines'|trans }}</div>
+                <div class="metric-value">{{ summary.totalLloc }}</div>
+                <div class="text-muted">{{ 'loc.executable'|trans }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'loc.comment_lines'|trans }}</div>
+                <div class="metric-value">{{ summary.totalCloc }}</div>
+                <div class="text-muted">{{ summary.commentRatio }}% {{ 'loc.ratio'|trans }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'loc.files_analyzed'|trans }}</div>
+                <div class="metric-value">{{ summary.totalFiles }}</div>
+                <div class="text-muted">{{ summary.errors }} {{ 'loc.with_errors'|trans }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>{{ 'loc.composition'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="compositionChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>{{ 'loc.metrics_explained'|trans }}</h3>
+                <table>
+                    <tr>
+                        <td><strong>LOC</strong></td>
+                        <td>{{ 'loc.total_lines_desc'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLOC</strong></td>
+                        <td>{{ 'loc.lloc_desc'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CLOC</strong></td>
+                        <td>{{ 'loc.cloc_desc'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ 'loc.blank'|trans }}</strong></td>
+                        <td>{{ 'loc.blank_desc'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code</strong></td>
+                        <td>{{ 'loc.code_desc'|trans }}</td>
+                    </tr>
+                </table>
+                <div class="info-box" style="margin-top: 1rem;">
+                    <strong>{{ 'loc.comment_ratio'|trans }}:</strong> {{ 'loc.comment_ratio_info'|trans }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Breakdown -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'loc.distribution'|trans }}</h3>
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>{{ 'loc.executable_code'|trans }}</span>
+                    <span>{{ summary.totalLloc }} ({{ ((summary.totalLloc / summary.totalLoc) * 100)|round(1) }}%)</span>
+                </div>
+                <div class="progress-bar" style="height: 24px;">
+                    <div class="progress-fill rating-B" style="width: {{ (summary.totalLloc / summary.totalLoc) * 100 }}%;"></div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>{{ 'loc.comments'|trans }}</span>
+                    <span>{{ summary.totalCloc }} ({{ summary.commentRatio }}%)</span>
+                </div>
+                <div class="progress-bar" style="height: 24px;">
+                    <div class="progress-fill rating-A" style="width: {{ summary.commentRatio }}%;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Files Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'loc.all_files'|trans }}</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="{{ 'loc.search_file'|trans }}">
+                <select id="sizeFilter" class="filter-select">
+                    <option value="">{{ 'tables.all_sizes'|trans }}</option>
+                    <option value="small">{{ 'loc.small'|trans }} (&lt;100 LOC)</option>
+                    <option value="medium">{{ 'loc.medium'|trans }} (100-300 LOC)</option>
+                    <option value="large">{{ 'loc.large'|trans }} (300-500 LOC)</option>
+                    <option value="xlarge">{{ 'loc.xlarge'|trans }} (&gt;500 LOC)</option>
+                </select>
+            </div>
+            <table id="filesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">{{ 'tables.file'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)" class="sorted">LOC <span class="sort-icon">&#9660;</span></th>
+                        <th onclick="sortTable(2)">LLOC <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(3)">CLOC <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">{{ 'loc.comment_pct'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(5)">{{ 'tables.classes'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(6)">MI <span class="sort-icon">&#9650;</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    {% if not file.hasErrors %}
+                    <tr data-loc="{{ file.loc.loc ?? 0 }}">
+                        <td>{{ file.relativePath }}</td>
+                        <td data-sort="{{ file.loc.loc ?? 0 }}">{{ file.loc.loc ?? 0 }}</td>
+                        <td data-sort="{{ file.loc.lloc ?? 0 }}">{{ file.loc.lloc ?? 0 }}</td>
+                        <td data-sort="{{ file.loc.cloc ?? 0 }}">{{ file.loc.cloc ?? 0 }}</td>
+                        <td data-sort="{{ file.loc.commentRatio ?? 0 }}">{{ file.loc.commentRatio ?? 0 }}%</td>
+                        <td data-sort="{{ file.classes|length }}">{{ file.classes|length }}</td>
+                        <td data-sort="{{ file.mi }}">
+                            <span class="label label-{{ file.miRating }}">{{ file.miRating }}</span>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">{{ 'tables.total'|trans }}: {{ files|length }} {{ 'tables.files'|trans|lower }}</p>
+        </div>
+    </section>
+
+    <!-- Large Files Warning -->
+    {% if largeFiles|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h3 style="color: var(--color-warning);">{{ 'loc.large_files'|trans }} (&gt;300 LOC)</h3>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'loc.large_files_hint'|trans }}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ 'tables.file'|trans }}</th>
+                        <th>LOC</th>
+                        <th>{{ 'tables.classes'|trans }}</th>
+                        <th>{{ 'loc.recommendation'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in largeFiles %}
+                    <tr>
+                        <td>{{ file.relativePath }}</td>
+                        <td>{{ file.loc.loc ?? 0 }}</td>
+                        <td>{{ file.classes|length }}</td>
+                        <td class="text-muted">
+                            {% if file.classes|length > 1 %}
+                            {{ 'loc.split_files'|trans }}
+                            {% else %}
+                            {{ 'loc.extract_helpers'|trans }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Composition Chart
+    const codeLines = {{ summary.totalLoc - summary.totalCloc - (summary.totalLoc - summary.totalLloc - summary.totalCloc) }};
+    const blankLines = {{ summary.totalLoc - summary.totalLloc - summary.totalCloc }};
+
+    new Chart(document.getElementById('compositionChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['{{ 'loc.executable'|trans }}', '{{ 'loc.comments'|trans }}', '{{ 'loc.other'|trans }}'],
+            datasets: [{
+                data: [{{ summary.totalLloc }}, {{ summary.totalCloc }}, {{ summary.totalLoc - summary.totalLloc - summary.totalCloc }}],
+                backgroundColor: ['#3b82f6', '#22c55e', '#64748b'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const sizeFilter = document.getElementById('sizeFilter');
+    const tbody = document.querySelector('#filesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const size = sizeFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const loc = parseInt(row.dataset.loc) || 0;
+            let matchesSize = true;
+
+            if (size === 'small') matchesSize = loc < 100;
+            else if (size === 'medium') matchesSize = loc >= 100 && loc < 300;
+            else if (size === 'large') matchesSize = loc >= 300 && loc < 500;
+            else if (size === 'xlarge') matchesSize = loc >= 500;
+
+            const matchesSearch = text.includes(search);
+            row.style.display = matchesSearch && matchesSize ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    sizeFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 1, asc: false };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('#filesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+{% endblock %}

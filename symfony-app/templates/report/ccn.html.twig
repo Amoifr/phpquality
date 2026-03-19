@@ -1,0 +1,203 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'ccn.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_ccn %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'ccn.title'|trans }}</h1>
+        <p>{{ 'ccn.description'|trans }}</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card metric-card rating-{{ summary.ratings.ccn }}">
+                <div class="metric-label">{{ 'ccn.average_ccn'|trans }}</div>
+                <div class="metric-value">{{ summary.averageCcn }}</div>
+                <div><span class="rating rating-{{ summary.ratings.ccn }}">{{ summary.ratings.ccn }}</span></div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'ccn.maximum_ccn'|trans }}</div>
+                <div class="metric-value">{{ summary.maxCcn }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'ccn.total_methods'|trans }}</div>
+                <div class="metric-value">{{ summary.totalMethods }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'summary.violations'|trans }} (&gt;{{ summary.thresholds.ccn }})</div>
+                <div class="metric-value {{ summary.violations.ccn > 0 ? 'text-danger' : 'text-success' }}">{{ summary.violations.ccn }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chart -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>{{ 'distribution.cyclomatic_complexity'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="ccnDistChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>{{ 'ccn.rating_scale'|trans }}</h3>
+                <table>
+                    <tr>
+                        <td><span class="rating rating-A">A</span></td>
+                        <td>1-4</td>
+                        <td>{{ 'ccn.simple_low_risk'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-B">B</span></td>
+                        <td>5-7</td>
+                        <td>{{ 'ccn.moderate_complexity'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-C">C</span></td>
+                        <td>8-10</td>
+                        <td>{{ 'ccn.complex_moderate_risk'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-D">D</span></td>
+                        <td>11-15</td>
+                        <td>{{ 'ccn.high_complexity'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-F">F</span></td>
+                        <td>16+</td>
+                        <td>{{ 'ccn.very_high_risk'|trans }}</td>
+                    </tr>
+                </table>
+                <div class="info-box" style="margin-top: 1rem;">
+                    <strong>{{ 'summary.threshold'|trans }}:</strong> {{ 'ccn.threshold_info'|trans({'%threshold%': summary.thresholds.ccn, '%type%': summary.projectTypeLabel}) }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methods Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'ccn.all_methods'|trans }}</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="{{ 'ccn.search_placeholder'|trans }}">
+                <select id="ratingFilter" class="filter-select">
+                    <option value="">{{ 'tables.all_ratings'|trans }}</option>
+                    <option value="A">{{ 'tables.rating'|trans }} A</option>
+                    <option value="B">{{ 'tables.rating'|trans }} B</option>
+                    <option value="C">{{ 'tables.rating'|trans }} C</option>
+                    <option value="D">{{ 'tables.rating'|trans }} D</option>
+                    <option value="F">{{ 'tables.rating'|trans }} F ({{ 'summary.violations'|trans }})</option>
+                </select>
+            </div>
+            <table id="methodsTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">{{ 'tables.class'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)">{{ 'tables.method'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(2)" class="sorted">CCN <span class="sort-icon">&#9660;</span></th>
+                        <th onclick="sortTable(3)">{{ 'tables.rating'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">{{ 'tables.loc'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th>{{ 'tables.lines'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for method in methods %}
+                    <tr data-rating="{{ method.ccnRating }}">
+                        <td>{{ method.className }}</td>
+                        <td><code>{{ method.name }}()</code></td>
+                        <td data-sort="{{ method.ccn }}">{{ method.ccn }}</td>
+                        <td data-sort="{{ method.ccnRating }}"><span class="label label-{{ method.ccnRating }}">{{ method.ccnRating }}</span></td>
+                        <td data-sort="{{ method.loc }}">{{ method.loc }}</td>
+                        <td class="text-muted">{{ method.startLine }}-{{ method.endLine }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">{{ 'tables.total'|trans }}: {{ methods|length }} {{ 'tables.methods'|trans|lower }}</p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const chartData = {{ chartData|json_encode|raw }};
+
+    // CCN Distribution Chart
+    new Chart(document.getElementById('ccnDistChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: chartData.ccnDistribution.labels,
+            datasets: [{
+                data: chartData.ccnDistribution.values,
+                backgroundColor: chartData.ccnDistribution.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const tbody = document.querySelector('#methodsTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const rating = ratingFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowRating = row.dataset.rating;
+            const matchesSearch = text.includes(search);
+            const matchesRating = !rating || rowRating === rating;
+            row.style.display = matchesSearch && matchesRating ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    ratingFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 2, asc: false };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update sort indicators
+        document.querySelectorAll('#methodsTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            th.querySelector('.sort-icon').innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+{% endblock %}

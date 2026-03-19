@@ -1,0 +1,246 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'mi.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_mi %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'mi.title'|trans }}</h1>
+        <p>{{ 'mi.description'|trans }}</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card metric-card rating-{{ summary.ratings.mi }}">
+                <div class="metric-label">{{ 'mi.average_mi'|trans }}</div>
+                <div class="metric-value">{{ summary.averageMi }}</div>
+                <div><span class="rating rating-{{ summary.ratings.mi }}">{{ summary.ratings.mi }}</span></div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'mi.total_classes'|trans }}</div>
+                <div class="metric-value">{{ summary.totalClasses }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'summary.violations'|trans }} (&lt;{{ summary.thresholds.mi }})</div>
+                <div class="metric-value {{ summary.violations.mi > 0 ? 'text-danger' : 'text-success' }}">{{ summary.violations.mi }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'mi.total_loc'|trans }}</div>
+                <div class="metric-value">{{ summary.totalLoc }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formula & Chart -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>{{ 'mi.formula'|trans }}</h3>
+                <div class="formula" style="font-size: 1.1rem; text-align: center; padding: 1.5rem;">
+                    {{ 'mi.formula_text'|trans }}
+                </div>
+                <table style="margin-top: 1rem;">
+                    <tr><td><strong>V</strong></td><td>{{ 'mi.halstead_volume'|trans }}</td></tr>
+                    <tr><td><strong>CCN</strong></td><td>{{ 'distribution.cyclomatic_complexity'|trans }}</td></tr>
+                    <tr><td><strong>LOC</strong></td><td>{{ 'summary.lines_of_code'|trans }}</td></tr>
+                </table>
+                <div class="info-box" style="margin-top: 1rem;">
+                    {{ 'mi.formula_info'|trans }}
+                </div>
+            </div>
+            <div class="card">
+                <h3>{{ 'distribution.maintainability_index'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="miDistChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rating Scale -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'ratings.scale'|trans }}</h3>
+            <div class="grid grid-5" style="gap: 0.5rem; margin-top: 1rem;">
+                <div style="text-align: center; padding: 1rem; background: var(--color-a); border-radius: 0.5rem;">
+                    <div style="font-size: 2rem; font-weight: bold;">A</div>
+                    <div>85-100</div>
+                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">{{ 'mi.highly_maintainable'|trans }}</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: var(--color-b); border-radius: 0.5rem;">
+                    <div style="font-size: 2rem; font-weight: bold;">B</div>
+                    <div>65-84</div>
+                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">{{ 'mi.good_maintainability'|trans }}</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: var(--color-c); border-radius: 0.5rem; color: black;">
+                    <div style="font-size: 2rem; font-weight: bold;">C</div>
+                    <div>40-64</div>
+                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">{{ 'mi.moderate'|trans }}</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: var(--color-d); border-radius: 0.5rem;">
+                    <div style="font-size: 2rem; font-weight: bold;">D</div>
+                    <div>20-39</div>
+                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">{{ 'mi.difficult'|trans }}</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: var(--color-f); border-radius: 0.5rem;">
+                    <div style="font-size: 2rem; font-weight: bold;">F</div>
+                    <div>0-19</div>
+                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">{{ 'mi.unmaintainable'|trans }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classes Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'mi.all_classes'|trans }}</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="{{ 'mi.search_placeholder'|trans }}">
+                <select id="ratingFilter" class="filter-select">
+                    <option value="">{{ 'tables.all_ratings'|trans }}</option>
+                    <option value="A">{{ 'tables.rating'|trans }} A</option>
+                    <option value="B">{{ 'tables.rating'|trans }} B</option>
+                    <option value="C">{{ 'tables.rating'|trans }} C</option>
+                    <option value="D">{{ 'tables.rating'|trans }} D</option>
+                    <option value="F">{{ 'tables.rating'|trans }} F ({{ 'summary.violations'|trans }})</option>
+                </select>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">{{ 'tables.all_categories'|trans }}</option>
+                    {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <table id="classesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">{{ 'tables.class'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)">{{ 'tables.category'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(2)" class="sorted">MI <span class="sort-icon">&#9660;</span></th>
+                        <th onclick="sortTable(3)">{{ 'tables.rating'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">{{ 'tables.methods'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(5)">{{ 'tables.max_ccn'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(6)">{{ 'tables.loc'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th>{{ 'mi.maintainability'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for class in classes %}
+                    <tr data-rating="{{ class.miRating }}" data-category="{{ class.category ?? '' }}">
+                        <td>
+                            <div>{{ class.name }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">{{ class.namespace }}</div>
+                        </td>
+                        <td class="text-muted">{{ class.category ?? '-' }}</td>
+                        <td data-sort="{{ class.mi }}">{{ class.mi|round(1) }}</td>
+                        <td data-sort="{{ class.miRating }}"><span class="label label-{{ class.miRating }}">{{ class.miRating }}</span></td>
+                        <td data-sort="{{ class.methodCount }}">{{ class.methodCount }}</td>
+                        <td data-sort="{{ class.maxCcn }}">{{ class.maxCcn }}</td>
+                        <td data-sort="{{ class.totalLoc }}">{{ class.totalLoc }}</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-{{ class.miRating }}" style="width: {{ class.mi }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">{{ 'tables.total'|trans }}: {{ classes|length }} {{ 'tables.classes'|trans|lower }}</p>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_styles %}
+    .grid-5 { grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 1200px) { .grid-5 { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) { .grid-5 { grid-template-columns: repeat(2, 1fr); } }
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const chartData = {{ chartData|json_encode|raw }};
+
+    // MI Distribution Chart
+    new Chart(document.getElementById('miDistChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: chartData.miDistribution.labels,
+            datasets: [{
+                data: chartData.miDistribution.values,
+                backgroundColor: chartData.miDistribution.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const tbody = document.querySelector('#classesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const rating = ratingFilter.value;
+        const category = categoryFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowRating = row.dataset.rating;
+            const rowCategory = row.dataset.category;
+            const matchesSearch = text.includes(search);
+            const matchesRating = !rating || rowRating === rating;
+            const matchesCategory = !category || rowCategory === category;
+            row.style.display = matchesSearch && matchesRating && matchesCategory ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    ratingFilter.addEventListener('change', filterTable);
+    categoryFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 2, asc: false };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('#classesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+{% endblock %}

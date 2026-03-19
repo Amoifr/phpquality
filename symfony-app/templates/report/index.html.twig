@@ -1,0 +1,264 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}PhpQuality Report - {{ project.sourcePath }}{% endblock %}
+
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>{{ 'report.title'|trans }}</h1>
+                <p>{{ project.sourcePath }}</p>
+            </div>
+            <span class="badge badge-info">{{ summary.projectTypeLabel }}</span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <section class="section">
+        <div class="grid grid-4">
+            <a href="loc.html" class="card" style="text-decoration: none; color: inherit;">
+                <div class="metric-label">{{ 'summary.lines_of_code'|trans }}</div>
+                <div class="metric-value">{{ summary.totalLoc }}</div>
+                <div class="text-muted">{{ summary.totalClasses }} {{ 'summary.total_classes'|trans }}, {{ summary.totalMethods }} {{ 'summary.total_methods'|trans }}</div>
+            </a>
+            <a href="loc.html" class="card" style="text-decoration: none; color: inherit;">
+                <div class="metric-label">{{ 'summary.total_files'|trans }}</div>
+                <div class="metric-value">{{ summary.totalFiles }}</div>
+                <div class="text-muted">{{ summary.errors }} {{ 'common.error'|trans|lower }}s</div>
+            </a>
+            <a href="dependencies.html" class="card" style="text-decoration: none; color: inherit;">
+                <div class="metric-label">{{ 'summary.violations'|trans }}</div>
+                <div class="metric-value">{{ summary.violations.ccn + summary.violations.lcom + summary.violations.mi }}</div>
+                <div class="text-muted">CCN: {{ summary.violations.ccn }}, LCOM: {{ summary.violations.lcom }}, MI: {{ summary.violations.mi }}</div>
+            </a>
+            <div class="card">
+                <div class="metric-label">{{ 'report.project_type'|trans }}</div>
+                <div class="metric-value" style="font-size: 1.5rem;">{{ summary.projectTypeLabel }}</div>
+                <div class="text-muted">{{ project.sourcePath|split('/')|last }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="section print-charts">
+        <h2>{{ 'distribution.title'|trans }}</h2>
+        <div class="grid grid-3">
+            <div class="card chart-card">
+                <div class="chart-kpi rating-{{ summary.ratings.ccn }}">
+                    <div class="chart-kpi-value">{{ summary.averageCcn }}</div>
+                    <div class="chart-kpi-rating">{{ summary.ratings.ccn }}</div>
+                </div>
+                <h3>{{ 'distribution.cyclomatic_complexity'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="ccnChart"></canvas>
+                </div>
+                <!-- Print fallback table -->
+                <div class="print-only chart-fallback">
+                    <table class="chart-data-table">
+                        <tbody>
+                            {% for i in 0..4 %}
+                            <tr><td>{{ chartData.ccnDistribution.labels[i] ?? '' }}</td><td>{{ chartData.ccnDistribution.values[i] ?? 0 }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card chart-card">
+                <div class="chart-kpi rating-{{ summary.ratings.mi }}">
+                    <div class="chart-kpi-value">{{ summary.averageMi|round(0) }}</div>
+                    <div class="chart-kpi-rating">{{ summary.ratings.mi }}</div>
+                </div>
+                <h3>{{ 'distribution.maintainability_index'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="miChart"></canvas>
+                </div>
+                <div class="print-only chart-fallback">
+                    <table class="chart-data-table">
+                        <tbody>
+                            {% for i in 0..4 %}
+                            <tr><td>{{ chartData.miDistribution.labels[i] ?? '' }}</td><td>{{ chartData.miDistribution.values[i] ?? 0 }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card chart-card">
+                <div class="chart-kpi rating-{{ summary.ratings.lcom }}">
+                    <div class="chart-kpi-value">{{ summary.averageLcom }}</div>
+                    <div class="chart-kpi-rating">{{ summary.ratings.lcom }}</div>
+                </div>
+                <h3>{{ 'distribution.lack_of_cohesion'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="lcomChart"></canvas>
+                </div>
+                <div class="print-only chart-fallback">
+                    <table class="chart-data-table">
+                        <tbody>
+                            {% for i in 0..4 %}
+                            <tr><td>{{ chartData.lcomDistribution.labels[i] ?? '' }}</td><td>{{ chartData.lcomDistribution.values[i] ?? 0 }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tables -->
+    <section class="section">
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('classes')">{{ 'tables.classes'|trans }}</button>
+                <button class="tab" onclick="showTab('files')">{{ 'tables.files'|trans }}</button>
+                <button class="tab" onclick="showTab('violations')">{{ 'summary.violations'|trans }} ({{ summary.violations.ccn + summary.violations.lcom + summary.violations.mi }})</button>
+            </div>
+
+            <div id="tab-classes" class="tab-content active">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ 'tables.class'|trans }}</th>
+                            <th>{{ 'tables.category'|trans }}</th>
+                            <th>{{ 'tables.methods'|trans }}</th>
+                            <th>CCN<sup class="footnote-ref">(1)</sup></th>
+                            <th>MI<sup class="footnote-ref">(2)</sup></th>
+                            <th>LCOM<sup class="footnote-ref">(3)</sup></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for class in classes|slice(0, 50) %}
+                        <tr>
+                            <td>{{ class.name }}</td>
+                            <td class="text-muted">{{ class.category ?? '-' }}</td>
+                            <td>{{ class.methodCount }}</td>
+                            <td>
+                                <span class="label label-{{ class.methods|length > 0 ? class.methods[0].ccnRating : 'C' }}">{{ class.maxCcn }}</span>
+                            </td>
+                            <td>
+                                <span class="label label-{{ class.miRating }}">{{ class.mi|round(0) }}</span>
+                            </td>
+                            <td>
+                                <span class="label label-{{ class.lcomRating }}">{{ class.lcom }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if classes|length > 50 %}
+                <p class="text-muted" style="padding: 1rem;">{{ 'tables.showing'|trans }} 50 {{ 'tables.of'|trans }} {{ classes|length }} {{ 'tables.classes'|trans|lower }}. <a href="mi.html" class="text-info">{{ 'tables.view_all'|trans }}</a></p>
+                {% endif %}
+            </div>
+
+            <div id="tab-files" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ 'tables.file'|trans }}</th>
+                            <th>LOC<sup class="footnote-ref">(4)</sup></th>
+                            <th>CCN<sup class="footnote-ref">(1)</sup></th>
+                            <th>MI<sup class="footnote-ref">(2)</sup></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in worstFiles %}
+                        <tr>
+                            <td>{{ file.relativePath }}</td>
+                            <td>{{ file.loc.loc ?? 0 }}</td>
+                            <td>{{ file.ccn.summary.maxCcn ?? 0 }}</td>
+                            <td>
+                                <span class="label label-{{ file.miRating }}">{{ file.mi|round(0) }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="text-muted" style="padding: 1rem;"><a href="loc.html" class="text-info">{{ 'tables.view_all'|trans }}</a></p>
+            </div>
+
+            <div id="tab-violations" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ 'violations.metric'|trans }}</th>
+                            <th>{{ 'summary.threshold'|trans }}</th>
+                            <th>{{ 'summary.violations'|trans }}</th>
+                            <th>{{ 'tables.details'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ 'distribution.cyclomatic_complexity'|trans }}</td>
+                            <td>&gt; {{ summary.thresholds.ccn }}</td>
+                            <td class="{{ summary.violations.ccn > 0 ? 'text-danger' : 'text-success' }}">{{ summary.violations.ccn }}</td>
+                            <td><a href="ccn.html" class="text-info">{{ 'tables.view_details'|trans }}</a></td>
+                        </tr>
+                        <tr>
+                            <td>{{ 'distribution.lack_of_cohesion'|trans }}</td>
+                            <td>&gt; {{ summary.thresholds.lcom }}</td>
+                            <td class="{{ summary.violations.lcom > 0 ? 'text-danger' : 'text-success' }}">{{ summary.violations.lcom }}</td>
+                            <td><a href="lcom.html" class="text-info">{{ 'tables.view_details'|trans }}</a></td>
+                        </tr>
+                        <tr>
+                            <td>{{ 'summary.maintainability_index'|trans }}</td>
+                            <td>&lt; {{ summary.thresholds.mi }}</td>
+                            <td class="{{ summary.violations.mi > 0 ? 'text-danger' : 'text-success' }}">{{ summary.violations.mi }}</td>
+                            <td><a href="mi.html" class="text-info">{{ 'tables.view_details'|trans }}</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footnotes -->
+            <div class="footnotes">
+                <p><sup>(1)</sup> <strong>CCN</strong> - {{ 'footnotes.ccn'|trans }} <a href="ccn.html">→ {{ 'tables.view_details'|trans }}</a></p>
+                <p><sup>(2)</sup> <strong>MI</strong> - {{ 'footnotes.mi'|trans }} <a href="mi.html">→ {{ 'tables.view_details'|trans }}</a></p>
+                <p><sup>(3)</sup> <strong>LCOM</strong> - {{ 'footnotes.lcom'|trans }} <a href="lcom.html">→ {{ 'tables.view_details'|trans }}</a></p>
+                <p><sup>(4)</sup> <strong>LOC</strong> - {{ 'footnotes.loc'|trans }} <a href="loc.html">→ {{ 'tables.view_details'|trans }}</a></p>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const chartData = {{ chartData|json_encode|raw }};
+
+        function createDoughnutChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.values,
+                        backgroundColor: data.colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        createDoughnutChart('ccnChart', chartData.ccnDistribution);
+        createDoughnutChart('miChart', chartData.miDistribution);
+        createDoughnutChart('lcomChart', chartData.lcomDistribution);
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+    </script>
+{% endblock %}

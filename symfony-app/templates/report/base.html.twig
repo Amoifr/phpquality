@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="{{ lang|default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PhpQuality Report{% endblock %}</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        {% block extra_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link {% block nav_dashboard %}{% endblock %}">{{ 'nav.dashboard'|trans }}</a></li>
+                <li><a href="metrics.html" class="nav-link {% block nav_metrics %}{% endblock %}">{{ 'nav.documentation'|trans }}</a></li>
+                <li><a href="ccn.html" class="nav-link {% block nav_ccn %}{% endblock %}">{{ 'nav.ccn'|trans }}</a></li>
+                <li><a href="mi.html" class="nav-link {% block nav_mi %}{% endblock %}">{{ 'nav.mi'|trans }}</a></li>
+                <li><a href="lcom.html" class="nav-link {% block nav_lcom %}{% endblock %}">{{ 'nav.lcom'|trans }}</a></li>
+                <li><a href="loc.html" class="nav-link {% block nav_loc %}{% endblock %}">{{ 'nav.loc'|trans }}</a></li>
+                <li><a href="halstead.html" class="nav-link {% block nav_halstead %}{% endblock %}">{{ 'nav.halstead'|trans }}</a></li>
+                <li><a href="dependencies.html" class="nav-link {% block nav_dependencies %}{% endblock %}">{{ 'nav.dependencies'|trans }}</a></li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="{{ 'common.toggle_theme'|trans }}">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+
+        <footer>
+            <p>{{ 'report.generated_by'|trans }} <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> {{ 'report.on'|trans }} {{ project.analyzedAt|date('Y-m-d H:i:s') }}</p>
+            <p style="margin-top: 0.5rem;">{{ 'report.developed_by'|trans }} <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

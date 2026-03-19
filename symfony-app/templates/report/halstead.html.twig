@@ -1,0 +1,318 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'halstead.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_halstead %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'halstead.title'|trans }}</h1>
+        <p>{{ 'halstead.description'|trans }}</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card">
+                <div class="metric-label">{{ 'halstead.total_volume'|trans }}</div>
+                <div class="metric-value">{{ halsteadSummary.totalVolume|number_format(0) }}</div>
+                <div class="text-muted">{{ 'halstead.implementation_size'|trans }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'halstead.avg_difficulty'|trans }}</div>
+                <div class="metric-value">{{ halsteadSummary.avgDifficulty|round(2) }}</div>
+                <div class="text-muted">{{ 'halstead.comprehension'|trans }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'halstead.total_effort'|trans }}</div>
+                <div class="metric-value">{{ halsteadSummary.totalEffort|number_format(0) }}</div>
+                <div class="text-muted">{{ 'halstead.mental_effort'|trans }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'halstead.estimated_bugs'|trans }}</div>
+                <div class="metric-value">{{ halsteadSummary.totalBugs|round(2) }}</div>
+                <div class="text-muted">B = V / 3000</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulas -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'halstead.overview'|trans }}</h2>
+            <p style="margin-bottom: 1.5rem;">{{ 'halstead.intro'|trans }}</p>
+
+            <div class="grid grid-2">
+                <div>
+                    <h3>{{ 'halstead.base_measures'|trans }}</h3>
+                    <table>
+                        <tr>
+                            <td><span class="formula-inline">n1</span></td>
+                            <td>{{ 'halstead.distinct_operators'|trans }}</td>
+                            <td>{{ halsteadSummary.n1 }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="formula-inline">n2</span></td>
+                            <td>{{ 'halstead.distinct_operands'|trans }}</td>
+                            <td>{{ halsteadSummary.n2 }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="formula-inline">N1</span></td>
+                            <td>{{ 'halstead.total_operators'|trans }}</td>
+                            <td>{{ halsteadSummary.N1 }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="formula-inline">N2</span></td>
+                            <td>{{ 'halstead.total_operands'|trans }}</td>
+                            <td>{{ halsteadSummary.N2 }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <h3>{{ 'halstead.derived_metrics'|trans }}</h3>
+                    <table>
+                        <tr>
+                            <td><span class="formula-inline">n = n1 + n2</span></td>
+                            <td>{{ 'halstead.vocabulary'|trans }}</td>
+                            <td>{{ halsteadSummary.vocabulary }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="formula-inline">N = N1 + N2</span></td>
+                            <td>{{ 'halstead.length'|trans }}</td>
+                            <td>{{ halsteadSummary.length }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="formula-inline">V = N * log2(n)</span></td>
+                            <td>{{ 'halstead.volume'|trans }}</td>
+                            <td>{{ halsteadSummary.totalVolume|round(2) }}</td>
+                        </tr>
+                        <tr>
+                            <td><span class="formula-inline">D = (n1/2) * (N2/n2)</span></td>
+                            <td>{{ 'halstead.difficulty'|trans }}</td>
+                            <td>{{ halsteadSummary.avgDifficulty|round(2) }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interpretation -->
+    <section class="section">
+        <div class="grid grid-3">
+            <div class="card">
+                <h3>{{ 'halstead.volume'|trans }} (V)</h3>
+                <p class="text-muted">{{ 'halstead.volume_desc'|trans }}</p>
+                <table style="margin-top: 1rem;">
+                    <tr><td>&lt; 100</td><td class="text-success">{{ 'halstead.simple_function'|trans }}</td></tr>
+                    <tr><td>100 - 500</td><td>{{ 'halstead.moderate'|trans }}</td></tr>
+                    <tr><td>500 - 1000</td><td class="text-warning">{{ 'halstead.complex'|trans }}</td></tr>
+                    <tr><td>&gt; 1000</td><td class="text-danger">{{ 'halstead.should_split'|trans }}</td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>{{ 'halstead.difficulty'|trans }} (D)</h3>
+                <p class="text-muted">{{ 'halstead.difficulty_desc'|trans }}</p>
+                <table style="margin-top: 1rem;">
+                    <tr><td>&lt; 10</td><td class="text-success">{{ 'halstead.easy'|trans }}</td></tr>
+                    <tr><td>10 - 20</td><td>{{ 'halstead.moderate'|trans }}</td></tr>
+                    <tr><td>20 - 30</td><td class="text-warning">{{ 'halstead.difficult'|trans }}</td></tr>
+                    <tr><td>&gt; 30</td><td class="text-danger">{{ 'halstead.very_difficult'|trans }}</td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>{{ 'halstead.bugs'|trans }} (B)</h3>
+                <p class="text-muted">{{ 'halstead.bugs_formula'|trans }}</p>
+                <div class="info-box" style="margin-top: 1rem;">
+                    {{ 'halstead.bugs_info'|trans }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Operators Chart -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>{{ 'halstead.most_used_operators'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="operatorsChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>{{ 'halstead.operator_categories'|trans }}</h3>
+                <table>
+                    <tr>
+                        <td><strong>{{ 'halstead.arithmetic'|trans }}</strong></td>
+                        <td><span class="formula-inline">+</span> <span class="formula-inline">-</span> <span class="formula-inline">*</span> <span class="formula-inline">/</span> <span class="formula-inline">%</span> <span class="formula-inline">**</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ 'halstead.comparison'|trans }}</strong></td>
+                        <td><span class="formula-inline">==</span> <span class="formula-inline">===</span> <span class="formula-inline">!=</span> <span class="formula-inline"><</span> <span class="formula-inline">></span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ 'halstead.logical'|trans }}</strong></td>
+                        <td><span class="formula-inline">&&</span> <span class="formula-inline">||</span> <span class="formula-inline">!</span> <span class="formula-inline">??</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ 'halstead.assignment'|trans }}</strong></td>
+                        <td><span class="formula-inline">=</span> <span class="formula-inline">+=</span> <span class="formula-inline">-=</span> <span class="formula-inline">.=</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ 'halstead.access'|trans }}</strong></td>
+                        <td><span class="formula-inline">-></span> <span class="formula-inline">::</span> <span class="formula-inline">[]</span> <span class="formula-inline">new</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ 'halstead.control'|trans }}</strong></td>
+                        <td><span class="formula-inline">if</span> <span class="formula-inline">for</span> <span class="formula-inline">while</span> <span class="formula-inline">return</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Files Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'halstead.files_by_metrics'|trans }}</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="{{ 'loc.search_file'|trans }}">
+            </div>
+            <table id="filesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">{{ 'tables.file'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)" class="sorted">{{ 'halstead.volume'|trans }} <span class="sort-icon">&#9660;</span></th>
+                        <th onclick="sortTable(2)">{{ 'halstead.difficulty'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(3)">{{ 'halstead.effort'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">{{ 'halstead.est_bugs'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(5)">{{ 'halstead.vocabulary'|trans }} <span class="sort-icon">&#9650;</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    {% if not file.hasErrors and file.halstead.volume is defined %}
+                    <tr>
+                        <td>{{ file.relativePath }}</td>
+                        <td data-sort="{{ file.halstead.volume ?? 0 }}">{{ (file.halstead.volume ?? 0)|round(2) }}</td>
+                        <td data-sort="{{ file.halstead.difficulty ?? 0 }}">{{ (file.halstead.difficulty ?? 0)|round(2) }}</td>
+                        <td data-sort="{{ file.halstead.effort ?? 0 }}">{{ (file.halstead.effort ?? 0)|round(0) }}</td>
+                        <td data-sort="{{ file.halstead.bugs ?? 0 }}">{{ (file.halstead.bugs ?? 0)|round(4) }}</td>
+                        <td data-sort="{{ file.halstead.vocabulary ?? 0 }}">{{ file.halstead.vocabulary ?? 0 }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Effort Calculation -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'halstead.understanding_effort'|trans }}</h3>
+            <div class="formula" style="text-align: center; padding: 1rem; font-size: 1.1rem;">
+                E = D * V = {{ 'halstead.difficulty'|trans }} * {{ 'halstead.volume'|trans }}
+            </div>
+            <p style="margin-top: 1rem;">{{ 'halstead.effort_explanation'|trans }}</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li><strong>{{ 'halstead.time_implement'|trans }}:</strong> T = E / 18 ({{ 'halstead.in_seconds'|trans }})</li>
+                <li><strong>{{ 'halstead.time_understand'|trans }}:</strong> {{ 'halstead.proportional'|trans }}</li>
+            </ul>
+            <div class="info-box" style="margin-top: 1rem;">
+                <strong>{{ 'halstead.total_time'|trans }}:</strong> {{ (halsteadSummary.totalEffort / 18 / 3600)|round(1) }} {{ 'halstead.hours'|trans }}
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const topOperators = {{ topOperators|json_encode|raw }};
+
+    // Operators Bar Chart - detect theme for colors
+    const isDarkMode = !document.documentElement.hasAttribute('data-theme') ||
+                       document.documentElement.getAttribute('data-theme') !== 'light';
+    const textColor = isDarkMode ? '#f1f5f9' : '#1e293b';
+    const gridColor = isDarkMode ? '#334155' : '#e2e8f0';
+    const mutedColor = isDarkMode ? '#94a3b8' : '#64748b';
+
+    new Chart(document.getElementById('operatorsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: topOperators.map(o => o.operator),
+            datasets: [{
+                label: '{{ 'halstead.usage_count'|trans }}',
+                data: topOperators.map(o => o.count),
+                backgroundColor: '#6366f1',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { color: gridColor },
+                    ticks: { color: mutedColor }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: {
+                        color: textColor,
+                        font: {
+                            family: 'monospace',
+                            weight: 'bold',
+                            size: 13
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const tbody = document.querySelector('#filesTable tbody');
+
+    searchInput.addEventListener('input', function() {
+        const search = this.value.toLowerCase();
+        tbody.querySelectorAll('tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(search) ? '' : 'none';
+        });
+    });
+
+    // Sort functionality
+    let currentSort = { col: 1, asc: false };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('#filesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+{% endblock %}

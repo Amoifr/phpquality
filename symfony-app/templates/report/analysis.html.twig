@@ -1,0 +1,375 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'analysis.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_analysis %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'analysis.title'|trans }}</h1>
+        <p>{{ 'analysis.description'|trans }}</p>
+    </div>
+
+    <!-- Bubble Charts Grid -->
+    <section class="section">
+        <div class="grid grid-2">
+            <!-- CCN vs MI -->
+            <div class="card chart-card">
+                <h3>{{ 'analysis.ccn_vs_mi'|trans }}</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">{{ 'analysis.ccn_vs_mi_desc'|trans }}</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartCcnMi"></canvas>
+                </div>
+            </div>
+
+            <!-- LCOM vs MI -->
+            <div class="card chart-card">
+                <h3>{{ 'analysis.lcom_vs_mi'|trans }}</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">{{ 'analysis.lcom_vs_mi_desc'|trans }}</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartLcomMi"></canvas>
+                </div>
+            </div>
+
+            <!-- CCN vs LOC -->
+            <div class="card chart-card">
+                <h3>{{ 'analysis.ccn_vs_loc'|trans }}</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">{{ 'analysis.ccn_vs_loc_desc'|trans }}</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartCcnLoc"></canvas>
+                </div>
+            </div>
+
+            <!-- LCOM vs LOC -->
+            <div class="card chart-card">
+                <h3>{{ 'analysis.lcom_vs_loc'|trans }}</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">{{ 'analysis.lcom_vs_loc_desc'|trans }}</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartLcomLoc"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Correlation Analysis -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'analysis.correlation'|trans }}</h2>
+            <div class="grid grid-3" style="margin-top: 1rem;">
+                <div class="correlation-card">
+                    <div class="correlation-metrics">CCN ↔ MI</div>
+                    <div class="correlation-value" id="corrCcnMi">-</div>
+                    <div class="correlation-label text-muted">{{ 'analysis.correlation_coefficient'|trans }}</div>
+                </div>
+                <div class="correlation-card">
+                    <div class="correlation-metrics">LCOM ↔ MI</div>
+                    <div class="correlation-value" id="corrLcomMi">-</div>
+                    <div class="correlation-label text-muted">{{ 'analysis.correlation_coefficient'|trans }}</div>
+                </div>
+                <div class="correlation-card">
+                    <div class="correlation-metrics">CCN ↔ LOC</div>
+                    <div class="correlation-value" id="corrCcnLoc">-</div>
+                    <div class="correlation-label text-muted">{{ 'analysis.correlation_coefficient'|trans }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quadrant Analysis -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'analysis.quadrant'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'analysis.quadrant_desc'|trans }}</p>
+            <div class="grid grid-4">
+                <div class="quadrant-card quadrant-good">
+                    <div class="quadrant-icon">✓</div>
+                    <div class="quadrant-title">{{ 'analysis.quadrant_good'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.quadrant_good_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countGood">0</div>
+                </div>
+                <div class="quadrant-card quadrant-complex">
+                    <div class="quadrant-icon">⚠</div>
+                    <div class="quadrant-title">{{ 'analysis.quadrant_complex'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.quadrant_complex_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countComplex">0</div>
+                </div>
+                <div class="quadrant-card quadrant-large">
+                    <div class="quadrant-icon">📏</div>
+                    <div class="quadrant-title">{{ 'analysis.quadrant_large'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.quadrant_large_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countLarge">0</div>
+                </div>
+                <div class="quadrant-card quadrant-critical">
+                    <div class="quadrant-icon">✗</div>
+                    <div class="quadrant-title">{{ 'analysis.quadrant_critical'|trans }}</div>
+                    <div class="quadrant-desc">{{ 'analysis.quadrant_critical_desc'|trans }}</div>
+                    <div class="quadrant-count" id="countCritical">0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classes needing attention -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'analysis.attention'|trans }}</h2>
+            <table id="attentionTable">
+                <thead>
+                    <tr>
+                        <th>{{ 'tables.class'|trans }}</th>
+                        <th>CCN</th>
+                        <th>MI</th>
+                        <th>LCOM</th>
+                        <th>LOC</th>
+                        <th>{{ 'analysis.issues'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody id="attentionBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_styles %}
+.correlation-card {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--color-surface-hover);
+    border-radius: 0.5rem;
+}
+.correlation-metrics {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.correlation-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: monospace;
+}
+.correlation-value.positive { color: var(--color-danger); }
+.correlation-value.negative { color: var(--color-success); }
+.correlation-value.neutral { color: var(--color-text-muted); }
+
+.quadrant-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 2px solid var(--color-border);
+}
+.quadrant-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.quadrant-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.quadrant-desc {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+.quadrant-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.quadrant-good { border-color: var(--color-success); }
+.quadrant-good .quadrant-icon { color: var(--color-success); }
+.quadrant-good .quadrant-count { color: var(--color-success); }
+
+.quadrant-complex { border-color: var(--color-warning); }
+.quadrant-complex .quadrant-icon { color: var(--color-warning); }
+.quadrant-complex .quadrant-count { color: var(--color-warning); }
+
+.quadrant-large { border-color: var(--color-info); }
+.quadrant-large .quadrant-icon { color: var(--color-info); }
+.quadrant-large .quadrant-count { color: var(--color-info); }
+
+.quadrant-critical { border-color: var(--color-danger); }
+.quadrant-critical .quadrant-icon { color: var(--color-danger); }
+.quadrant-critical .quadrant-count { color: var(--color-danger); }
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Class data for bubble charts
+    const classData = {{ analysisData|json_encode|raw }};
+
+    // Theme detection
+    const isDarkMode = !document.documentElement.hasAttribute('data-theme') ||
+                       document.documentElement.getAttribute('data-theme') !== 'light';
+    const gridColor = isDarkMode ? '#334155' : '#e2e8f0';
+    const textColor = isDarkMode ? '#94a3b8' : '#64748b';
+
+    // Color by rating
+    function getColor(rating, alpha = 0.7) {
+        const colors = {
+            'A': `rgba(22, 163, 74, ${alpha})`,
+            'B': `rgba(101, 163, 13, ${alpha})`,
+            'C': `rgba(202, 138, 4, ${alpha})`,
+            'D': `rgba(234, 88, 12, ${alpha})`,
+            'F': `rgba(220, 38, 38, ${alpha})`
+        };
+        return colors[rating] || `rgba(100, 116, 139, ${alpha})`;
+    }
+
+    // Prepare bubble data
+    function prepareBubbleData(xKey, yKey, rKey, ratingKey) {
+        return classData.map(c => ({
+            x: c[xKey],
+            y: c[yKey],
+            r: Math.max(4, Math.min(25, Math.sqrt(c[rKey]) * 1.5)),
+            name: c.name,
+            rating: c[ratingKey],
+            backgroundColor: getColor(c[ratingKey]),
+            borderColor: getColor(c[ratingKey], 1)
+        }));
+    }
+
+    // Create bubble chart
+    function createBubbleChart(canvasId, xLabel, yLabel, data, xReverse = false, yReverse = false) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'bubble',
+            data: {
+                datasets: [{
+                    data: data,
+                    backgroundColor: data.map(d => d.backgroundColor),
+                    borderColor: data.map(d => d.borderColor),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const d = context.raw;
+                                return `${d.name}: ${xLabel}=${d.x.toFixed(1)}, ${yLabel}=${d.y.toFixed(1)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: xLabel, color: textColor },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor },
+                        reverse: xReverse
+                    },
+                    y: {
+                        title: { display: true, text: yLabel, color: textColor },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor },
+                        reverse: yReverse
+                    }
+                }
+            }
+        });
+    }
+
+    // Create charts
+    const dataCcnMi = prepareBubbleData('maxCcn', 'mi', 'loc', 'miRating');
+    createBubbleChart('chartCcnMi', 'CCN', 'MI', dataCcnMi);
+
+    const dataLcomMi = prepareBubbleData('lcom', 'mi', 'loc', 'miRating');
+    createBubbleChart('chartLcomMi', 'LCOM', 'MI', dataLcomMi);
+
+    const dataCcnLoc = prepareBubbleData('maxCcn', 'loc', 'methodCount', 'ccnRating');
+    createBubbleChart('chartCcnLoc', 'CCN', 'LOC', dataCcnLoc);
+
+    const dataLcomLoc = prepareBubbleData('lcom', 'loc', 'methodCount', 'lcomRating');
+    createBubbleChart('chartLcomLoc', 'LCOM', 'LOC', dataLcomLoc);
+
+    // Calculate correlations
+    function correlation(x, y) {
+        const n = x.length;
+        if (n === 0) return 0;
+        const sumX = x.reduce((a, b) => a + b, 0);
+        const sumY = y.reduce((a, b) => a + b, 0);
+        const sumXY = x.reduce((total, xi, i) => total + xi * y[i], 0);
+        const sumX2 = x.reduce((total, xi) => total + xi * xi, 0);
+        const sumY2 = y.reduce((total, yi) => total + yi * yi, 0);
+        const num = n * sumXY - sumX * sumY;
+        const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+        return den === 0 ? 0 : num / den;
+    }
+
+    const ccnValues = classData.map(c => c.maxCcn);
+    const miValues = classData.map(c => c.mi);
+    const lcomValues = classData.map(c => c.lcom);
+    const locValues = classData.map(c => c.loc);
+
+    function displayCorrelation(elementId, value) {
+        const el = document.getElementById(elementId);
+        el.textContent = value.toFixed(3);
+        if (value > 0.3) el.classList.add('positive');
+        else if (value < -0.3) el.classList.add('negative');
+        else el.classList.add('neutral');
+    }
+
+    displayCorrelation('corrCcnMi', correlation(ccnValues, miValues));
+    displayCorrelation('corrLcomMi', correlation(lcomValues, miValues));
+    displayCorrelation('corrCcnLoc', correlation(ccnValues, locValues));
+
+    // Quadrant analysis (based on CCN and MI thresholds)
+    const ccnThreshold = 10;
+    const miThreshold = 65;
+    let good = 0, complex = 0, large = 0, critical = 0;
+    const attentionClasses = [];
+
+    classData.forEach(c => {
+        const issues = [];
+        const isHighCcn = c.maxCcn > ccnThreshold;
+        const isLowMi = c.mi < miThreshold;
+        const isHighLcom = c.lcom > 0.7;
+        const isLargeLoc = c.loc > 300;
+
+        if (isHighCcn) issues.push('CCN');
+        if (isLowMi) issues.push('MI');
+        if (isHighLcom) issues.push('LCOM');
+        if (isLargeLoc) issues.push('LOC');
+
+        if (!isHighCcn && !isLowMi) good++;
+        else if (isHighCcn && !isLowMi) complex++;
+        else if (!isHighCcn && isLowMi) large++;
+        else critical++;
+
+        if (issues.length > 0) {
+            attentionClasses.push({ ...c, issues });
+        }
+    });
+
+    document.getElementById('countGood').textContent = good;
+    document.getElementById('countComplex').textContent = complex;
+    document.getElementById('countLarge').textContent = large;
+    document.getElementById('countCritical').textContent = critical;
+
+    // Sort attention classes by number of issues (descending)
+    attentionClasses.sort((a, b) => b.issues.length - a.issues.length);
+
+    // Populate attention table
+    const tbody = document.getElementById('attentionBody');
+    attentionClasses.slice(0, 20).forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${c.name}</td>
+            <td><span class="label label-${c.ccnRating}">${c.maxCcn}</span></td>
+            <td><span class="label label-${c.miRating}">${c.mi.toFixed(0)}</span></td>
+            <td><span class="label label-${c.lcomRating}">${c.lcom.toFixed(2)}</span></td>
+            <td>${c.loc}</td>
+            <td>${c.issues.map(i => `<span class="label label-warning" style="font-size: 0.65rem;">${i}</span>`).join(' ')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (attentionClasses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-muted" style="text-align: center;">{{ "analysis.no_issues"|trans }}</td></tr>';
+    }
+</script>
+{% endblock %}
