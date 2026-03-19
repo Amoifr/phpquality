@@ -9,6 +9,7 @@ use App\Analyzer\Ast\Visitor\LinesOfCodeVisitor;
 use App\Analyzer\Ast\Visitor\CyclomaticComplexityVisitor;
 use App\Analyzer\Ast\Visitor\HalsteadVisitor;
 use App\Analyzer\Ast\Visitor\CohesionVisitor;
+use App\Analyzer\Ast\Visitor\DependencyVisitor;
 use App\Analyzer\Metric\MaintainabilityIndex;
 use App\Analyzer\Result\FileResult;
 use App\Analyzer\Result\ClassResult;
@@ -40,6 +41,7 @@ class FileAnalyzer
             $ccnVisitor = new CyclomaticComplexityVisitor();
             $halsteadVisitor = new HalsteadVisitor();
             $cohesionVisitor = new CohesionVisitor();
+            $dependencyVisitor = new DependencyVisitor();
 
             // Traverse AST
             $this->parser->traverse($ast, [
@@ -47,6 +49,7 @@ class FileAnalyzer
                 $ccnVisitor,
                 $halsteadVisitor,
                 $cohesionVisitor,
+                $dependencyVisitor,
             ]);
 
             // Get results
@@ -54,6 +57,7 @@ class FileAnalyzer
             $ccnResults = $ccnVisitor->getResults();
             $halsteadResults = $halsteadVisitor->getResults();
             $lcomResults = $cohesionVisitor->getResults();
+            $dependencyResults = $dependencyVisitor->getResults();
 
             // Calculate MI
             $miResult = $this->miCalculator->calculate([
@@ -82,6 +86,7 @@ class FileAnalyzer
                 lcom: $lcomResults,
                 mi: $miResult->value,
                 miRating: $miResult->rating,
+                dependencies: $dependencyResults,
             );
         } catch (\Throwable $e) {
             return new FileResult(

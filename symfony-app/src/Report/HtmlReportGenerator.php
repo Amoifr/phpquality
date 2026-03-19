@@ -115,6 +115,13 @@ class HtmlReportGenerator implements ReportGeneratorInterface
             'treeData' => $this->prepareTreeData($result),
             'authorStats' => $authorStats,
         ]), $lang);
+
+        // Generate architecture.html
+        if ($result->architecture !== null) {
+            $this->generatePage($outputPath, 'architecture.html', 'report/architecture.html.twig', array_merge($commonData, [
+                'architecture' => $result->architecture,
+            ]), $lang);
+        }
     }
 
     private function generatePage(string $outputPath, string $filename, string $template, array $data, string $lang): void

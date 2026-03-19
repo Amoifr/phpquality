@@ -16,6 +16,7 @@ class ProjectAnalyzer
         private readonly FileAnalyzer $fileAnalyzer,
         private readonly ProjectTypeDetector $typeDetector,
         private readonly DependenciesAnalyzer $dependenciesAnalyzer,
+        private readonly ArchitectureAnalyzer $architectureAnalyzer,
     ) {}
 
     /**
@@ -32,6 +33,7 @@ class ProjectAnalyzer
         $fileResults = $this->analyzeFiles($files, $sourcePath, $projectType, $progressCallback);
         $summary = $this->calculateSummary($fileResults, $projectType);
         $dependencies = $this->dependenciesAnalyzer->analyze($sourcePath);
+        $architecture = $this->architectureAnalyzer->analyze($fileResults, $projectType);
 
         return new ProjectResult(
             sourcePath: $sourcePath,
@@ -40,6 +42,7 @@ class ProjectAnalyzer
             summary: $summary,
             analyzedAt: new \DateTimeImmutable(),
             dependencies: $dependencies,
+            architecture: $architecture,
         );
     }
 

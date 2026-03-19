@@ -20,6 +20,18 @@
 | **LCOM** | Lack of Cohesion of Methods (0-1, plus bas = meilleur) |
 | **Halstead** | Volume, Difficulté, Effort, Bugs estimés |
 
+### Analyse d'architecture v0.4
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Détection de couches** | Auto-détection des couches (Controller, Application, Domain, Infrastructure) |
+| **Violations de couches** | Détection des dépendances interdites (ex: Domain → Infrastructure) |
+| **Violations SOLID** | Détection des violations SRP, OCP, ISP, DIP |
+| **Dépendances circulaires** | Détection des cycles de dépendances avec Tarjan |
+| **Graphe de dépendances** | Visualisation interactive D3.js |
+| **Matrice de dépendances** | Vue matricielle des dépendances entre couches |
+| **Score d'architecture** | Score global 0-100 basé sur les violations |
+
 ### Rapports HTML v0.2
 
 Le rapport HTML multi-pages inclut :
@@ -33,6 +45,9 @@ Le rapport HTML multi-pages inclut :
 | **LCOM** | Cohésion par classe |
 | **LOC** | Lignes de code par fichier |
 | **Halstead** | Métriques de complexité avancées |
+| **Analysis** | Analyse multi-dimensionnelle et arbre du code |
+| **Architecture** | Graphe de dépendances, violations SOLID, matrice de dépendances |
+| **Dependencies** | Analyse des dépendances Composer |
 
 ### Types de projets supportés
 
@@ -183,7 +198,12 @@ phpquality/
 │   │   │   │       ├── LinesOfCodeVisitor.php
 │   │   │   │       ├── CyclomaticComplexityVisitor.php
 │   │   │   │       ├── HalsteadVisitor.php
-│   │   │   │       └── CohesionVisitor.php
+│   │   │   │       ├── CohesionVisitor.php
+│   │   │   │       └── DependencyVisitor.php
+│   │   │   ├── Architecture/
+│   │   │   │   ├── LayerDetector.php
+│   │   │   │   └── SolidAnalyzer.php
+│   │   │   ├── ArchitectureAnalyzer.php
 │   │   │   ├── Metric/
 │   │   │   │   └── MaintainabilityIndex.php
 │   │   │   ├── ProjectType/
@@ -209,7 +229,10 @@ phpquality/
 │   │       ├── mi.html.twig
 │   │       ├── lcom.html.twig
 │   │       ├── loc.html.twig
-│   │       └── halstead.html.twig
+│   │       ├── halstead.html.twig
+│   │       ├── analysis.html.twig
+│   │       ├── architecture.html.twig
+│   │       └── dependencies.html.twig
 │   └── composer.json
 └── README.md
 ```
@@ -262,14 +285,44 @@ phpquality/
 | 0.6-0.8 | D | Faible cohésion |
 | 0.8-1.0 | F | Très faible cohésion |
 
+### Architecture Score
+
+| Score | Rating | Interprétation |
+|-------|--------|----------------|
+| 85-100 | A | Architecture exemplaire |
+| 70-84 | B | Bonne architecture |
+| 50-69 | C | Architecture acceptable |
+| 30-49 | D | Architecture à améliorer |
+| 0-29 | F | Architecture critique |
+
+### Règles de couches (Clean Architecture)
+
+PhpQuality détecte automatiquement les couches et vérifie les règles de dépendances :
+
+| Couche | Peut dépendre de | Ne peut pas dépendre de |
+|--------|------------------|-------------------------|
+| **Domain** | rien | Application, Infrastructure, Controller |
+| **Application** | Domain | Infrastructure, Controller |
+| **Infrastructure** | Domain, Application | Controller |
+| **Controller** | Domain, Application, Infrastructure | - |
+
+### Violations SOLID détectées
+
+| Principe | Détection | Seuils |
+|----------|-----------|--------|
+| **SRP** (Single Responsibility) | Classes avec trop de méthodes, dépendances et lignes de code | LCOM > 0.7, méthodes > 20, deps > 15 |
+| **OCP** (Open/Closed) | Nombreux switch/match sur type | À venir |
+| **ISP** (Interface Segregation) | Interfaces avec trop de méthodes | > 5 méthodes |
+| **DIP** (Dependency Inversion) | Ratio dépendances concrètes/abstraites | ratio < 0.5 |
+
 ---
 
 ## Feuille de route
 
 - [x] **v0.1** - Analyse basique : LOC, CCN, MI, LCOM + rapport HTML + types de projets
 - [x] **v0.2** - Rapport HTML multi-pages avec documentation des métriques
-- [ ] **v0.3** - Exports JSON, CSV, XML violations
-- [ ] **v0.4** - Graphe de dépendances, PageRank, couplage afférent/efférent
+- [x] **v0.3** - Analyse multi-dimensionnelle, arbre du code, Hall of Fame/Shame, analyse des dépendances Composer
+- [x] **v0.4** - Analyse d'architecture (couches, violations SOLID, graphe de dépendances D3.js, dépendances circulaires)
 - [ ] **v0.5** - Règles CI configurables, mode `failIfFound`, intégration GitHub Actions
 - [ ] **v0.6** - Plugin Git, corrélation historique/métriques
 - [ ] **v1.0** - Rapport HTML complet (cercles, daltonisme, filtres, groupes)
@@ -300,3 +353,7 @@ MIT - voir le fichier [LICENSE](./LICENSE).
 - [Halstead complexity measures (Wikipedia)](https://en.wikipedia.org/wiki/Halstead_complexity_measures)
 - [Cyclomatic complexity (Wikipedia)](https://en.wikipedia.org/wiki/Cyclomatic_complexity)
 - [Software package metrics - Robert Martin (Wikipedia)](https://en.wikipedia.org/wiki/Software_package_metrics)
+- [Deptrac (GitHub)](https://github.com/qossmic/deptrac) - inspiration pour l'analyse de couches
+- [PHP Insights (GitHub)](https://github.com/nunomaduro/phpinsights) - inspiration pour l'analyse de qualité
+- [SOLID principles (Wikipedia)](https://en.wikipedia.org/wiki/SOLID)
+- [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)

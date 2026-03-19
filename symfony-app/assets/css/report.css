@@ -1174,6 +1174,364 @@ footer a:hover { text-decoration: underline; }
     background: linear-gradient(135deg, rgba(180, 100, 40, 0.2) 0%, rgba(180, 100, 40, 0.08) 100%);
 }
 
+/* Architecture Page Styles */
+
+/* Layer colors */
+.layer-controller { background: #8b5cf6; color: white; }
+.layer-application { background: #3b82f6; color: white; }
+.layer-domain { background: #22c55e; color: white; }
+.layer-infrastructure { background: #f97316; color: white; }
+.layer-other { background: #6b7280; color: white; }
+
+/* Layer stat cards */
+.layer-stat {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: white;
+}
+
+.layer-stat.layer-controller { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.layer-stat.layer-application { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.layer-stat.layer-domain { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.layer-stat.layer-infrastructure { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+.layer-stat.layer-other { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }
+
+.layer-count {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.layer-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Layer labels in tables */
+.label-layer-controller { background: #8b5cf6; color: white; }
+.label-layer-application { background: #3b82f6; color: white; }
+.label-layer-domain { background: #22c55e; color: white; }
+.label-layer-infrastructure { background: #f97316; color: white; }
+.label-layer-other { background: #6b7280; color: white; }
+
+.label-error { background: var(--color-danger); color: white; }
+
+/* Dependency Graph */
+.dependency-graph {
+    width: 100%;
+    height: 500px;
+    background: var(--color-bg);
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.dependency-graph svg {
+    width: 100%;
+    height: 100%;
+}
+
+.dependency-graph {
+    position: relative;
+}
+
+/* Node info panel */
+.node-info-panel {
+    position: absolute;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    min-width: 220px;
+    max-width: 350px;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.node-info-header {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    color: white;
+    font-weight: 600;
+}
+
+.node-info-body {
+    padding: 0.5rem 0.75rem;
+}
+
+.node-info-label {
+    color: var(--color-text-muted);
+    margin-right: 0.25rem;
+}
+
+.node-info-body > div {
+    margin: 0.25rem 0;
+    word-break: break-word;
+}
+
+.graph-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.graph-controls label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.graph-controls input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    color: var(--color-text);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn:hover {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface-hover);
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-dot.layer-controller { background: #8b5cf6; }
+.legend-dot.layer-application { background: #3b82f6; }
+.legend-dot.layer-domain { background: #22c55e; }
+.legend-dot.layer-infrastructure { background: #f97316; }
+.legend-dot.layer-other { background: #6b7280; }
+
+.legend-line {
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.legend-line.violation {
+    background: var(--color-danger);
+}
+
+/* SOLID Tabs */
+.solid-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.solid-tab {
+    padding: 0.5rem 1rem;
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.solid-tab:hover {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+}
+
+.solid-tab.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.solid-tab .badge {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: inherit;
+}
+
+.solid-tab.active .badge {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.solid-panel {
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.solid-principle-info {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface-hover);
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--color-primary);
+}
+
+/* Circular Dependencies */
+.circular-deps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.circular-dep {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--color-bg);
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--color-danger);
+}
+
+.circular-dep-icon {
+    font-size: 1.5rem;
+}
+
+.circular-dep-path {
+    font-family: 'Fira Code', 'Monaco', monospace;
+    font-size: 0.85rem;
+    color: var(--color-text);
+    word-break: break-word;
+}
+
+/* Dependency Matrix */
+.matrix-container {
+    overflow-x: auto;
+}
+
+.matrix-table {
+    border-collapse: separate;
+    border-spacing: 2px;
+    font-size: 0.8rem;
+}
+
+.matrix-table th,
+.matrix-table td {
+    padding: 0.5rem 0.75rem;
+    text-align: center;
+    border: none;
+    border-radius: 0.25rem;
+}
+
+.matrix-header {
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    background: var(--color-surface-hover);
+    font-weight: 600;
+    min-height: 80px;
+}
+
+.matrix-row-header {
+    text-align: right !important;
+    background: var(--color-surface-hover);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.matrix-cell {
+    background: var(--color-surface-hover);
+    color: var(--color-text-muted);
+    min-width: 50px;
+    transition: all 0.15s;
+}
+
+.matrix-cell.has-deps {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--color-info);
+    font-weight: 600;
+}
+
+.matrix-cell.high-deps {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--color-danger);
+    font-weight: 700;
+}
+
+.matrix-table tr:hover .matrix-row-header,
+.matrix-table tr:hover .matrix-cell {
+    filter: brightness(1.1);
+}
+
+/* Rating badge for architecture score */
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.rating-badge.rating-A { background: var(--color-a); color: white; }
+.rating-badge.rating-B { background: var(--color-b); color: white; }
+.rating-badge.rating-C { background: var(--color-c); color: black; }
+.rating-badge.rating-D { background: var(--color-d); color: white; }
+.rating-badge.rating-F { background: var(--color-f); color: white; }
+
+/* 5-column grid for layer stats */
+.grid-5 { grid-template-columns: repeat(5, 1fr); }
+
+@media (max-width: 1200px) { .grid-5 { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) { .grid-5 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .grid-5 { grid-template-columns: 1fr; } }
+
+/* Text alignment helpers */
+.text-center { text-align: center; }
+.text-mono { font-family: 'Fira Code', 'Monaco', monospace; font-size: 0.85rem; }
+
 /* Print Styles - use light theme */
 @media print {
     :root {

@@ -1,0 +1,445 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'architecture.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_architecture %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'architecture.title'|trans }}</h1>
+        <p>{{ 'architecture.description'|trans }}</p>
+    </div>
+
+    <!-- Architecture Score Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="metric-card">
+                <div class="metric-value">
+                    <span class="rating-badge rating-{{ architecture.rating }}">{{ architecture.rating }}</span>
+                </div>
+                <div class="metric-label">{{ 'architecture.score'|trans }}</div>
+                <div class="metric-detail">{{ architecture.score|round(1) }}/100</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value {% if architecture.layerViolations|length > 0 %}text-danger{% else %}text-success{% endif %}">
+                    {{ architecture.layerViolations|length }}
+                </div>
+                <div class="metric-label">{{ 'architecture.layer_violations'|trans }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value {% if architecture.solidViolations|length > 0 %}text-warning{% else %}text-success{% endif %}">
+                    {{ architecture.solidViolations|length }}
+                </div>
+                <div class="metric-label">{{ 'architecture.solid_violations'|trans }}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value {% if architecture.circularDependencies|length > 0 %}text-danger{% else %}text-success{% endif %}">
+                    {{ architecture.circularDependencies|length }}
+                </div>
+                <div class="metric-label">{{ 'architecture.circular_deps'|trans }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Layer Distribution -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'architecture.layer_distribution'|trans }}</h2>
+            <div class="grid grid-5" style="margin-top: 1rem;">
+                {% for layer, count in architecture.layerStats %}
+                <div class="layer-stat layer-{{ layer|lower }}">
+                    <div class="layer-count">{{ count }}</div>
+                    <div class="layer-name">{{ layer }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Dependency Graph -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'architecture.dependency_graph'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'architecture.dependency_graph_desc'|trans }}</p>
+            <div class="graph-controls">
+                <button class="btn btn-sm" onclick="resetZoom()">{{ 'architecture.reset_view'|trans }}</button>
+                <label><input type="checkbox" id="showLabels" checked onchange="toggleLabels()"> {{ 'architecture.show_labels'|trans }}</label>
+                <label><input type="checkbox" id="showViolationsOnly" onchange="filterGraph()"> {{ 'architecture.show_violations_only'|trans }}</label>
+            </div>
+            <div id="dependencyGraph" class="dependency-graph"></div>
+            <div class="graph-legend">
+                <span class="legend-item"><span class="legend-dot layer-controller"></span> Controller</span>
+                <span class="legend-item"><span class="legend-dot layer-application"></span> Application</span>
+                <span class="legend-item"><span class="legend-dot layer-domain"></span> Domain</span>
+                <span class="legend-item"><span class="legend-dot layer-infrastructure"></span> Infrastructure</span>
+                <span class="legend-item"><span class="legend-dot layer-other"></span> Other</span>
+                <span class="legend-item"><span class="legend-line violation"></span> {{ 'architecture.violation'|trans }}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Layer Violations -->
+    {% if architecture.layerViolations|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'architecture.layer_violations'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'architecture.layer_violations_desc'|trans }}</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ 'architecture.source'|trans }}</th>
+                        <th>{{ 'architecture.source_layer'|trans }}</th>
+                        <th></th>
+                        <th>{{ 'architecture.target'|trans }}</th>
+                        <th>{{ 'architecture.target_layer'|trans }}</th>
+                        <th>{{ 'architecture.type'|trans }}</th>
+                        <th>{{ 'architecture.severity'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for violation in architecture.layerViolations %}
+                    <tr>
+                        <td class="text-mono">{{ violation.sourceClass|split('\\')|last }}</td>
+                        <td><span class="label label-layer-{{ violation.sourceLayer|lower }}">{{ violation.sourceLayer }}</span></td>
+                        <td class="text-center text-danger">&#8594;</td>
+                        <td class="text-mono">{{ violation.targetClass|split('\\')|last }}</td>
+                        <td><span class="label label-layer-{{ violation.targetLayer|lower }}">{{ violation.targetLayer }}</span></td>
+                        <td><span class="label">{{ violation.dependencyType }}</span></td>
+                        <td><span class="label label-{{ violation.severity }}">{{ violation.severity }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- SOLID Violations -->
+    {% if architecture.solidViolations|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'architecture.solid_violations'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'architecture.solid_violations_desc'|trans }}</p>
+
+            <div class="solid-tabs">
+                {% set solidGroups = architecture.solidViolationsByPrinciple %}
+                {% for principle, violations in solidGroups %}
+                {% if violations|length > 0 %}
+                <button class="solid-tab {% if loop.first %}active{% endif %}" onclick="showSolidTab('{{ principle }}')">
+                    {{ principle }}
+                    <span class="badge">{{ violations|length }}</span>
+                </button>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% for principle, violations in solidGroups %}
+            {% if violations|length > 0 %}
+            <div class="solid-panel" id="panel-{{ principle }}" {% if not loop.first %}style="display: none;"{% endif %}>
+                <div class="solid-principle-info">
+                    <strong>{{ violations[0].principleName }}</strong>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>{{ 'tables.class'|trans }}</th>
+                            <th>{{ 'architecture.message'|trans }}</th>
+                            <th>{{ 'architecture.severity'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for violation in violations %}
+                        <tr>
+                            <td class="text-mono">{{ violation.className|split('\\')|last }}</td>
+                            <td>{{ violation.message }}</td>
+                            <td><span class="label label-{{ violation.severity }}">{{ violation.severity }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Circular Dependencies -->
+    {% if architecture.circularDependencies|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'architecture.circular_deps'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'architecture.circular_deps_desc'|trans }}</p>
+            <div class="circular-deps-list">
+                {% for cycle in architecture.circularDependencies %}
+                <div class="circular-dep">
+                    <span class="circular-dep-icon">&#128260;</span>
+                    <span class="circular-dep-path">
+                        {% for class in cycle %}
+                            {{ class|split('\\')|last }}{% if not loop.last %} &#8594; {% endif %}
+                        {% endfor %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Dependency Matrix -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'architecture.dependency_matrix'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'architecture.dependency_matrix_desc'|trans }}</p>
+            <div class="matrix-container">
+                {% set matrix = architecture.dependencyMatrix %}
+                {% set layers = matrix|keys %}
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            {% for layer in layers %}
+                            <th class="matrix-header">{{ layer }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fromLayer in layers %}
+                        <tr>
+                            <th class="matrix-row-header">{{ fromLayer }}</th>
+                            {% for toLayer in layers %}
+                            {% set count = matrix[fromLayer][toLayer] ?? 0 %}
+                            <td class="matrix-cell {% if count > 0 %}has-deps{% endif %} {% if count > 10 %}high-deps{% endif %}">
+                                {{ count > 0 ? count : '-' }}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    // Graph data
+    const graphData = {{ architecture.dependencyGraph|json_encode|raw }};
+    const layerAssignments = {{ architecture.layerAssignments|json_encode|raw }};
+    const layerViolations = {{ architecture.layerViolations|json_encode|raw }};
+
+    // Layer colors
+    const layerColors = {
+        'Controller': '#8b5cf6',
+        'Application': '#3b82f6',
+        'Domain': '#22c55e',
+        'Infrastructure': '#f97316',
+        'Other': '#6b7280'
+    };
+
+    // Build violation set for quick lookup
+    const violationEdges = new Set();
+    layerViolations.forEach(v => {
+        violationEdges.add(v.sourceClass + '->' + v.targetClass);
+    });
+
+    // Prepare nodes and links for D3
+    let nodes = Object.entries(graphData.nodes || {}).map(([fqn, data]) => ({
+        id: fqn,
+        name: data.name,
+        layer: layerAssignments[fqn] || 'Other',
+        type: data.type,
+        file: data.file
+    }));
+
+    let links = (graphData.edges || []).map(edge => ({
+        source: edge.from,
+        target: edge.to,
+        types: edge.types,
+        violation: violationEdges.has(edge.from + '->' + edge.to)
+    }));
+
+    // Filter out nodes that don't exist in both nodes array
+    const nodeIds = new Set(nodes.map(n => n.id));
+    links = links.filter(l => nodeIds.has(l.source) && nodeIds.has(l.target));
+
+    // Setup SVG
+    const container = document.getElementById('dependencyGraph');
+    const width = container.clientWidth;
+    const height = 500;
+
+    const svg = d3.select('#dependencyGraph')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', [0, 0, width, height]);
+
+    // Add zoom behavior
+    const g = svg.append('g');
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 4])
+        .on('zoom', (event) => g.attr('transform', event.transform));
+    svg.call(zoom);
+
+    // Create force simulation with better spacing for labels
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(150))
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(60))
+        .force('x', d3.forceX(width / 2).strength(0.05))
+        .force('y', d3.forceY(height / 2).strength(0.05));
+
+    // Draw links
+    const link = g.append('g')
+        .attr('class', 'links')
+        .selectAll('line')
+        .data(links)
+        .join('line')
+        .attr('stroke', d => d.violation ? '#ef4444' : '#64748b')
+        .attr('stroke-opacity', d => d.violation ? 0.8 : 0.3)
+        .attr('stroke-width', d => d.violation ? 2 : 1)
+        .attr('marker-end', 'url(#arrowhead)');
+
+    // Add arrowhead marker
+    svg.append('defs').append('marker')
+        .attr('id', 'arrowhead')
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', 20)
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .append('path')
+        .attr('d', 'M 0,-5 L 10,0 L 0,5')
+        .attr('fill', '#64748b');
+
+    // Draw nodes
+    const node = g.append('g')
+        .attr('class', 'nodes')
+        .selectAll('g')
+        .data(nodes)
+        .join('g')
+        .attr('class', 'node')
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
+        .on('mouseover', showNodeInfo)
+        .on('mouseout', hideNodeInfo)
+        .style('cursor', 'pointer');
+
+    node.append('circle')
+        .attr('r', 12)
+        .attr('fill', d => layerColors[d.layer] || layerColors['Other'])
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2);
+
+    // Add text labels
+    node.append('text')
+        .attr('dx', 16)
+        .attr('dy', 4)
+        .attr('font-size', '11px')
+        .attr('font-family', 'system-ui, sans-serif')
+        .attr('fill', 'currentColor')
+        .text(d => d.name);
+
+    // Node info panel
+    const infoPanel = d3.select('#dependencyGraph')
+        .append('div')
+        .attr('class', 'node-info-panel')
+        .style('display', 'none');
+
+    function showNodeInfo(event, d) {
+        const deps = links.filter(l => l.source.id === d.id || l.target.id === d.id);
+        const outgoing = deps.filter(l => l.source.id === d.id);
+        const incoming = deps.filter(l => l.target.id === d.id);
+        const violations = deps.filter(l => l.violation);
+
+        infoPanel.html(`
+            <div class="node-info-header" style="background: ${layerColors[d.layer] || layerColors['Other']}">
+                <strong>${d.name}</strong>
+            </div>
+            <div class="node-info-body">
+                <div><span class="node-info-label">Layer:</span> ${d.layer}</div>
+                <div><span class="node-info-label">Type:</span> ${d.type || 'class'}</div>
+                <div><span class="node-info-label">File:</span> ${d.file}</div>
+                <hr style="border-color: var(--color-border); margin: 0.5rem 0;">
+                <div><span class="node-info-label">Dependencies:</span> ${outgoing.length} outgoing, ${incoming.length} incoming</div>
+                ${violations.length > 0 ? `<div style="color: var(--color-danger);"><span class="node-info-label">Violations:</span> ${violations.length}</div>` : ''}
+            </div>
+        `)
+        .style('display', 'block')
+        .style('left', (event.pageX - container.getBoundingClientRect().left + 20) + 'px')
+        .style('top', (event.pageY - container.getBoundingClientRect().top - 10) + 'px');
+    }
+
+    function hideNodeInfo() {
+        infoPanel.style('display', 'none');
+    }
+
+    // Update positions on tick
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+    // Drag functions
+    function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+    }
+
+    function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+
+    function resetZoom() {
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+    }
+
+    function filterGraph() {
+        const showViolationsOnly = document.getElementById('showViolationsOnly').checked;
+        link.attr('visibility', d => {
+            if (showViolationsOnly && !d.violation) return 'hidden';
+            return 'visible';
+        });
+        // Also filter nodes when showing violations only
+        node.attr('visibility', d => {
+            if (!showViolationsOnly) return 'visible';
+            // Show node if it has any violation link
+            const hasViolation = links.some(l => l.violation && (l.source.id === d.id || l.target.id === d.id));
+            return hasViolation ? 'visible' : 'hidden';
+        });
+    }
+
+    function toggleLabels() {
+        const showLabels = document.getElementById('showLabels').checked;
+        node.selectAll('text').attr('visibility', showLabels ? 'visible' : 'hidden');
+    }
+
+    // SOLID tabs
+    function showSolidTab(principle) {
+        document.querySelectorAll('.solid-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.solid-panel').forEach(p => p.style.display = 'none');
+
+        document.querySelector(`.solid-tab[onclick*="${principle}"]`).classList.add('active');
+        document.getElementById('panel-' + principle).style.display = 'block';
+    }
+</script>
+{% endblock %}

@@ -18,6 +18,7 @@ class ProjectResult
         public readonly array $summary,
         public readonly \DateTimeImmutable $analyzedAt,
         public readonly ?DependenciesResult $dependencies = null,
+        public readonly ?ArchitectureResult $architecture = null,
     ) {}
 
     public function getFileCount(): int
@@ -123,6 +124,7 @@ class ProjectResult
             'summary' => $this->summary,
             'files' => array_map(fn($f) => $f->toArray(), $this->files),
             'dependencies' => $this->dependencies?->toArray(),
+            'architecture' => $this->architecture?->toArray(),
         ];
     }
 }

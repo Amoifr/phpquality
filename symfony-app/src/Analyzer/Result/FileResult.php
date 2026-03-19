@@ -9,6 +9,10 @@ class FileResult
     /**
      * @param array<ClassResult> $classes
      */
+    /**
+     * @param array<ClassResult> $classes
+     * @param array $dependencies Dependency analysis results from DependencyVisitor
+     */
     public function __construct(
         public readonly string $path,
         public readonly string $relativePath,
@@ -21,6 +25,7 @@ class FileResult
         public readonly string $miRating,
         public readonly bool $hasErrors = false,
         public readonly ?string $error = null,
+        public readonly array $dependencies = [],
     ) {}
 
     public function getTotalLoc(): int
@@ -62,6 +67,44 @@ class FileResult
             'miRating' => $this->miRating,
             'hasErrors' => $this->hasErrors,
             'error' => $this->error,
+            'dependencies' => $this->dependencies,
         ];
+    }
+
+    /**
+     * Get the namespace of this file (from dependency analysis)
+     */
+    public function getNamespace(): ?string
+    {
+        return $this->dependencies['namespace'] ?? null;
+    }
+
+    /**
+     * Get the use statements in this file
+     */
+    public function getUseStatements(): array
+    {
+        return $this->dependencies['useStatements'] ?? [];
+    }
+
+    /**
+     * Get all dependencies found in this file
+     */
+    public function getDependencies(): array
+    {
+        return $this->dependencies['dependencies'] ?? [];
+    }
+
+    /**
+     * Get unique dependency count
+     */
+    public function getUniqueDependencyCount(): int
+    {
+        $deps = $this->getDependencies();
+        $unique = [];
+        foreach ($deps as $dep) {
+            $unique[$dep['fqn']] = true;
+        }
+        return count($unique);
     }
 }
