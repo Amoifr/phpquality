@@ -98,6 +98,12 @@ class AnalyzeCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'List available languages'
+            )
+            ->addOption(
+                'git-blame',
+                null,
+                InputOption::VALUE_NONE,
+                'Enable git blame analysis for Hall of Fame/Shame (slower)'
             );
     }
 
@@ -175,7 +181,8 @@ class AnalyzeCommand extends Command
         if (!$input->getOption('no-html')) {
             $htmlPath = $input->getOption('report-html') ?: $source . '/phpquality-report';
             $lang = $input->getOption('lang') ?? 'en';
-            $this->htmlGenerator->generate($result, $htmlPath, $lang);
+            $enableGitBlame = $input->getOption('git-blame');
+            $this->htmlGenerator->generate($result, $htmlPath, $lang, $enableGitBlame);
             $io->success('HTML report generated: ' . $htmlPath . '/index.html');
         }
 

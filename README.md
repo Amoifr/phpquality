@@ -176,6 +176,7 @@ docker run --rm \
 | `--exclude`, `-x` | Répertoires supplémentaires à exclure (répétable) |
 | `--no-html` | Ne pas générer le rapport HTML |
 | `--fail-on-violation` | Échouer si des violations sont détectées |
+| `--git-blame` | Activer l'analyse git blame pour Hall of Fame/Shame (plus lent) |
 | `--list-types` | Lister tous les types de projets disponibles |
 
 ---

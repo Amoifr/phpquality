@@ -18,6 +18,8 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         'id', 'ro', 'sk', 'sv', 'th', 'tr', 'uk', 'vi', 'bg', 'hr',
     ];
 
+    private bool $enableGitBlame = false;
+
     public function __construct(
         private readonly Environment $twig,
         private readonly Filesystem $filesystem,
@@ -25,7 +27,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         private readonly GitBlameAnalyzer $gitBlameAnalyzer,
     ) {}
 
-    public function generate(ProjectResult $result, mixed $outputPath, string $lang = 'en'): void
+    public function generate(ProjectResult $result, mixed $outputPath, string $lang = 'en', bool $enableGitBlame = false): void
     {
         if (!is_string($outputPath)) {
             throw new \InvalidArgumentException('Output path must be a string');
@@ -35,6 +37,8 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         if (!in_array($lang, self::SUPPORTED_LANGUAGES, true)) {
             $lang = 'en';
         }
+
+        $this->enableGitBlame = $enableGitBlame;
 
         $this->filesystem->mkdir($outputPath);
 
@@ -109,7 +113,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         }
 
         // Generate analysis.html (cross-dimension charts)
-        $authorStats = $this->gitBlameAnalyzer->analyze($result);
+        $authorStats = $this->enableGitBlame ? $this->gitBlameAnalyzer->analyze($result) : null;
         $this->generatePage($outputPath, 'analysis.html', 'report/analysis.html.twig', array_merge($commonData, [
             'analysisData' => $this->prepareAnalysisData($result),
             'treeData' => $this->prepareTreeData($result),

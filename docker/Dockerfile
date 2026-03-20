@@ -33,7 +33,7 @@ FROM php:8.3-cli-alpine
 
 LABEL org.opencontainers.image.title="PhpQuality"
 LABEL org.opencontainers.image.description="PHP Static Code Analyzer - Metrics & Quality Reports"
-LABEL org.opencontainers.image.version="0.2.0"
+LABEL org.opencontainers.image.version="1.0.1"
 LABEL org.opencontainers.image.vendor="amoifr"
 LABEL org.opencontainers.image.source="https://github.com/amoifr/PhpQuality"
 LABEL org.opencontainers.image.authors="Pascal CESCON <contact@moi.ruedesjasses.fr>"
