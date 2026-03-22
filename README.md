@@ -1,8 +1,9 @@
 # PhpQuality - Analyseur statique PHP
 
 > Analyseur statique PHP distribué via Docker, conçu pour remplacer `phpmetrics/phpmetrics` (désormais non maintenu).
-> Analyse votre code PHP et génère des rapports détaillés sur la complexité, la maintenabilité, le couplage et bien plus encore.
+> Analyse votre code PHP et génère des rapports détaillés sur la complexité, la maintenabilité, le couplage, l'architecture et la couverture de tests.
 
+**Version:** 1.1.0
 **Auteur:** [Pascal CESCON](https://moi.ruedesjasses.fr)
 **GitHub:** [amoifr/PhpQuality](https://github.com/amoifr/PhpQuality)
 
@@ -10,7 +11,7 @@
 
 ## Fonctionnalités
 
-### Métriques v0.1
+### Métriques de code v0.1
 
 | Métrique | Description |
 |----------|-------------|
@@ -32,6 +33,26 @@
 | **Matrice de dépendances** | Vue matricielle des dépendances entre couches |
 | **Score d'architecture** | Score global 0-100 basé sur les violations |
 
+### Couverture de tests v1.1 (NOUVEAU)
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Couverture des lignes** | Pourcentage de lignes de code couvertes par les tests |
+| **Couverture des méthodes** | Pourcentage de méthodes testées |
+| **Couverture des classes** | Pourcentage de classes testées |
+| **Couverture par package** | Analyse de couverture par namespace/package |
+| **Couverture par fichier** | Détail de couverture pour chaque fichier |
+| **Score de couverture** | Note A-F basée sur le pourcentage de couverture |
+
+### Hall of Fame / Hall of Shame v0.3
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Analyse git blame** | Statistiques par auteur via git blame |
+| **Score composite** | Score combinant MI et CCN par contributeur |
+| **Hall of Fame** | Top contributeurs en qualité de code |
+| **Hall of Shame** | Contributeurs dont le code nécessite de l'attention |
+
 ### Rapports HTML v0.2
 
 Le rapport HTML multi-pages inclut :
@@ -45,8 +66,9 @@ Le rapport HTML multi-pages inclut :
 | **LCOM** | Cohésion par classe |
 | **LOC** | Lignes de code par fichier |
 | **Halstead** | Métriques de complexité avancées |
-| **Analysis** | Analyse multi-dimensionnelle et arbre du code |
+| **Analysis** | Analyse multi-dimensionnelle, arbre du code, contributeurs |
 | **Architecture** | Graphe de dépendances, violations SOLID, matrice de dépendances |
+| **Coverage** | Couverture de tests par fichier et package |
 | **Dependencies** | Analyse des dépendances Composer |
 
 ### Types de projets supportés
@@ -129,6 +151,30 @@ docker run --rm \
   analyze --source=/project/app/code/Vendor/Module --type=magento
 ```
 
+### Avec couverture de tests
+
+```bash
+# Générer d'abord le rapport de couverture avec PHPUnit
+./vendor/bin/phpunit --coverage-clover coverage.xml
+
+# Puis analyser avec la couverture
+docker run --rm \
+  -v $(pwd):/project \
+  -v $(pwd)/reports:/reports \
+  amoifr13/phpquality \
+  analyze --source=/project/src --coverage=/project/coverage.xml --report-html=/reports
+```
+
+### Avec Hall of Fame/Shame (git blame)
+
+```bash
+docker run --rm \
+  -v $(pwd):/project \
+  -v $(pwd)/reports:/reports \
+  amoifr13/phpquality \
+  analyze --source=/project/src --git-blame --report-html=/reports
+```
+
 ### Afficher le résumé dans le terminal uniquement
 
 ```bash
@@ -177,7 +223,11 @@ docker run --rm \
 | `--no-html` | Ne pas générer le rapport HTML |
 | `--fail-on-violation` | Échouer si des violations sont détectées |
 | `--git-blame` | Activer l'analyse git blame pour Hall of Fame/Shame (plus lent) |
+| `--coverage`, `-c` | Chemin vers le fichier de couverture Clover XML |
+| `--project-name`, `-p` | Nom du projet à afficher dans les titres du rapport |
+| `--lang`, `-l` | Langue du rapport (en, fr, de, es, it, pt, nl, pl, ru, ja, zh, ko...) |
 | `--list-types` | Lister tous les types de projets disponibles |
+| `--list-langs` | Lister toutes les langues disponibles |
 
 ---
 
@@ -205,6 +255,8 @@ phpquality/
 │   │   │   │   ├── LayerDetector.php
 │   │   │   │   └── SolidAnalyzer.php
 │   │   │   ├── ArchitectureAnalyzer.php
+│   │   │   ├── CoverageAnalyzer.php
+│   │   │   ├── GitBlameAnalyzer.php
 │   │   │   ├── Metric/
 │   │   │   │   └── MaintainabilityIndex.php
 │   │   │   ├── ProjectType/
@@ -216,6 +268,11 @@ phpquality/
 │   │   │   ├── FileAnalyzer.php
 │   │   │   ├── ProjectAnalyzer.php
 │   │   │   └── Result/
+│   │   │       ├── ProjectResult.php
+│   │   │       ├── FileResult.php
+│   │   │       ├── ClassResult.php
+│   │   │       ├── ArchitectureResult.php
+│   │   │       └── CoverageResult.php
 │   │   ├── Command/
 │   │   │   └── AnalyzeCommand.php
 │   │   └── Report/
@@ -233,7 +290,12 @@ phpquality/
 │   │       ├── halstead.html.twig
 │   │       ├── analysis.html.twig
 │   │       ├── architecture.html.twig
+│   │       ├── coverage.html.twig
 │   │       └── dependencies.html.twig
+│   ├── translations/
+│   │   ├── messages.en.yaml
+│   │   ├── messages.fr.yaml
+│   │   └── ... (30+ langues)
 │   └── composer.json
 └── README.md
 ```
@@ -247,7 +309,7 @@ phpquality/
 | Langage | PHP 8.3 |
 | Framework | Symfony 7.x |
 | Parseur AST | [nikic/php-parser](https://github.com/nikic/PHP-Parser) |
-| Rendu HTML | Twig + Chart.js |
+| Rendu HTML | Twig + Chart.js + D3.js |
 | CLI | Symfony Console |
 | Image de base | `php:8.3-cli-alpine` |
 | Gestion des dépendances | Composer |
@@ -296,6 +358,16 @@ phpquality/
 | 30-49 | D | Architecture à améliorer |
 | 0-29 | F | Architecture critique |
 
+### Test Coverage
+
+| Score | Rating | Interprétation |
+|-------|--------|----------------|
+| 80-100% | A | Excellente couverture |
+| 60-79% | B | Bonne couverture |
+| 40-59% | C | Couverture modérée |
+| 20-39% | D | Faible couverture |
+| 0-19% | F | Couverture critique |
+
 ### Règles de couches (Clean Architecture)
 
 PhpQuality détecte automatiquement les couches et vérifie les règles de dépendances :
@@ -318,15 +390,75 @@ PhpQuality détecte automatiquement les couches et vérifie les règles de dépe
 
 ---
 
+## Intégration CI/CD
+
+### GitHub Actions
+
+```yaml
+name: Code Quality
+
+on: [push, pull_request]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run tests with coverage
+        run: ./vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: Run PhpQuality
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/project \
+            amoifr13/phpquality \
+            analyze --source=/project/src \
+            --coverage=/project/coverage.xml \
+            --fail-on-violation \
+            --json=/project/phpquality.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: phpquality-report
+          path: phpquality.json
+```
+
+### GitLab CI
+
+```yaml
+code-quality:
+  image: amoifr13/phpquality
+  script:
+    - analyze --source=/builds/$CI_PROJECT_PATH/src --coverage=/builds/$CI_PROJECT_PATH/coverage.xml --fail-on-violation
+  artifacts:
+    reports:
+      codequality: phpquality.json
+```
+
+---
+
 ## Feuille de route
 
 - [x] **v0.1** - Analyse basique : LOC, CCN, MI, LCOM + rapport HTML + types de projets
 - [x] **v0.2** - Rapport HTML multi-pages avec documentation des métriques
 - [x] **v0.3** - Analyse multi-dimensionnelle, arbre du code, Hall of Fame/Shame, analyse des dépendances Composer
 - [x] **v0.4** - Analyse d'architecture (couches, violations SOLID, graphe de dépendances D3.js, dépendances circulaires)
-- [ ] **v0.5** - Règles CI configurables, mode `failIfFound`, intégration GitHub Actions
-- [ ] **v0.6** - Plugin Git, corrélation historique/métriques
-- [ ] **v1.0** - Rapport HTML complet (cercles, daltonisme, filtres, groupes)
+- [x] **v1.0** - Option git blame, nom de projet personnalisé
+- [x] **v1.1** - Analyse de couverture de tests (Clover XML)
+- [ ] **v1.2** - Règles CI configurables, seuils personnalisés
+- [ ] **v1.3** - Export PDF, comparaison entre versions
+- [ ] **v2.0** - Interface web interactive, historique des analyses
 
 ---
 
@@ -358,3 +490,4 @@ MIT - voir le fichier [LICENSE](./LICENSE).
 - [PHP Insights (GitHub)](https://github.com/nunomaduro/phpinsights) - inspiration pour l'analyse de qualité
 - [SOLID principles (Wikipedia)](https://en.wikipedia.org/wiki/SOLID)
 - [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [PHPUnit Code Coverage](https://phpunit.readthedocs.io/en/9.5/code-coverage-analysis.html)

@@ -33,10 +33,10 @@ FROM php:8.3-cli-alpine
 
 LABEL org.opencontainers.image.title="PhpQuality"
 LABEL org.opencontainers.image.description="PHP Static Code Analyzer - Metrics & Quality Reports"
-LABEL org.opencontainers.image.version="1.0.1"
+LABEL org.opencontainers.image.version="1.1.0"
 LABEL org.opencontainers.image.vendor="amoifr"
 LABEL org.opencontainers.image.source="https://github.com/amoifr/PhpQuality"
-LABEL org.opencontainers.image.authors="Pascal CESCON <contact@moi.ruedesjasses.fr>"
+LABEL org.opencontainers.image.authors="Pascal CESCON <pascal.cescon@gmail.com>"
 
 # Install runtime dependencies (including git for blame analysis)
 RUN apk add --no-cache libzip tini git
