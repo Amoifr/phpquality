@@ -12,12 +12,20 @@ use Symfony\Component\Finder\Finder;
 
 class ProjectAnalyzer
 {
+    private ?string $coveragePath = null;
+
     public function __construct(
         private readonly FileAnalyzer $fileAnalyzer,
         private readonly ProjectTypeDetector $typeDetector,
         private readonly DependenciesAnalyzer $dependenciesAnalyzer,
         private readonly ArchitectureAnalyzer $architectureAnalyzer,
+        private readonly CoverageAnalyzer $coverageAnalyzer,
     ) {}
+
+    public function setCoveragePath(?string $path): void
+    {
+        $this->coveragePath = $path;
+    }
 
     /**
      * @param array<string> $excludes
@@ -35,6 +43,12 @@ class ProjectAnalyzer
         $dependencies = $this->dependenciesAnalyzer->analyze($sourcePath);
         $architecture = $this->architectureAnalyzer->analyze($fileResults, $projectType);
 
+        // Analyze coverage if path is set
+        $coverage = null;
+        if ($this->coveragePath !== null) {
+            $coverage = $this->coverageAnalyzer->analyze($this->coveragePath);
+        }
+
         return new ProjectResult(
             sourcePath: $sourcePath,
             projectType: $projectType,
@@ -43,6 +57,7 @@ class ProjectAnalyzer
             analyzedAt: new \DateTimeImmutable(),
             dependencies: $dependencies,
             architecture: $architecture,
+            coverage: $coverage,
         );
     }
 

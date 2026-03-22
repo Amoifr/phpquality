@@ -19,6 +19,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
     ];
 
     private bool $enableGitBlame = false;
+    private ?string $projectName = null;
 
     public function __construct(
         private readonly Environment $twig,
@@ -27,7 +28,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         private readonly GitBlameAnalyzer $gitBlameAnalyzer,
     ) {}
 
-    public function generate(ProjectResult $result, mixed $outputPath, string $lang = 'en', bool $enableGitBlame = false): void
+    public function generate(ProjectResult $result, mixed $outputPath, string $lang = 'en', bool $enableGitBlame = false, ?string $projectName = null): void
     {
         if (!is_string($outputPath)) {
             throw new \InvalidArgumentException('Output path must be a string');
@@ -39,6 +40,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
         }
 
         $this->enableGitBlame = $enableGitBlame;
+        $this->projectName = $projectName;
 
         $this->filesystem->mkdir($outputPath);
 
@@ -60,6 +62,7 @@ class HtmlReportGenerator implements ReportGeneratorInterface
             'summary' => $result->summary,
             'chartData' => $chartData,
             'lang' => $lang,
+            'projectName' => $this->projectName,
         ];
 
         // Generate index.html
@@ -126,6 +129,341 @@ class HtmlReportGenerator implements ReportGeneratorInterface
                 'architecture' => $result->architecture,
             ]), $lang);
         }
+
+        // Generate coverage.html (always generate, show message if no data)
+        $this->generatePage($outputPath, 'coverage.html', 'report/coverage.html.twig', array_merge($commonData, [
+            'coverage' => $result->coverage,
+            'coverageData' => ($result->coverage !== null && $result->coverage->found)
+                ? $this->prepareCoverageData($result->coverage)
+                : null,
+        ]), $lang);
+
+        // Generate recommendations.html
+        $this->generatePage($outputPath, 'recommendations.html', 'report/recommendations.html.twig', array_merge($commonData, [
+            'recommendations' => $this->generateRecommendations($result),
+        ]), $lang);
+    }
+
+    private function generateRecommendations(ProjectResult $result): array
+    {
+        $mustHave = [];
+        $niceToHave = [];
+        $ifTime = [];
+
+        $classes = $result->getAllClasses();
+        $thresholds = $result->summary['thresholds'] ?? [];
+
+        // MUST HAVE: Critical complexity issues (CCN > 15)
+        $criticalCcnMethods = [];
+        foreach ($classes as $class) {
+            foreach ($class->methods as $method) {
+                if ($method->ccn > 15) {
+                    $criticalCcnMethods[] = [
+                        'name' => $class->name . '::' . $method->name . '()',
+                        'value' => 'CCN: ' . $method->ccn,
+                        'file' => $class->filePath,
+                    ];
+                }
+            }
+        }
+        if (count($criticalCcnMethods) > 0) {
+            $mustHave[] = [
+                'category' => 'Complexity',
+                'title' => 'Refactor methods with critical complexity',
+                'description' => 'These methods have CCN > 15, making them extremely difficult to test and maintain. Split them into smaller, focused methods.',
+                'impact' => 'high',
+                'items' => $criticalCcnMethods,
+            ];
+        }
+
+        // MUST HAVE: Unmaintainable code (MI < 20)
+        $unmaintainableClasses = [];
+        foreach ($classes as $class) {
+            if ($class->mi < 20) {
+                $unmaintainableClasses[] = [
+                    'name' => $class->name,
+                    'value' => 'MI: ' . round($class->mi, 1),
+                    'file' => $class->filePath,
+                ];
+            }
+        }
+        if (count($unmaintainableClasses) > 0) {
+            $mustHave[] = [
+                'category' => 'Maintainability',
+                'title' => 'Refactor unmaintainable classes',
+                'description' => 'These classes have a Maintainability Index below 20, indicating they are extremely difficult to maintain. Consider major refactoring or rewriting.',
+                'impact' => 'high',
+                'items' => $unmaintainableClasses,
+            ];
+        }
+
+        // MUST HAVE: Architecture layer violations
+        if ($result->architecture !== null && count($result->architecture->layerViolations) > 0) {
+            $violations = [];
+            foreach (array_slice($result->architecture->layerViolations, 0, 20) as $v) {
+                $violations[] = [
+                    'name' => $v->sourceClass . ' → ' . $v->targetClass,
+                    'value' => $v->sourceLayer . ' → ' . $v->targetLayer,
+                ];
+            }
+            $mustHave[] = [
+                'category' => 'Architecture',
+                'title' => 'Fix layer dependency violations',
+                'description' => 'These classes violate clean architecture principles by depending on forbidden layers. This creates tight coupling and makes the code harder to test.',
+                'impact' => 'high',
+                'items' => $violations,
+            ];
+        }
+
+        // MUST HAVE: SOLID violations (SRP, DIP)
+        if ($result->architecture !== null) {
+            $srpViolations = [];
+            $dipViolations = [];
+            foreach ($result->architecture->solidViolations as $v) {
+                if ($v->principle === 'SRP') {
+                    $srpViolations[] = ['name' => $v->className, 'value' => $v->message];
+                } elseif ($v->principle === 'DIP') {
+                    $dipViolations[] = ['name' => $v->className, 'value' => $v->message];
+                }
+            }
+            if (count($srpViolations) > 0) {
+                $mustHave[] = [
+                    'category' => 'SOLID',
+                    'title' => 'Split classes violating Single Responsibility Principle',
+                    'description' => 'These classes have too many responsibilities. Split them into smaller, focused classes with a single purpose.',
+                    'impact' => 'high',
+                    'items' => $srpViolations,
+                ];
+            }
+            if (count($dipViolations) > 0) {
+                $niceToHave[] = [
+                    'category' => 'SOLID',
+                    'title' => 'Introduce abstractions for Dependency Inversion',
+                    'description' => 'These classes depend too heavily on concrete implementations. Consider introducing interfaces.',
+                    'impact' => 'medium',
+                    'items' => $dipViolations,
+                ];
+            }
+        }
+
+        // MUST HAVE: Low test coverage (if available)
+        if ($result->coverage !== null && $result->coverage->found && $result->coverage->lineCoverage < 40) {
+            $mustHave[] = [
+                'category' => 'Testing',
+                'title' => 'Increase test coverage urgently',
+                'description' => sprintf('Current line coverage is only %.1f%%. Aim for at least 60%% coverage on critical business logic.', $result->coverage->lineCoverage),
+                'impact' => 'high',
+                'items' => [],
+            ];
+        }
+
+        // NICE TO HAVE: High complexity methods (CCN 10-15)
+        $highCcnMethods = [];
+        foreach ($classes as $class) {
+            foreach ($class->methods as $method) {
+                if ($method->ccn > 10 && $method->ccn <= 15) {
+                    $highCcnMethods[] = [
+                        'name' => $class->name . '::' . $method->name . '()',
+                        'value' => 'CCN: ' . $method->ccn,
+                    ];
+                }
+            }
+        }
+        if (count($highCcnMethods) > 0) {
+            $niceToHave[] = [
+                'category' => 'Complexity',
+                'title' => 'Simplify high complexity methods',
+                'description' => 'These methods have CCN between 10-15. They would benefit from refactoring to improve testability.',
+                'impact' => 'medium',
+                'items' => $highCcnMethods,
+            ];
+        }
+
+        // NICE TO HAVE: Poor maintainability (MI 20-40)
+        $poorMiClasses = [];
+        foreach ($classes as $class) {
+            if ($class->mi >= 20 && $class->mi < 40) {
+                $poorMiClasses[] = [
+                    'name' => $class->name,
+                    'value' => 'MI: ' . round($class->mi, 1),
+                ];
+            }
+        }
+        if (count($poorMiClasses) > 0) {
+            $niceToHave[] = [
+                'category' => 'Maintainability',
+                'title' => 'Improve maintainability of struggling classes',
+                'description' => 'These classes have MI between 20-40. Consider refactoring to improve code clarity.',
+                'impact' => 'medium',
+                'items' => $poorMiClasses,
+            ];
+        }
+
+        // NICE TO HAVE: Low cohesion (LCOM > 0.7)
+        $lowCohesionClasses = [];
+        foreach ($classes as $class) {
+            if ($class->lcom > 0.7) {
+                $lowCohesionClasses[] = [
+                    'name' => $class->name,
+                    'value' => 'LCOM: ' . round($class->lcom, 2),
+                ];
+            }
+        }
+        if (count($lowCohesionClasses) > 0) {
+            $niceToHave[] = [
+                'category' => 'Cohesion',
+                'title' => 'Split classes with low cohesion',
+                'description' => 'These classes have LCOM > 0.7, indicating methods that don\'t share properties. Consider splitting into multiple focused classes.',
+                'impact' => 'medium',
+                'items' => $lowCohesionClasses,
+            ];
+        }
+
+        // NICE TO HAVE: Circular dependencies
+        if ($result->architecture !== null && count($result->architecture->circularDependencies) > 0) {
+            $cycles = [];
+            foreach (array_slice($result->architecture->circularDependencies, 0, 10) as $cycle) {
+                $cycles[] = ['name' => implode(' → ', $cycle)];
+            }
+            $niceToHave[] = [
+                'category' => 'Architecture',
+                'title' => 'Break circular dependencies',
+                'description' => 'These classes form dependency cycles. Introduce interfaces or restructure to break the cycles.',
+                'impact' => 'medium',
+                'items' => $cycles,
+            ];
+        }
+
+        // NICE TO HAVE: Improve test coverage (40-60%)
+        if ($result->coverage !== null && $result->coverage->found && $result->coverage->lineCoverage >= 40 && $result->coverage->lineCoverage < 60) {
+            $lowCoverageFiles = [];
+            foreach (array_slice($result->coverage->files, 0, 10) as $file) {
+                if ($file['coverage'] < 50) {
+                    $lowCoverageFiles[] = [
+                        'name' => $file['name'],
+                        'value' => $file['coverage'] . '%',
+                    ];
+                }
+            }
+            $niceToHave[] = [
+                'category' => 'Testing',
+                'title' => 'Improve test coverage on critical files',
+                'description' => sprintf('Current coverage is %.1f%%. Focus on adding tests for these low-coverage files.', $result->coverage->lineCoverage),
+                'impact' => 'medium',
+                'items' => $lowCoverageFiles,
+            ];
+        }
+
+        // IF TIME: Large files (>500 LOC)
+        $largeFiles = [];
+        foreach ($result->files as $file) {
+            $loc = $file->loc['loc'] ?? 0;
+            if ($loc > 500) {
+                $largeFiles[] = [
+                    'name' => $file->relativePath,
+                    'value' => $loc . ' LOC',
+                ];
+            }
+        }
+        if (count($largeFiles) > 0) {
+            $ifTime[] = [
+                'category' => 'Size',
+                'title' => 'Consider splitting large files',
+                'description' => 'These files exceed 500 lines of code. While not critical, smaller files are easier to navigate and maintain.',
+                'impact' => 'low',
+                'items' => $largeFiles,
+            ];
+        }
+
+        // IF TIME: Moderate complexity (CCN 7-10)
+        $moderateCcnMethods = [];
+        foreach ($classes as $class) {
+            foreach ($class->methods as $method) {
+                if ($method->ccn > 7 && $method->ccn <= 10) {
+                    $moderateCcnMethods[] = [
+                        'name' => $class->name . '::' . $method->name . '()',
+                        'value' => 'CCN: ' . $method->ccn,
+                    ];
+                }
+            }
+        }
+        if (count($moderateCcnMethods) > 0) {
+            $ifTime[] = [
+                'category' => 'Complexity',
+                'title' => 'Review methods with moderate complexity',
+                'description' => 'These methods have CCN between 7-10. They\'re manageable but could be simplified when time permits.',
+                'impact' => 'low',
+                'items' => array_slice($moderateCcnMethods, 0, 20),
+            ];
+        }
+
+        // IF TIME: ISP violations
+        if ($result->architecture !== null) {
+            $ispViolations = [];
+            foreach ($result->architecture->solidViolations as $v) {
+                if ($v->principle === 'ISP') {
+                    $ispViolations[] = ['name' => $v->className, 'value' => $v->message];
+                }
+            }
+            if (count($ispViolations) > 0) {
+                $ifTime[] = [
+                    'category' => 'SOLID',
+                    'title' => 'Split large interfaces (ISP)',
+                    'description' => 'These interfaces have many methods. Consider splitting into smaller, focused interfaces.',
+                    'impact' => 'low',
+                    'items' => $ispViolations,
+                ];
+            }
+        }
+
+        // IF TIME: Improve comment ratio
+        $commentRatio = $result->summary['commentRatio'] ?? 0;
+        if ($commentRatio < 10) {
+            $ifTime[] = [
+                'category' => 'Documentation',
+                'title' => 'Add documentation to critical code',
+                'description' => sprintf('Comment ratio is only %.1f%%. Consider adding PHPDoc blocks to public methods and complex logic.', $commentRatio),
+                'impact' => 'low',
+                'items' => [],
+            ];
+        }
+
+        return [
+            'must_have' => $mustHave,
+            'nice_to_have' => $niceToHave,
+            'if_time' => $ifTime,
+        ];
+    }
+
+    private function prepareCoverageData($coverage): array
+    {
+        // Prepare coverage distribution for charts
+        $distribution = [
+            '80-100% (A)' => 0,
+            '60-79% (B)' => 0,
+            '40-59% (C)' => 0,
+            '20-39% (D)' => 0,
+            '0-19% (F)' => 0,
+        ];
+
+        foreach ($coverage->files as $file) {
+            $cov = $file['coverage'];
+            match (true) {
+                $cov >= 80 => $distribution['80-100% (A)']++,
+                $cov >= 60 => $distribution['60-79% (B)']++,
+                $cov >= 40 => $distribution['40-59% (C)']++,
+                $cov >= 20 => $distribution['20-39% (D)']++,
+                default => $distribution['0-19% (F)']++,
+            };
+        }
+
+        return [
+            'distribution' => [
+                'labels' => array_keys($distribution),
+                'values' => array_values($distribution),
+                'colors' => ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444'],
+            ],
+        ];
     }
 
     private function generatePage(string $outputPath, string $filename, string $template, array $data, string $lang): void

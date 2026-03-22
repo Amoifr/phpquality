@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PhpQuality Report{% endblock %}</title>
+    <title>{% block title %}PhpQuality Report{% endblock %}{% if projectName is defined and projectName %} - {{ projectName }}{% endif %}</title>
     <link rel="stylesheet" href="report.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
@@ -18,20 +18,59 @@
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
                 <span class="navbar-title">PhpQuality</span>
+                {% if projectName is defined and projectName %}<span class="navbar-project">{{ projectName }}</span>{% endif %}
                 <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
             </a>
 
             <ul class="nav-links">
                 <li><a href="index.html" class="nav-link {% block nav_dashboard %}{% endblock %}">{{ 'nav.dashboard'|trans }}</a></li>
                 <li><a href="metrics.html" class="nav-link {% block nav_metrics %}{% endblock %}">{{ 'nav.documentation'|trans }}</a></li>
-                <li><a href="ccn.html" class="nav-link {% block nav_ccn %}{% endblock %}">{{ 'nav.ccn'|trans }}</a></li>
-                <li><a href="mi.html" class="nav-link {% block nav_mi %}{% endblock %}">{{ 'nav.mi'|trans }}</a></li>
-                <li><a href="lcom.html" class="nav-link {% block nav_lcom %}{% endblock %}">{{ 'nav.lcom'|trans }}</a></li>
-                <li><a href="loc.html" class="nav-link {% block nav_loc %}{% endblock %}">{{ 'nav.loc'|trans }}</a></li>
-                <li><a href="halstead.html" class="nav-link {% block nav_halstead %}{% endblock %}">{{ 'nav.halstead'|trans }}</a></li>
-                <li><a href="analysis.html" class="nav-link {% block nav_analysis %}{% endblock %}">{{ 'nav.analysis'|trans }}</a></li>
-                <li><a href="architecture.html" class="nav-link {% block nav_architecture %}{% endblock %}">{{ 'nav.architecture'|trans }}</a></li>
-                <li><a href="dependencies.html" class="nav-link {% block nav_dependencies %}{% endblock %}">{{ 'nav.dependencies'|trans }}</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle {% block nav_metrics_group %}{% endblock %}">
+                        {{ 'nav.metrics'|trans }}
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link {% block nav_ccn %}{% endblock %}">{{ 'nav.ccn'|trans }} - {{ 'nav.ccn_full'|trans }}</a></li>
+                        <li><a href="mi.html" class="nav-link {% block nav_mi %}{% endblock %}">{{ 'nav.mi'|trans }} - {{ 'nav.mi_full'|trans }}</a></li>
+                        <li><a href="lcom.html" class="nav-link {% block nav_lcom %}{% endblock %}">{{ 'nav.lcom'|trans }} - {{ 'nav.lcom_full'|trans }}</a></li>
+                        <li><a href="loc.html" class="nav-link {% block nav_loc %}{% endblock %}">{{ 'nav.loc'|trans }} - {{ 'nav.loc_full'|trans }}</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle {% block nav_analysis_group %}{% endblock %}">
+                        {{ 'nav.analysis'|trans }}
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link {% block nav_halstead %}{% endblock %}">{{ 'nav.halstead'|trans }}</a></li>
+                        <li><a href="analysis.html" class="nav-link {% block nav_analysis %}{% endblock %}">{{ 'nav.multidim'|trans }}</a></li>
+                        <li><a href="recommendations.html" class="nav-link {% block nav_recommendations %}{% endblock %}">{{ 'nav.recommendations'|trans }}</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle {% block nav_arch_group %}{% endblock %}">
+                        {{ 'nav.architecture'|trans }}
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link {% block nav_architecture %}{% endblock %}">{{ 'nav.arch_layers'|trans }}</a></li>
+                        <li><a href="coverage.html" class="nav-link {% block nav_coverage %}{% endblock %}">{{ 'nav.coverage'|trans }}</a></li>
+                        <li><a href="dependencies.html" class="nav-link {% block nav_dependencies %}{% endblock %}">{{ 'nav.dependencies'|trans }}</a></li>
+                    </ul>
+                </li>
             </ul>
 
             <button class="btn-icon" onclick="toggleTheme()" title="{{ 'common.toggle_theme'|trans }}">

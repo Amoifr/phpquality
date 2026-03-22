@@ -104,6 +104,18 @@ class AnalyzeCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Enable git blame analysis for Hall of Fame/Shame (slower)'
+            )
+            ->addOption(
+                'project-name',
+                'p',
+                InputOption::VALUE_REQUIRED,
+                'Project name to display in report titles'
+            )
+            ->addOption(
+                'coverage',
+                'c',
+                InputOption::VALUE_REQUIRED,
+                'Path to Clover XML coverage file (from PHPUnit --coverage-clover)'
             );
     }
 
@@ -148,6 +160,18 @@ class AnalyzeCommand extends Command
             sprintf('Project Type: <info>%s</info>', $projectType),
         ]);
 
+        // Set coverage path if provided
+        $coveragePath = $input->getOption('coverage');
+        if ($coveragePath) {
+            if (!file_exists($coveragePath)) {
+                $io->warning('Coverage file not found: ' . $coveragePath);
+                $coveragePath = null;
+            } else {
+                $io->text(sprintf('Coverage: <info>%s</info>', $coveragePath));
+            }
+            $this->analyzer->setCoveragePath($coveragePath);
+        }
+
         // Create progress bar
         $progressBar = null;
         $progressCallback = function (int $current, int $total, string $file) use ($output, &$progressBar) {
@@ -182,7 +206,8 @@ class AnalyzeCommand extends Command
             $htmlPath = $input->getOption('report-html') ?: $source . '/phpquality-report';
             $lang = $input->getOption('lang') ?? 'en';
             $enableGitBlame = $input->getOption('git-blame');
-            $this->htmlGenerator->generate($result, $htmlPath, $lang, $enableGitBlame);
+            $projectName = $input->getOption('project-name');
+            $this->htmlGenerator->generate($result, $htmlPath, $lang, $enableGitBlame, $projectName);
             $io->success('HTML report generated: ' . $htmlPath . '/index.html');
         }
 

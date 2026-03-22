@@ -1,0 +1,345 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'recommendations.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_recommendations %}active{% endblock %}
+{% block nav_analysis_group %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'recommendations.title'|trans }}</h1>
+        <p>{{ 'recommendations.description'|trans }}</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-3">
+            <div class="card priority-card priority-must">
+                <div class="priority-icon">!</div>
+                <div class="metric-label">{{ 'recommendations.must_have'|trans }}</div>
+                <div class="metric-value">{{ recommendations.must_have|length }}</div>
+                <div class="text-muted">{{ 'recommendations.critical_actions'|trans }}</div>
+            </div>
+            <div class="card priority-card priority-nice">
+                <div class="priority-icon">+</div>
+                <div class="metric-label">{{ 'recommendations.nice_to_have'|trans }}</div>
+                <div class="metric-value">{{ recommendations.nice_to_have|length }}</div>
+                <div class="text-muted">{{ 'recommendations.improvement_actions'|trans }}</div>
+            </div>
+            <div class="card priority-card priority-time">
+                <div class="priority-icon">~</div>
+                <div class="metric-label">{{ 'recommendations.if_time'|trans }}</div>
+                <div class="metric-value">{{ recommendations.if_time|length }}</div>
+                <div class="text-muted">{{ 'recommendations.optional_actions'|trans }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Must Have -->
+    {% if recommendations.must_have|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h2 class="section-title priority-must-title">
+                <span class="priority-badge priority-must">{{ 'recommendations.must_have'|trans }}</span>
+                {{ 'recommendations.must_have_desc'|trans }}
+            </h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'recommendations.must_have_intro'|trans }}</p>
+
+            <div class="recommendations-list">
+                {% for rec in recommendations.must_have %}
+                <div class="recommendation-item priority-must">
+                    <div class="recommendation-header">
+                        <span class="recommendation-category">{{ rec.category }}</span>
+                        <span class="recommendation-impact impact-{{ rec.impact }}">{{ rec.impact|upper }}</span>
+                    </div>
+                    <div class="recommendation-content">
+                        <h4>{{ rec.title }}</h4>
+                        <p>{{ rec.description }}</p>
+                        {% if rec.items|length > 0 %}
+                        <details class="recommendation-details">
+                            <summary>{{ 'recommendations.show_details'|trans }} ({{ rec.items|length }})</summary>
+                            <ul>
+                                {% for item in rec.items|slice(0, 10) %}
+                                <li>
+                                    <code>{{ item.name }}</code>
+                                    {% if item.value is defined %}<span class="item-value">{{ item.value }}</span>{% endif %}
+                                    {% if item.file is defined %}<span class="item-file">{{ item.file }}</span>{% endif %}
+                                </li>
+                                {% endfor %}
+                                {% if rec.items|length > 10 %}
+                                <li class="text-muted">... {{ 'recommendations.and_more'|trans({'%count%': rec.items|length - 10}) }}</li>
+                                {% endif %}
+                            </ul>
+                        </details>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Nice to Have -->
+    {% if recommendations.nice_to_have|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h2 class="section-title priority-nice-title">
+                <span class="priority-badge priority-nice">{{ 'recommendations.nice_to_have'|trans }}</span>
+                {{ 'recommendations.nice_to_have_desc'|trans }}
+            </h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'recommendations.nice_to_have_intro'|trans }}</p>
+
+            <div class="recommendations-list">
+                {% for rec in recommendations.nice_to_have %}
+                <div class="recommendation-item priority-nice">
+                    <div class="recommendation-header">
+                        <span class="recommendation-category">{{ rec.category }}</span>
+                        <span class="recommendation-impact impact-{{ rec.impact }}">{{ rec.impact|upper }}</span>
+                    </div>
+                    <div class="recommendation-content">
+                        <h4>{{ rec.title }}</h4>
+                        <p>{{ rec.description }}</p>
+                        {% if rec.items|length > 0 %}
+                        <details class="recommendation-details">
+                            <summary>{{ 'recommendations.show_details'|trans }} ({{ rec.items|length }})</summary>
+                            <ul>
+                                {% for item in rec.items|slice(0, 10) %}
+                                <li>
+                                    <code>{{ item.name }}</code>
+                                    {% if item.value is defined %}<span class="item-value">{{ item.value }}</span>{% endif %}
+                                    {% if item.file is defined %}<span class="item-file">{{ item.file }}</span>{% endif %}
+                                </li>
+                                {% endfor %}
+                                {% if rec.items|length > 10 %}
+                                <li class="text-muted">... {{ 'recommendations.and_more'|trans({'%count%': rec.items|length - 10}) }}</li>
+                                {% endif %}
+                            </ul>
+                        </details>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- If We've Got Time -->
+    {% if recommendations.if_time|length > 0 %}
+    <section class="section">
+        <div class="card">
+            <h2 class="section-title priority-time-title">
+                <span class="priority-badge priority-time">{{ 'recommendations.if_time'|trans }}</span>
+                {{ 'recommendations.if_time_desc'|trans }}
+            </h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">{{ 'recommendations.if_time_intro'|trans }}</p>
+
+            <div class="recommendations-list">
+                {% for rec in recommendations.if_time %}
+                <div class="recommendation-item priority-time">
+                    <div class="recommendation-header">
+                        <span class="recommendation-category">{{ rec.category }}</span>
+                        <span class="recommendation-impact impact-{{ rec.impact }}">{{ rec.impact|upper }}</span>
+                    </div>
+                    <div class="recommendation-content">
+                        <h4>{{ rec.title }}</h4>
+                        <p>{{ rec.description }}</p>
+                        {% if rec.items|length > 0 %}
+                        <details class="recommendation-details">
+                            <summary>{{ 'recommendations.show_details'|trans }} ({{ rec.items|length }})</summary>
+                            <ul>
+                                {% for item in rec.items|slice(0, 10) %}
+                                <li>
+                                    <code>{{ item.name }}</code>
+                                    {% if item.value is defined %}<span class="item-value">{{ item.value }}</span>{% endif %}
+                                    {% if item.file is defined %}<span class="item-file">{{ item.file }}</span>{% endif %}
+                                </li>
+                                {% endfor %}
+                                {% if rec.items|length > 10 %}
+                                <li class="text-muted">... {{ 'recommendations.and_more'|trans({'%count%': rec.items|length - 10}) }}</li>
+                                {% endif %}
+                            </ul>
+                        </details>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- No Recommendations -->
+    {% if recommendations.must_have|length == 0 and recommendations.nice_to_have|length == 0 and recommendations.if_time|length == 0 %}
+    <section class="section">
+        <div class="card text-center" style="padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">&#10003;</div>
+            <h2>{{ 'recommendations.all_good'|trans }}</h2>
+            <p class="text-muted">{{ 'recommendations.all_good_desc'|trans }}</p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Legend -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'recommendations.legend'|trans }}</h3>
+            <div class="grid grid-2">
+                <div>
+                    <h4>{{ 'recommendations.priority_levels'|trans }}</h4>
+                    <ul class="legend-list">
+                        <li><span class="priority-badge priority-must">Must Have</span> {{ 'recommendations.priority_must_desc'|trans }}</li>
+                        <li><span class="priority-badge priority-nice">Nice to Have</span> {{ 'recommendations.priority_nice_desc'|trans }}</li>
+                        <li><span class="priority-badge priority-time">If Time</span> {{ 'recommendations.priority_time_desc'|trans }}</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>{{ 'recommendations.impact_levels'|trans }}</h4>
+                    <ul class="legend-list">
+                        <li><span class="recommendation-impact impact-high">HIGH</span> {{ 'recommendations.impact_high_desc'|trans }}</li>
+                        <li><span class="recommendation-impact impact-medium">MEDIUM</span> {{ 'recommendations.impact_medium_desc'|trans }}</li>
+                        <li><span class="recommendation-impact impact-low">LOW</span> {{ 'recommendations.impact_low_desc'|trans }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .priority-card {
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .priority-card .priority-icon {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        font-size: 4rem;
+        opacity: 0.1;
+        font-weight: bold;
+    }
+    .priority-card.priority-must { border-left: 4px solid var(--color-danger); }
+    .priority-card.priority-nice { border-left: 4px solid var(--color-warning); }
+    .priority-card.priority-time { border-left: 4px solid var(--color-info); }
+
+    .priority-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .priority-badge.priority-must { background: var(--color-danger); color: white; }
+    .priority-badge.priority-nice { background: var(--color-warning); color: black; }
+    .priority-badge.priority-time { background: var(--color-info); color: white; }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .recommendations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .recommendation-item {
+        background: var(--color-surface-hover);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        border-left: 4px solid transparent;
+    }
+    .recommendation-item.priority-must { border-left-color: var(--color-danger); }
+    .recommendation-item.priority-nice { border-left-color: var(--color-warning); }
+    .recommendation-item.priority-time { border-left-color: var(--color-info); }
+
+    .recommendation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .recommendation-category {
+        font-size: 0.75rem;
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .recommendation-impact {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 0.25rem;
+        font-weight: 600;
+    }
+    .impact-high { background: var(--color-danger); color: white; }
+    .impact-medium { background: var(--color-warning); color: black; }
+    .impact-low { background: var(--color-text-muted); color: white; }
+
+    .recommendation-content h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+    }
+    .recommendation-content p {
+        margin: 0;
+        color: var(--color-text-muted);
+        font-size: 0.9rem;
+    }
+
+    .recommendation-details {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+    }
+    .recommendation-details summary {
+        cursor: pointer;
+        color: var(--color-primary);
+        font-weight: 500;
+    }
+    .recommendation-details ul {
+        margin: 0.5rem 0 0 1rem;
+        padding: 0;
+    }
+    .recommendation-details li {
+        margin: 0.25rem 0;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .recommendation-details code {
+        background: var(--color-surface);
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.25rem;
+        font-size: 0.8rem;
+    }
+    .item-value {
+        color: var(--color-danger);
+        font-weight: 500;
+    }
+    .item-file {
+        color: var(--color-text-muted);
+        font-size: 0.75rem;
+    }
+
+    .legend-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
+    .legend-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0.5rem 0;
+    }
+</style>
+{% endblock %}

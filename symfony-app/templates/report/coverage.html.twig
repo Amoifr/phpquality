@@ -1,0 +1,351 @@
+{% extends 'report/base.html.twig' %}
+
+{% block title %}{{ 'coverage.title'|trans }} - PhpQuality{% endblock %}
+
+{% block nav_coverage %}active{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{{ 'coverage.title'|trans }}</h1>
+        <p>{{ 'coverage.description'|trans }}</p>
+    </div>
+
+    {% if coverage is null or not coverage.found %}
+    <!-- No Coverage Data -->
+    <section class="section">
+        <div class="card text-center" style="padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">&#128202;</div>
+            <h2>{{ 'coverage.no_coverage'|trans }}</h2>
+            <p class="text-muted" style="margin-bottom: 2rem;">{{ 'coverage.no_coverage_desc'|trans }}</p>
+
+            <div class="card" style="text-align: left; max-width: 700px; margin: 0 auto;">
+                <h3>{{ 'coverage.how_to_generate'|trans }}</h3>
+                <p>{{ 'coverage.how_to_generate_intro'|trans }}</p>
+                <pre><code># PHPUnit (Clover format)
+./vendor/bin/phpunit --coverage-clover coverage.xml
+
+# Then run PhpQuality with coverage
+docker run --rm \
+  -v $(pwd):/project \
+  amoifr13/phpquality \
+  analyze --source=/project/src --coverage=/project/coverage.xml</code></pre>
+            </div>
+        </div>
+    </section>
+    {% else %}
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card metric-card rating-{{ coverage.rating }}">
+                <div class="metric-label">{{ 'coverage.line_coverage'|trans }}</div>
+                <div class="metric-value">{{ coverage.lineCoverage }}%</div>
+                <div><span class="rating rating-{{ coverage.rating }}">{{ coverage.rating }}</span></div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'coverage.method_coverage'|trans }}</div>
+                <div class="metric-value">{{ coverage.methodCoverage }}%</div>
+                <div class="text-muted">{{ coverage.coveredMethods }}/{{ coverage.totalMethods }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'coverage.class_coverage'|trans }}</div>
+                <div class="metric-value">{{ coverage.classCoverage }}%</div>
+                <div class="text-muted">{{ coverage.coveredClasses }}/{{ coverage.totalClasses }}</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">{{ 'coverage.lines_covered'|trans }}</div>
+                <div class="metric-value">{{ coverage.coveredLines }}</div>
+                <div class="text-muted">{{ 'coverage.of_total'|trans }} {{ coverage.totalLines }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>{{ 'coverage.distribution'|trans }}</h3>
+                <div class="chart-container">
+                    <canvas id="coverageDistChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>{{ 'coverage.rating_scale'|trans }}</h3>
+                <table>
+                    <tr>
+                        <td><span class="rating rating-A">A</span></td>
+                        <td>80-100%</td>
+                        <td>{{ 'coverage.excellent_coverage'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-B">B</span></td>
+                        <td>60-79%</td>
+                        <td>{{ 'coverage.good_coverage'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-C">C</span></td>
+                        <td>40-59%</td>
+                        <td>{{ 'coverage.moderate_coverage'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-D">D</span></td>
+                        <td>20-39%</td>
+                        <td>{{ 'coverage.low_coverage'|trans }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rating rating-F">F</span></td>
+                        <td>0-19%</td>
+                        <td>{{ 'coverage.critical_coverage'|trans }}</td>
+                    </tr>
+                </table>
+                <div class="info-box" style="margin-top: 1rem;">
+                    <strong>{{ 'coverage.recommendation'|trans }}:</strong> {{ 'coverage.recommendation_text'|trans }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coverage Progress Bar -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'coverage.overall_progress'|trans }}</h3>
+            <div class="coverage-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill rating-bg-{{ coverage.rating }}" style="width: {{ coverage.lineCoverage }}%"></div>
+                </div>
+                <div class="progress-labels">
+                    <span>0%</span>
+                    <span>{{ coverage.lineCoverage }}% {{ 'coverage.covered'|trans }}</span>
+                    <span>100%</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if coverage.packages|length > 0 %}
+    <!-- Packages Coverage -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'coverage.package_coverage'|trans }}</h2>
+            <table id="packagesTable">
+                <thead>
+                    <tr>
+                        <th>{{ 'tables.package'|trans }}</th>
+                        <th>{{ 'coverage.coverage'|trans }}</th>
+                        <th>{{ 'coverage.lines'|trans }}</th>
+                        <th>{{ 'tables.files'|trans }}</th>
+                        <th>{{ 'tables.classes'|trans }}</th>
+                        <th>{{ 'tables.rating'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in coverage.packages %}
+                    <tr data-rating="{{ package.rating }}">
+                        <td>{{ package.name }}</td>
+                        <td>
+                            <div class="mini-progress">
+                                <div class="mini-progress-fill rating-bg-{{ package.rating }}" style="width: {{ package.coverage }}%"></div>
+                                <span>{{ package.coverage }}%</span>
+                            </div>
+                        </td>
+                        <td>{{ package.coveredLines }}/{{ package.totalLines }}</td>
+                        <td>{{ package.files }}</td>
+                        <td>{{ package.classes }}</td>
+                        <td><span class="label label-{{ package.rating }}">{{ package.rating }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Files Table -->
+    <section class="section">
+        <div class="card">
+            <h2>{{ 'coverage.file_coverage'|trans }}</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="{{ 'coverage.search_placeholder'|trans }}">
+                <select id="ratingFilter" class="filter-select">
+                    <option value="">{{ 'tables.all_ratings'|trans }}</option>
+                    <option value="A">{{ 'tables.rating'|trans }} A (80%+)</option>
+                    <option value="B">{{ 'tables.rating'|trans }} B (60-79%)</option>
+                    <option value="C">{{ 'tables.rating'|trans }} C (40-59%)</option>
+                    <option value="D">{{ 'tables.rating'|trans }} D (20-39%)</option>
+                    <option value="F">{{ 'tables.rating'|trans }} F (0-19%)</option>
+                </select>
+            </div>
+            <table id="filesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">{{ 'tables.file'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)" class="sorted">{{ 'coverage.coverage'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(2)">{{ 'coverage.lines'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(3)">{{ 'tables.methods'|trans }} <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">{{ 'tables.rating'|trans }} <span class="sort-icon">&#9650;</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in coverage.files %}
+                    <tr data-rating="{{ file.rating }}">
+                        <td title="{{ file.path }}">{{ file.name }}</td>
+                        <td data-sort="{{ file.coverage }}">
+                            <div class="mini-progress">
+                                <div class="mini-progress-fill rating-bg-{{ file.rating }}" style="width: {{ file.coverage }}%"></div>
+                                <span>{{ file.coverage }}%</span>
+                            </div>
+                        </td>
+                        <td data-sort="{{ file.coveredLines }}">{{ file.coveredLines }}/{{ file.totalLines }}</td>
+                        <td data-sort="{{ file.coveredMethods }}">{{ file.coveredMethods }}/{{ file.totalMethods }}</td>
+                        <td data-sort="{{ file.rating }}"><span class="label label-{{ file.rating }}">{{ file.rating }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">{{ 'tables.total'|trans }}: {{ coverage.files|length }} {{ 'tables.files'|trans|lower }}</p>
+        </div>
+    </section>
+
+    <!-- How to generate coverage -->
+    <section class="section">
+        <div class="card">
+            <h3>{{ 'coverage.how_to_generate'|trans }}</h3>
+            <p>{{ 'coverage.how_to_generate_intro'|trans }}</p>
+            <pre><code># PHPUnit (Clover format)
+./vendor/bin/phpunit --coverage-clover coverage.xml
+
+# Then run PhpQuality with coverage
+docker run --rm \
+  -v $(pwd):/project \
+  amoifr13/phpquality \
+  analyze --source=/project/src --coverage=/project/coverage.xml</code></pre>
+        </div>
+    </section>
+
+    {% if coverage.generatedAt %}
+    <p class="text-muted text-center">{{ 'coverage.generated_at'|trans }}: {{ coverage.generatedAt }}</p>
+    {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .coverage-progress {
+        margin: 1rem 0;
+    }
+    .progress-bar {
+        height: 24px;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    .mini-progress {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .mini-progress .mini-progress-fill {
+        height: 8px;
+        border-radius: 4px;
+        min-width: 60px;
+        background: var(--bg-secondary);
+        position: relative;
+    }
+    .rating-bg-A { background: #22c55e; }
+    .rating-bg-B { background: #84cc16; }
+    .rating-bg-C { background: #eab308; }
+    .rating-bg-D { background: #f97316; }
+    .rating-bg-F { background: #ef4444; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const coverageData = {{ coverageData|json_encode|raw }};
+
+    // Coverage Distribution Chart
+    new Chart(document.getElementById('coverageDistChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: coverageData.distribution.labels,
+            datasets: [{
+                data: coverageData.distribution.values,
+                backgroundColor: coverageData.distribution.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const tbody = document.querySelector('#filesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const rating = ratingFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowRating = row.dataset.rating;
+            const matchesSearch = text.includes(search);
+            const matchesRating = !rating || rowRating === rating;
+            row.style.display = matchesSearch && matchesRating ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    ratingFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 1, asc: true };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update sort indicators
+        document.querySelectorAll('#filesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+{% endblock %}

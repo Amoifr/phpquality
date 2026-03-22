@@ -116,6 +116,15 @@ body {
     font-weight: 700;
 }
 
+.navbar-project {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    border-left: 1px solid var(--color-border);
+    padding-left: 0.5rem;
+    margin-left: 0.25rem;
+}
+
 .navbar-author {
     font-size: 0.75rem;
     font-weight: 400;
@@ -161,6 +170,75 @@ body {
 .nav-link.active {
     color: white;
     background: var(--color-primary);
+}
+
+/* Dropdown Navigation */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nav-dropdown-toggle .dropdown-arrow {
+    transition: transform 0.2s;
+}
+
+.nav-dropdown:hover .dropdown-arrow,
+.nav-dropdown:focus-within .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    list-style: none;
+    padding: 0.5rem 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-dropdown-menu li {
+    margin: 0;
+}
+
+.nav-dropdown-menu .nav-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: 0;
+    white-space: nowrap;
+}
+
+.nav-dropdown-menu .nav-link:hover {
+    background: var(--color-surface-hover);
+}
+
+.nav-dropdown-menu .nav-link.active {
+    background: var(--color-primary);
+    color: white;
 }
 
 .navbar-actions {
@@ -1562,3 +1640,66 @@ footer a:hover { text-decoration: underline; }
         padding: 1rem;
     }
 }
+
+/* Coverage Progress Bars */
+.coverage-progress {
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 24px;
+    background: var(--color-surface-hover);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.mini-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mini-progress-fill {
+    height: 8px;
+    border-radius: 4px;
+    min-width: 60px;
+    background: var(--color-surface-hover);
+    position: relative;
+    overflow: hidden;
+}
+
+.mini-progress-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--progress, 0%);
+    border-radius: 4px;
+}
+
+.mini-progress span {
+    min-width: 50px;
+    text-align: right;
+    font-size: 0.85rem;
+}
+
+/* Rating background colors */
+.rating-bg-A { background: var(--color-a); }
+.rating-bg-B { background: var(--color-b); }
+.rating-bg-C { background: var(--color-c); }
+.rating-bg-D { background: var(--color-d); }
+.rating-bg-F { background: var(--color-f); }
