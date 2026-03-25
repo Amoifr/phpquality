@@ -1,5 +1,5 @@
 {
-    "name": "phpquality/phpquality-bundle",
+    "name": "amoifr/phpquality-bundle",
     "description": "Symfony bundle for PHP static code analysis, metrics, and quality reports",
     "type": "symfony-bundle",
     "license": "MIT",
