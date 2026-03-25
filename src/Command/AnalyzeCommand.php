@@ -117,12 +117,114 @@ class AnalyzeCommand extends Command
                 'c',
                 InputOption::VALUE_REQUIRED,
                 'Path to Clover XML coverage file (from PHPUnit --coverage-clover)'
+            )
+            ->addOption(
+                'wizard',
+                'w',
+                InputOption::VALUE_NONE,
+                'Interactive wizard mode to configure all options'
             );
+    }
+
+    private function runWizard(InputInterface $input, SymfonyStyle $io): void
+    {
+        $io->title('PhpQuality - Configuration Wizard');
+        $io->text('Answer the following questions to configure the analysis.');
+        $io->newLine();
+
+        // Source directory (required)
+        $defaultSource = $input->getOption('source') ?: getcwd() . '/src';
+        $source = $io->ask('Source directory to analyze', $defaultSource, function ($value) {
+            if (!$value || !is_dir($value)) {
+                throw new \RuntimeException('Directory does not exist: ' . ($value ?: 'empty'));
+            }
+            return realpath($value);
+        });
+        $input->setOption('source', $source);
+
+        // Project type
+        $availableTypes = ['auto', ...$this->typeDetector->getTypeNames()];
+        $defaultType = $input->getOption('type') ?: 'auto';
+        $type = $io->choice('Project type', $availableTypes, $defaultType);
+        $input->setOption('type', $type);
+
+        // Project name
+        $defaultName = $input->getOption('project-name') ?: basename($source);
+        $projectName = $io->ask('Project name (for report title)', $defaultName);
+        $input->setOption('project-name', $projectName ?: null);
+
+        // Language
+        $languages = [
+            'en' => 'English', 'fr' => 'Français', 'de' => 'Deutsch', 'es' => 'Español',
+            'it' => 'Italiano', 'pt' => 'Português', 'nl' => 'Nederlands', 'pl' => 'Polski',
+            'ru' => 'Русский', 'ja' => '日本語', 'zh' => '中文', 'ko' => '한국어',
+        ];
+        $defaultLang = $input->getOption('lang') ?: 'en';
+        $langChoices = array_map(fn($code, $name) => "$code - $name", array_keys($languages), $languages);
+        $langChoice = $io->choice('Report language', $langChoices, array_search("$defaultLang - " . ($languages[$defaultLang] ?? 'English'), $langChoices) ?: 0);
+        $input->setOption('lang', explode(' - ', $langChoice)[0]);
+
+        // HTML Report
+        $generateHtml = $io->confirm('Generate HTML report?', true);
+        $input->setOption('no-html', !$generateHtml);
+
+        if ($generateHtml) {
+            $defaultHtmlPath = $input->getOption('report-html') ?: $source . '/phpquality-report';
+            $htmlPath = $io->ask('HTML report output directory', $defaultHtmlPath);
+            $input->setOption('report-html', $htmlPath);
+        }
+
+        // JSON Report
+        $generateJson = $io->confirm('Generate JSON report?', false);
+        if ($generateJson) {
+            $defaultJsonPath = $input->getOption('json') ?: $source . '/phpquality-report.json';
+            $jsonPath = $io->ask('JSON report output path', $defaultJsonPath);
+            $input->setOption('json', $jsonPath);
+        }
+
+        // Coverage file
+        $hasCoverage = $io->confirm('Include code coverage data (requires Clover XML)?', false);
+        if ($hasCoverage) {
+            $defaultCoverage = $input->getOption('coverage') ?: $source . '/coverage.xml';
+            $coveragePath = $io->ask('Path to Clover XML coverage file', $defaultCoverage);
+            $input->setOption('coverage', $coveragePath);
+        }
+
+        // Git blame
+        $enableGitBlame = $io->confirm('Enable git blame analysis (Hall of Fame/Shame - slower)?', false);
+        $input->setOption('git-blame', $enableGitBlame);
+
+        // Exclude directories
+        $addExcludes = $io->confirm('Add directories to exclude?', false);
+        if ($addExcludes) {
+            $excludes = [];
+            while (true) {
+                $exclude = $io->ask('Directory to exclude (leave empty to finish)', '');
+                if (empty($exclude)) {
+                    break;
+                }
+                $excludes[] = $exclude;
+            }
+            $input->setOption('exclude', $excludes);
+        }
+
+        // Fail on violation
+        $failOnViolation = $io->confirm('Exit with error code if violations are found (for CI)?', false);
+        $input->setOption('fail-on-violation', $failOnViolation);
+
+        $io->newLine();
+        $io->success('Configuration complete! Starting analysis...');
+        $io->newLine();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+
+        // Wizard mode
+        if ($input->getOption('wizard')) {
+            $this->runWizard($input, $io);
+        }
 
         // List types mode
         if ($input->getOption('list-types')) {
