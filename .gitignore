@@ -8,20 +8,34 @@
 .DS_Store
 Thumbs.db
 
-# Generated reports (examples)
+# Generated reports
 /report/
 phpquality-report/
 
-# Symfony
-symfony-app/var/
-symfony-app/vendor/
-symfony-app/.env.local
+# Bundle
+/vendor/
+/var/
+.env.local
+.phpunit.cache/
+
+# Docker app
+/docker/app/vendor/
+/docker/app/var/
+/docker/app/.env.local
+
+# Old symfony-app (to be removed after migration verified)
+/symfony-app/
 
 # Composer
 composer.phar
+composer.lock
 
 # Node
 node_modules/
 
 # Logs
 *.log
+
+# Coverage
+coverage.xml
+coverage-report/

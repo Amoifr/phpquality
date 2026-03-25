@@ -10,22 +10,27 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Install build dependencies
 RUN apk add --no-cache git unzip
 
-WORKDIR /app
+WORKDIR /build
 
-# Copy composer files first for better caching
-COPY symfony-app/composer.json symfony-app/composer.lock* ./
+# Copy bundle source first
+COPY src/ /build/bundle/src/
+COPY composer.json /build/bundle/composer.json
 
-# Install dependencies (no dev)
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+# Copy docker app
+COPY docker/app/ /build/app/
 
-# Copy application code
-COPY symfony-app/ .
+# Configure path repository to use local bundle (with symlink disabled for Docker copy)
+RUN cd /build/app && \
+    composer config repositories.phpquality '{"type": "path", "url": "/build/bundle", "options": {"symlink": false}}' && \
+    composer config minimum-stability dev && \
+    composer require phpquality/phpquality-bundle:@dev --no-scripts --no-interaction
 
 # Generate optimized autoloader
-RUN composer dump-autoload --optimize --classmap-authoritative
+RUN cd /build/app && composer dump-autoload --optimize --classmap-authoritative
 
 # Clear and warm up cache
-RUN php bin/console cache:clear --env=prod --no-warmup && \
+RUN cd /build/app && \
+    php bin/console cache:clear --env=prod --no-warmup && \
     php bin/console cache:warmup --env=prod
 
 # Stage 2: Runtime
@@ -33,7 +38,7 @@ FROM php:8.3-cli-alpine
 
 LABEL org.opencontainers.image.title="PhpQuality"
 LABEL org.opencontainers.image.description="PHP Static Code Analyzer - Metrics & Quality Reports"
-LABEL org.opencontainers.image.version="1.1.0"
+LABEL org.opencontainers.image.version="2.0.0"
 LABEL org.opencontainers.image.vendor="amoifr"
 LABEL org.opencontainers.image.source="https://github.com/amoifr/PhpQuality"
 LABEL org.opencontainers.image.authors="Pascal CESCON <pascal.cescon@gmail.com>"
@@ -44,7 +49,7 @@ RUN apk add --no-cache libzip tini git
 WORKDIR /app
 
 # Copy application from builder
-COPY --from=builder /app /app
+COPY --from=builder /build/app /app
 
 # Make console executable and var directory writable by any user
 RUN chmod +x /app/bin/console && \
@@ -52,9 +57,11 @@ RUN chmod +x /app/bin/console && \
 
 # Set production environment
 ENV APP_ENV=prod
+ENV APP_SECRET=docker-build-secret-change-in-production
 
 # Set entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 
 # Default: show help

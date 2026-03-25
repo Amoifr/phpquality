@@ -1,0 +1,55 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    PhpQuality\Analyzer\:
+        resource: '../../Analyzer/'
+
+    PhpQuality\Command\:
+        resource: '../../Command/'
+
+    PhpQuality\Report\:
+        resource: '../../Report/'
+
+    PhpQuality\Analyzer\Ast\AstParser: ~
+    PhpQuality\Analyzer\FileAnalyzer: ~
+    PhpQuality\Analyzer\ProjectAnalyzer: ~
+
+    PhpQuality\Analyzer\ProjectType\ProjectTypeDetector:
+        arguments:
+            $projectTypes: !tagged_iterator phpquality.project_type
+
+    PhpQuality\Analyzer\ProjectType\PhpProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\SymfonyProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\LaravelProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\PrestashopProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\MagentoProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\WordpressProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\WooCommerceProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\DrupalProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\JoomlaProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\Typo3ProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\SuluProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\SyliusProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\CodeIgniterProjectType:
+        tags: ['phpquality.project_type']
+    PhpQuality\Analyzer\ProjectType\CakePHPProjectType:
+        tags: ['phpquality.project_type']
+
+    PhpQuality\Report\HtmlReportGenerator:
+        arguments:
+            $resourcesPath: '%phpquality.resources_path%'
+    PhpQuality\Report\ConsoleReportGenerator: ~
