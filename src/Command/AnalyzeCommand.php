@@ -214,8 +214,13 @@ class AnalyzeCommand extends Command
 
         // Generate JSON report
         if ($jsonPath = $input->getOption('json')) {
-            file_put_contents($jsonPath, json_encode($result->toArray(), JSON_PRETTY_PRINT));
-            $io->success('JSON report generated: ' . $jsonPath);
+            $jsonContent = json_encode($result->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            if ($jsonContent === false) {
+                $io->error('Failed to encode JSON: ' . json_last_error_msg());
+            } else {
+                file_put_contents($jsonPath, $jsonContent);
+                $io->success('JSON report generated: ' . $jsonPath);
+            }
         }
 
         // Check for violations
