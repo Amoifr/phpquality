@@ -255,4 +255,14 @@ class PhpQualityDataCollector extends AbstractDataCollector
     {
         return $this->data['debug'] ?? [];
     }
+
+    public function getController(): ?string
+    {
+        return $this->data['controller'] ?? null;
+    }
+
+    public function getControllerFile(): ?string
+    {
+        return $this->data['controllerFile'] ?? null;
+    }
 }
