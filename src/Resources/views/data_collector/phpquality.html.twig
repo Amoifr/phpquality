@@ -191,8 +191,40 @@
         </table>
     {% else %}
         <div class="empty">
-            <p>No PHP files from src/ were loaded during this request.</p>
+            <p>No PHP files were analyzed during this request.</p>
         </div>
+    {% endif %}
+
+    {% if collector.debug is not empty %}
+    <h3>Debug Information</h3>
+    <table>
+        <tr>
+            <th>Project Directory</th>
+            <td><code>{{ collector.debug.projectDir }}</code></td>
+        </tr>
+        <tr>
+            <th>Total Included Files</th>
+            <td>{{ collector.debug.includedFilesCount }}</td>
+        </tr>
+        <tr>
+            <th>Project Files Found</th>
+            <td>{{ collector.debug.projectFilesCount }}</td>
+        </tr>
+        <tr>
+            <th>Exclude Paths</th>
+            <td><code>{{ collector.debug.excludePaths|join(', ') }}</code></td>
+        </tr>
+        <tr>
+            <th>Sample Included Files</th>
+            <td>
+                <ul style="margin:0; padding-left:20px; font-size:12px;">
+                {% for file in collector.debug.sampleIncludedFiles %}
+                    <li><code>{{ file }}</code></li>
+                {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    </table>
     {% endif %}
 
     <style>

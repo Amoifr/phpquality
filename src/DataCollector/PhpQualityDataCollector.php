@@ -89,6 +89,13 @@ class PhpQualityDataCollector extends AbstractDataCollector
             'files' => $results,
             'summary' => $summary,
             'thresholds' => $thresholds,
+            'debug' => [
+                'projectDir' => $this->projectDir,
+                'includedFilesCount' => count($includedFiles),
+                'projectFilesCount' => count($projectFiles),
+                'excludePaths' => $this->excludePaths,
+                'sampleIncludedFiles' => array_slice($includedFiles, 0, 10),
+            ],
         ];
     }
 
@@ -218,5 +225,13 @@ class PhpQualityDataCollector extends AbstractDataCollector
         $violations = $summary['violations'] ?? ['ccn' => 0, 'lcom' => 0, 'mi' => 0];
 
         return $violations['ccn'] + $violations['lcom'] + $violations['mi'];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getDebug(): array
+    {
+        return $this->data['debug'] ?? [];
     }
 }
