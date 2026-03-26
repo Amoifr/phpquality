@@ -112,7 +112,7 @@ class PhpQualityDataCollector extends AbstractDataCollector
      */
     private function filterProjectFiles(array $includedFiles): array
     {
-        $projectDir = $this->projectDir . DIRECTORY_SEPARATOR;
+        $projectDir = rtrim($this->projectDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         return array_filter($includedFiles, function (string $filePath) use ($projectDir): bool {
             // Must be under project directory
@@ -120,10 +120,14 @@ class PhpQualityDataCollector extends AbstractDataCollector
                 return false;
             }
 
-            // Check excluded paths
+            // Get relative path from project root
+            $relativePath = substr($filePath, strlen($projectDir));
+
+            // Check excluded paths (relative to project root)
             foreach ($this->excludePaths as $excludePath) {
-                if (str_contains($filePath, DIRECTORY_SEPARATOR . trim($excludePath, '/') . DIRECTORY_SEPARATOR) ||
-                    str_contains($filePath, DIRECTORY_SEPARATOR . trim($excludePath, '/'))) {
+                $excludePath = trim($excludePath, '/');
+                if (str_starts_with($relativePath, $excludePath . DIRECTORY_SEPARATOR) ||
+                    str_starts_with($relativePath, $excludePath)) {
                     return false;
                 }
             }
