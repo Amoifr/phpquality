@@ -96,7 +96,7 @@ class PhpQualityDataCollector extends AbstractDataCollector
             'summary' => $summary,
             'thresholds' => $thresholds,
             'debug' => [
-                'mode' => $this->callstackTracer !== null ? 'controller_cascade' : 'all_included',
+                'mode' => $this->callstackTracer !== null ? 'request_files' : 'all_included',
                 'controllerFile' => $this->callstackTracer?->getControllerFile(),
                 'projectDir' => $this->projectDir,
                 'filesLoadedByController' => count($includedFiles),

@@ -6,16 +6,17 @@ namespace PhpQuality\DataCollector;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class CallstackTracer implements EventSubscriberInterface
 {
-    /** @var array<string> Files included before controller execution */
-    private array $filesBeforeController = [];
+    /** @var array<string> Files included at request start (after routing) */
+    private array $filesAtRequestStart = [];
 
-    /** @var array<string> Files loaded during controller execution */
-    private array $controllerFiles = [];
+    /** @var array<string> Files loaded during request handling */
+    private array $requestFiles = [];
 
     /** @var string|null Controller class file */
     private ?string $controllerFile = null;
@@ -23,17 +24,29 @@ class CallstackTracer implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            // High priority: capture state BEFORE controller runs
-            KernelEvents::CONTROLLER => ['onController', 1000],
-            // Low priority: capture state AFTER controller runs (before response sent)
+            // Very low priority on REQUEST: after routing, capture baseline
+            KernelEvents::REQUEST => ['onRequest', -1000],
+            // Capture controller info
+            KernelEvents::CONTROLLER => ['onController', 0],
+            // Very low priority on RESPONSE: capture final state
             KernelEvents::RESPONSE => ['onResponse', -1000],
         ];
     }
 
+    public function onRequest(RequestEvent $event): void
+    {
+        if (!$event->isMainRequest()) {
+            return;
+        }
+        // Capture baseline after routing but before controller resolution
+        $this->filesAtRequestStart = get_included_files();
+    }
+
     public function onController(ControllerEvent $event): void
     {
-        // Capture all files loaded before controller execution
-        $this->filesBeforeController = get_included_files();
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
         // Get controller file
         $controller = $event->getController();
@@ -48,17 +61,26 @@ class CallstackTracer implements EventSubscriberInterface
 
     public function onResponse(ResponseEvent $event): void
     {
-        // Get all files after controller execution
-        $filesAfterController = get_included_files();
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
-        // Files loaded during controller = difference
-        $this->controllerFiles = array_values(
-            array_diff($filesAfterController, $this->filesBeforeController)
+        // Get all files at end of request
+        $filesAtEnd = get_included_files();
+
+        // Files loaded during request = difference from baseline
+        $this->requestFiles = array_values(
+            array_diff($filesAtEnd, $this->filesAtRequestStart)
         );
 
-        // Add controller file at the beginning if not already included
-        if ($this->controllerFile !== null && !in_array($this->controllerFile, $this->controllerFiles, true)) {
-            array_unshift($this->controllerFiles, $this->controllerFile);
+        // Ensure controller file is first
+        if ($this->controllerFile !== null) {
+            // Remove if present elsewhere
+            $this->requestFiles = array_values(
+                array_filter($this->requestFiles, fn($f) => $f !== $this->controllerFile)
+            );
+            // Add at beginning
+            array_unshift($this->requestFiles, $this->controllerFile);
         }
     }
 
@@ -67,7 +89,7 @@ class CallstackTracer implements EventSubscriberInterface
      */
     public function getTracedFiles(): array
     {
-        return $this->controllerFiles;
+        return $this->requestFiles;
     }
 
     public function getControllerFile(): ?string
@@ -77,8 +99,8 @@ class CallstackTracer implements EventSubscriberInterface
 
     public function reset(): void
     {
-        $this->filesBeforeController = [];
-        $this->controllerFiles = [];
+        $this->filesAtRequestStart = [];
+        $this->requestFiles = [];
         $this->controllerFile = null;
     }
 }
