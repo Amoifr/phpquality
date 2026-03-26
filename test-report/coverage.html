@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Coverage - PhpQuality</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        <style>
+    .coverage-progress {
+        margin: 1rem 0;
+    }
+    .progress-bar {
+        height: 24px;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    .mini-progress {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .mini-progress .mini-progress-fill {
+        height: 8px;
+        border-radius: 4px;
+        min-width: 60px;
+        background: var(--bg-secondary);
+        position: relative;
+    }
+    .rating-bg-A { background: #22c55e; }
+    .rating-bg-B { background: #84cc16; }
+    .rating-bg-C { background: #eab308; }
+    .rating-bg-D { background: #f97316; }
+    .rating-bg-F { background: #ef4444; }
+</style>
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link ">Dashboard</a></li>
+                <li><a href="metrics.html" class="nav-link ">Documentation</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Metrics
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link ">CCN - Complexity</a></li>
+                        <li><a href="mi.html" class="nav-link ">MI - Maintainability</a></li>
+                        <li><a href="lcom.html" class="nav-link ">LCOM - Cohesion</a></li>
+                        <li><a href="loc.html" class="nav-link ">LOC - Lines of Code</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Analysis
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link ">Halstead Metrics</a></li>
+                        <li><a href="analysis.html" class="nav-link ">Multi-dimensional</a></li>
+                        <li><a href="recommendations.html" class="nav-link ">Recommendations</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Architecture
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link ">Layers &amp; SOLID</a></li>
+                        <li><a href="coverage.html" class="nav-link active">Test Coverage</a></li>
+                        <li><a href="dependencies.html" class="nav-link ">Dependencies</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+            <div class="page-header">
+        <h1>Test Coverage</h1>
+        <p>Code coverage analysis from PHPUnit test suite</p>
+    </div>
+
+        <!-- No Coverage Data -->
+    <section class="section">
+        <div class="card text-center" style="padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">&#128202;</div>
+            <h2>No Coverage Data</h2>
+            <p class="text-muted" style="margin-bottom: 2rem;">No coverage file was provided. Use --coverage option to include test coverage analysis.</p>
+
+            <div class="card" style="text-align: left; max-width: 700px; margin: 0 auto;">
+                <h3>How to Generate Coverage</h3>
+                <p>Use PHPUnit with the --coverage-clover option to generate a coverage report in Clover XML format:</p>
+                <pre><code># PHPUnit (Clover format)
+./vendor/bin/phpunit --coverage-clover coverage.xml
+
+# Then run PhpQuality with coverage
+docker run --rm \
+  -v $(pwd):/project \
+  amoifr13/phpquality \
+  analyze --source=/project/src --coverage=/project/coverage.xml</code></pre>
+            </div>
+        </div>
+    </section>
+    
+        <footer>
+            <p>Generated by <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> on 2026-03-26 06:49:34</p>
+            <p style="margin-top: 0.5rem;">Developed by <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    <script>
+    const coverageData = null;
+
+    // Coverage Distribution Chart
+    new Chart(document.getElementById('coverageDistChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: coverageData.distribution.labels,
+            datasets: [{
+                data: coverageData.distribution.values,
+                backgroundColor: coverageData.distribution.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const tbody = document.querySelector('#filesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const rating = ratingFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowRating = row.dataset.rating;
+            const matchesSearch = text.includes(search);
+            const matchesRating = !rating || rowRating === rating;
+            row.style.display = matchesSearch && matchesRating ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    ratingFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 1, asc: true };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update sort indicators
+        document.querySelectorAll('#filesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+</body>
+</html>

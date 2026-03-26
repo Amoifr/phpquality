@@ -66,9 +66,11 @@ class PhpQualityExtension extends Extension implements PrependExtensionInterface
             $profilerConfig['exclude_paths'],
         ]);
 
+        $definition->setPublic(true);
         $definition->addTag('data_collector', [
             'template' => '@PhpQuality/data_collector/phpquality.html.twig',
             'id' => 'phpquality',
+            'priority' => 300,
         ]);
 
         $container->setDefinition(PhpQualityDataCollector::class, $definition);

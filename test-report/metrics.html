@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>metrics.title - PhpQuality</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+            </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link ">Dashboard</a></li>
+                <li><a href="metrics.html" class="nav-link active">Documentation</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Metrics
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link ">CCN - Complexity</a></li>
+                        <li><a href="mi.html" class="nav-link ">MI - Maintainability</a></li>
+                        <li><a href="lcom.html" class="nav-link ">LCOM - Cohesion</a></li>
+                        <li><a href="loc.html" class="nav-link ">LOC - Lines of Code</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Analysis
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link ">Halstead Metrics</a></li>
+                        <li><a href="analysis.html" class="nav-link ">Multi-dimensional</a></li>
+                        <li><a href="recommendations.html" class="nav-link ">Recommendations</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Architecture
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link ">Layers &amp; SOLID</a></li>
+                        <li><a href="coverage.html" class="nav-link ">Test Coverage</a></li>
+                        <li><a href="dependencies.html" class="nav-link ">Dependencies</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+            <div class="page-header">
+        <h1>metrics.title</h1>
+        <p>metrics.description</p>
+    </div>
+
+    <!-- Quick Navigation -->
+    <section class="section">
+        <div class="grid grid-3">
+            <a href="#loc" class="card" style="text-decoration: none; color: inherit;">
+                <h3>LOC</h3>
+                <p class="text-muted">Lines of Code</p>
+            </a>
+            <a href="#ccn" class="card" style="text-decoration: none; color: inherit;">
+                <h3>CCN</h3>
+                <p class="text-muted">Cyclomatic Complexity</p>
+            </a>
+            <a href="#mi" class="card" style="text-decoration: none; color: inherit;">
+                <h3>MI</h3>
+                <p class="text-muted">Maintainability Index</p>
+            </a>
+            <a href="#lcom" class="card" style="text-decoration: none; color: inherit;">
+                <h3>LCOM</h3>
+                <p class="text-muted">Lack of Cohesion</p>
+            </a>
+            <a href="#halstead" class="card" style="text-decoration: none; color: inherit;">
+                <h3>Halstead</h3>
+                <p class="text-muted">Halstead Complexity Metrics</p>
+            </a>
+            <a href="#ratings" class="card" style="text-decoration: none; color: inherit;">
+                <h3>metrics.ratings</h3>
+                <p class="text-muted">metrics.scale_af</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- LOC Section -->
+    <section id="loc" class="doc-section">
+        <h2>LOC - Lines of Code</h2>
+        <div class="card">
+            <p>metrics.loc_intro</p>
+
+            <h3 style="margin-top: 1.5rem;">metrics.loc_metrics</h3>
+            <table>
+                <tr>
+                    <td><strong>LOC</strong></td>
+                    <td>metrics.loc_total</td>
+                </tr>
+                <tr>
+                    <td><strong>CLOC</strong></td>
+                    <td>metrics.loc_cloc</td>
+                </tr>
+                <tr>
+                    <td><strong>LLOC</strong></td>
+                    <td>metrics.loc_lloc</td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">metrics.loc_ratio</h3>
+            <div class="formula">metrics.loc_ratio_formula</div>
+
+            <div class="info-box">
+                <strong>Information:</strong> metrics.loc_interpretation
+            </div>
+        </div>
+    </section>
+
+    <!-- CCN Section -->
+    <section id="ccn" class="doc-section">
+        <h2>CCN - Cyclomatic Complexity</h2>
+        <div class="card">
+            <p>metrics.ccn_intro</p>
+
+            <h3 style="margin-top: 1.5rem;">MI Formula</h3>
+            <div class="formula">CCN = Number of decision points + 1</div>
+
+            <p style="margin-top: 1rem;">metrics.ccn_formula_alt</p>
+
+            <h3 style="margin-top: 1.5rem;">Decision Points</h3>
+            <table>
+                <tr><td><span class="formula-inline">if</span>, <span class="formula-inline">elseif</span></td><td>Conditional branches</td></tr>
+                <tr><td><span class="formula-inline">for</span>, <span class="formula-inline">foreach</span>, <span class="formula-inline">while</span>, <span class="formula-inline">do</span></td><td>Loop constructs</td></tr>
+                <tr><td><span class="formula-inline">case</span></td><td>Switch case (with condition)</td></tr>
+                <tr><td><span class="formula-inline">catch</span></td><td>Exception handlers</td></tr>
+                <tr><td><span class="formula-inline">&&</span>, <span class="formula-inline">||</span></td><td>Boolean operators</td></tr>
+                <tr><td><span class="formula-inline">?:</span></td><td>Ternary operator</td></tr>
+                <tr><td><span class="formula-inline">??</span></td><td>Null coalesce operator</td></tr>
+                <tr><td><span class="formula-inline">match</span></td><td>PHP 8 match expression arms</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">Rating Scale</h3>
+            <div class="rating-scale">
+                <div class="rating-item"><span class="rating rating-A">A</span> 1-4 : Simple, low risk, easy to test</div>
+                <div class="rating-item"><span class="rating rating-B">B</span> 5-7 : Moderate complexity</div>
+                <div class="rating-item"><span class="rating rating-C">C</span> 8-10 : Complex, moderate risk</div>
+                <div class="rating-item"><span class="rating rating-D">D</span> 11-15 : High complexity, hard to test</div>
+                <div class="rating-item"><span class="rating rating-F">F</span> 16+ : Very high risk, untestable</div>
+            </div>
+
+            <div class="warning-box">
+                <strong>Warning:</strong> metrics.ccn_why_matters
+            </div>
+        </div>
+    </section>
+
+    <!-- MI Section -->
+    <section id="mi" class="doc-section">
+        <h2>MI - Maintainability Index</h2>
+        <div class="card">
+            <p>metrics.mi_intro</p>
+
+            <h3 style="margin-top: 1.5rem;">MI Formula</h3>
+            <div class="formula">MI = 171 - 5.2 * ln(V) - 0.23 * CCN - 16.2 * ln(LOC)</div>
+
+            <table style="margin-top: 1rem;">
+                <tr><td><strong>V</strong></td><td>metrics.mi_volume</td></tr>
+                <tr><td><strong>CCN</strong></td><td>metrics.mi_ccn</td></tr>
+                <tr><td><strong>LOC</strong></td><td>metrics.mi_loc</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">Rating Scale</h3>
+            <div class="rating-scale">
+                <div class="rating-item"><span class="rating rating-A">A</span> 85-100 : Highly maintainable</div>
+                <div class="rating-item"><span class="rating rating-B">B</span> 65-84 : Good maintainability</div>
+                <div class="rating-item"><span class="rating rating-C">C</span> 40-64 : Moderate</div>
+                <div class="rating-item"><span class="rating rating-D">D</span> 20-39 : Difficult</div>
+                <div class="rating-item"><span class="rating rating-F">F</span> 0-19 : Unmaintainable</div>
+            </div>
+
+            <div class="info-box">
+                <strong>Information:</strong> metrics.mi_interpretation
+            </div>
+        </div>
+    </section>
+
+    <!-- LCOM Section -->
+    <section id="lcom" class="doc-section">
+        <h2>LCOM - Lack of Cohesion</h2>
+        <div class="card">
+            <p>metrics.lcom_intro</p>
+
+            <h3 style="margin-top: 1.5rem;">MI Formula (metrics.lcom_formula_variant)</h3>
+            <div class="formula">LCOM = 1 - (SUM / (M * A))</div>
+
+            <p style="margin-top: 1rem;">metrics.lcom_more_specific:</p>
+            <table style="margin-top: 1rem;">
+                <tr><td><strong>M</strong></td><td>Number of methods</td></tr>
+                <tr><td><strong>A</strong></td><td>Number of properties (attributes)</td></tr>
+                <tr><td><strong>SUM</strong></td><td>Sum of methods accessing each property</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">Rating Scale</h3>
+            <div class="rating-scale">
+                <div class="rating-item"><span class="rating rating-A">A</span> 0.0-0.2 : Perfect cohesion</div>
+                <div class="rating-item"><span class="rating rating-B">B</span> 0.2-0.4 : Good cohesion</div>
+                <div class="rating-item"><span class="rating rating-C">C</span> 0.4-0.6 : Moderate</div>
+                <div class="rating-item"><span class="rating rating-D">D</span> 0.6-0.8 : Poor cohesion</div>
+                <div class="rating-item"><span class="rating rating-F">F</span> 0.8-1.0 : No cohesion</div>
+            </div>
+
+            <div class="warning-box">
+                <strong>Warning:</strong> metrics.lcom_why_matters
+            </div>
+        </div>
+    </section>
+
+    <!-- Halstead Section -->
+    <section id="halstead" class="doc-section">
+        <h2>Halstead Complexity Metrics</h2>
+        <div class="card">
+            <p>metrics.halstead_intro</p>
+
+            <h3 style="margin-top: 1.5rem;">Base Measures</h3>
+            <table>
+                <tr><td><strong>n1</strong></td><td>Distinct operators</td></tr>
+                <tr><td><strong>n2</strong></td><td>Distinct operands</td></tr>
+                <tr><td><strong>N1</strong></td><td>Total operators</td></tr>
+                <tr><td><strong>N2</strong></td><td>Total operands</td></tr>
+            </table>
+
+            <h3 style="margin-top: 1.5rem;">Derived Metrics</h3>
+            <table>
+                <tr><td><strong>Vocabulary</strong></td><td><span class="formula-inline">n = n1 + n2</span></td></tr>
+                <tr><td><strong>Length</strong></td><td><span class="formula-inline">N = N1 + N2</span></td></tr>
+                <tr><td><strong>Volume</strong></td><td><span class="formula-inline">V = N * log2(n)</span></td></tr>
+                <tr><td><strong>Difficulty</strong></td><td><span class="formula-inline">D = (n1/2) * (N2/n2)</span></td></tr>
+                <tr><td><strong>Effort</strong></td><td><span class="formula-inline">E = D * V</span></td></tr>
+                <tr><td><strong>Bugs</strong></td><td><span class="formula-inline">B = V / 3000</span></td></tr>
+            </table>
+
+            <div class="info-box">
+                <strong>Information:</strong> metrics.halstead_volume_interpretation
+            </div>
+        </div>
+    </section>
+
+    <!-- Ratings Section -->
+    <section id="ratings" class="doc-section">
+        <h2>Rating Scale</h2>
+        <div class="card">
+            <p>metrics.ratings_intro</p>
+
+            <div class="grid grid-2" style="margin-top: 1.5rem;">
+                <div>
+                    <h3>metrics.ratings_meanings</h3>
+                    <table>
+                        <tr><td><span class="rating rating-A">A</span></td><td><strong>Excellent</strong> - metrics.ratings_excellent</td></tr>
+                        <tr><td><span class="rating rating-B">B</span></td><td><strong>Good</strong> - metrics.ratings_good</td></tr>
+                        <tr><td><span class="rating rating-C">C</span></td><td><strong>Moderate</strong> - metrics.ratings_moderate</td></tr>
+                        <tr><td><span class="rating rating-D">D</span></td><td><strong>Poor</strong> - metrics.ratings_poor</td></tr>
+                        <tr><td><span class="rating rating-F">F</span></td><td><strong>Critical</strong> - metrics.ratings_critical</td></tr>
+                    </table>
+                </div>
+                <div>
+                    <h3>metrics.ratings_thresholds</h3>
+                    <table>
+                        <tr><th>violations.metric</th><th>A</th><th>B</th><th>C</th><th>D</th><th>F</th></tr>
+                        <tr><td>CCN</td><td>1-4</td><td>5-7</td><td>8-10</td><td>11-15</td><td>16+</td></tr>
+                        <tr><td>MI</td><td>85+</td><td>65-84</td><td>40-64</td><td>20-39</td><td>&lt;20</td></tr>
+                        <tr><td>LCOM</td><td>0-0.2</td><td>0.2-0.4</td><td>0.4-0.6</td><td>0.6-0.8</td><td>0.8+</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- References -->
+    <section class="doc-section">
+        <h2>metrics.references</h2>
+        <div class="card">
+            <ul style="margin-left: 1.5rem;">
+                <li>McCabe, T.J. (1976). "A Complexity Measure". IEEE Transactions on Software Engineering.</li>
+                <li>Halstead, M.H. (1977). "Elements of Software Science". Elsevier North-Holland.</li>
+                <li>Oman, P. & Hagemeister, J. (1992). "Metrics for assessing a software system's maintainability".</li>
+                <li>Chidamber, S.R. & Kemerer, C.F. (1994). "A Metrics Suite for Object Oriented Design".</li>
+            </ul>
+        </div>
+    </section>
+
+        <footer>
+            <p>Generated by <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> on 2026-03-26 06:49:34</p>
+            <p style="margin-top: 0.5rem;">Developed by <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    </body>
+</html>

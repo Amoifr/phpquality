@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lack of Cohesion of Methods (LCOM) - PhpQuality</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+            </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link ">Dashboard</a></li>
+                <li><a href="metrics.html" class="nav-link ">Documentation</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Metrics
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link ">CCN - Complexity</a></li>
+                        <li><a href="mi.html" class="nav-link ">MI - Maintainability</a></li>
+                        <li><a href="lcom.html" class="nav-link active">LCOM - Cohesion</a></li>
+                        <li><a href="loc.html" class="nav-link ">LOC - Lines of Code</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Analysis
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link ">Halstead Metrics</a></li>
+                        <li><a href="analysis.html" class="nav-link ">Multi-dimensional</a></li>
+                        <li><a href="recommendations.html" class="nav-link ">Recommendations</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Architecture
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link ">Layers &amp; SOLID</a></li>
+                        <li><a href="coverage.html" class="nav-link ">Test Coverage</a></li>
+                        <li><a href="dependencies.html" class="nav-link ">Dependencies</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+            <div class="page-header">
+        <h1>Lack of Cohesion of Methods (LCOM)</h1>
+        <p>Class cohesion analysis - how well methods are related through shared properties</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card metric-card rating-A">
+                <div class="metric-label">Average LCOM</div>
+                <div class="metric-value">0.1186</div>
+                <div><span class="rating rating-A">A</span></div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Total Classes</div>
+                <div class="metric-value">48</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Violations (&gt;0.8)</div>
+                <div class="metric-value text-danger">2</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Cohesive Classes</div>
+                <div class="metric-value text-success">40</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explanation & Chart -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>Understanding LCOM</h3>
+                <div class="formula" style="text-align: center; padding: 1rem;">
+                    LCOM = 1 - (SUM / (M * A))
+                </div>
+                <p style="margin-top: 1rem;">Where:</p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li><strong>SUM</strong> = Sum of methods accessing each property</li>
+                    <li><strong>M</strong> = Number of methods</li>
+                    <li><strong>A</strong> = Number of properties (attributes)</li>
+                </ul>
+
+                <div class="info-box" style="margin-top: 1.5rem;">
+                    <strong>Low LCOM (0-0.4):</strong> Methods share properties, the class has a single responsibility.
+                </div>
+                <div class="warning-box">
+                    <strong>High LCOM (0.6-1.0):</strong> Methods use different properties - consider splitting the class.
+                </div>
+            </div>
+            <div class="card">
+                <h3>Lack of Cohesion</h3>
+                <div class="chart-container">
+                    <canvas id="lcomDistChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visual Scale -->
+    <section class="section">
+        <div class="card">
+            <h3>Cohesion Scale</h3>
+            <div style="display: flex; margin-top: 1rem; border-radius: 0.5rem; overflow: hidden;">
+                <div style="flex: 1; padding: 1rem; background: var(--color-a); text-align: center;">
+                    <div style="font-weight: bold;">0.0 - 0.2</div>
+                    <div style="font-size: 0.875rem;">Perfect cohesion</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-b); text-align: center;">
+                    <div style="font-weight: bold;">0.2 - 0.4</div>
+                    <div style="font-size: 0.875rem;">Good cohesion</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-c); text-align: center; color: black;">
+                    <div style="font-weight: bold;">0.4 - 0.6</div>
+                    <div style="font-size: 0.875rem;">Moderate</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-d); text-align: center;">
+                    <div style="font-weight: bold;">0.6 - 0.8</div>
+                    <div style="font-size: 0.875rem;">Poor cohesion</div>
+                </div>
+                <div style="flex: 1; padding: 1rem; background: var(--color-f); text-align: center;">
+                    <div style="font-weight: bold;">0.8 - 1.0</div>
+                    <div style="font-size: 0.875rem;">No cohesion</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classes Table -->
+    <section class="section">
+        <div class="card">
+            <h2>All Classes</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="Search class...">
+                <select id="ratingFilter" class="filter-select">
+                    <option value="">All ratings</option>
+                    <option value="A">Rating A (Cohesive)</option>
+                    <option value="B">Rating B</option>
+                    <option value="C">Rating C</option>
+                    <option value="D">Rating D</option>
+                    <option value="F">Rating F (Not cohesive)</option>
+                </select>
+            </div>
+            <table id="classesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Class <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)">Category <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(2)" class="sorted">LCOM <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(3)">Rating <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">Methods <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(5)">Properties <span class="sort-icon">&#9650;</span></th>
+                        <th>Cohesion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>PhpQualityBundle</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>Configuration</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>PhpQualityExtension</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>AnalyzeCommand</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>ConsoleReportGenerator</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="F">
+                        <td>
+                            <div>HtmlReportGenerator</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.9333">0.9333</td>
+                        <td data-sort="F"><span class="label label-F">F</span></td>
+                        <td data-sort="15">15</td>
+                        <td data-sort="2">2</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-F" style="width: 6.67%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>GitBlameAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="9">9</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="F">
+                        <td>
+                            <div>ProjectAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.8571">0.8571</td>
+                        <td data-sort="F"><span class="label label-F">F</span></td>
+                        <td data-sort="14">14</td>
+                        <td data-sort="1">1</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-F" style="width: 14.29%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>DependenciesAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="13">13</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>ClassResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>DependenciesResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>FileResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="11">11</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>LayerViolation</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>CoverageResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>ArchitectureResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="9">9</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>ProjectResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="12">12</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>SolidViolation</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>MethodResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>ArchitectureAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="10">10</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>FileAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>DrupalProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>LaravelProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>PhpProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="4">4</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>SymfonyProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="8">8</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>PrestashopProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>SuluProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>CodeIgniterProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>Typo3ProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>AbstractProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="8">8</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>SyliusProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>ProjectTypeDetector</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="1">1</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>WooCommerceProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>MagentoProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>CakePHPProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>WordpressProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>JoomlaProjectType</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>LayerDetector</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="9">9</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>SolidAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>MetricResult</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>MaintainabilityIndex</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>CoverageAnalyzer</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="11">11</td>
+                        <td data-sort="0">0</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="D">
+                        <td>
+                            <div>HalsteadVisitor</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.7273">0.7273</td>
+                        <td data-sort="D"><span class="label label-D">D</span></td>
+                        <td data-sort="11">11</td>
+                        <td data-sort="4">4</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-D" style="width: 27.27%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="D">
+                        <td>
+                            <div>CyclomaticComplexityVisitor</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.6769">0.6769</td>
+                        <td data-sort="D"><span class="label label-D">D</span></td>
+                        <td data-sort="13">13</td>
+                        <td data-sort="5">5</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-D" style="width: 32.31%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="A">
+                        <td>
+                            <div>AbstractMetricVisitor</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="A"><span class="label label-A">A</span></td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="1">1</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-A" style="width: 100%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="D">
+                        <td>
+                            <div>DependencyVisitor</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.6143">0.6143</td>
+                        <td data-sort="D"><span class="label label-D">D</span></td>
+                        <td data-sort="10">10</td>
+                        <td data-sort="7">7</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-D" style="width: 38.57%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="D">
+                        <td>
+                            <div>CohesionVisitor</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.6182">0.6182</td>
+                        <td data-sort="D"><span class="label label-D">D</span></td>
+                        <td data-sort="11">11</td>
+                        <td data-sort="5">5</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-D" style="width: 38.18%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="D">
+                        <td>
+                            <div>LinesOfCodeVisitor</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.7667">0.7667</td>
+                        <td data-sort="D"><span class="label label-D">D</span></td>
+                        <td data-sort="10">10</td>
+                        <td data-sort="3">3</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-D" style="width: 23.33%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                        <tr data-rating="C">
+                        <td>
+                            <div>AstParser</div>
+                            <div class="text-muted" style="font-size: 0.75rem;"></div>
+                        </td>
+                        <td class="text-muted">-</td>
+                        <td data-sort="0.5">0.5</td>
+                        <td data-sort="C"><span class="label label-C">C</span></td>
+                        <td data-sort="4">4</td>
+                        <td data-sort="1">1</td>
+                        <td style="width: 150px;">
+                            <div class="progress-bar">
+                                <div class="progress-fill rating-C" style="width: 50%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                                    </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">Total: 48 classes</p>
+        </div>
+    </section>
+
+    <!-- Tips -->
+    <section class="section">
+        <div class="card">
+            <h3>How to Improve Cohesion</h3>
+            <div class="grid grid-2" style="margin-top: 1rem;">
+                <div>
+                    <h4 style="color: var(--color-success);">Good Practices</h4>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Single Responsibility Principle - one class, one purpose</li>
+                        <li>Group related properties and methods</li>
+                        <li>Use composition over inheritance</li>
+                        <li>Extract unrelated functionality to new classes</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: var(--color-danger);">Warning Signs</h4>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>lcom.warning_no_properties</li>
+                        <li>lcom.warning_single_method</li>
+                        <li>lcom.warning_large_classes</li>
+                        <li>lcom.warning_god_classes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <footer>
+            <p>Generated by <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> on 2026-03-26 06:49:34</p>
+            <p style="margin-top: 0.5rem;">Developed by <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    <script>
+    const chartData = {"ccnDistribution":{"labels":["1-4 (A)","5-7 (B)","8-10 (C)","11-15 (D)","16+ (F)"],"values":[14,9,10,9,6],"colors":["#22c55e","#84cc16","#eab308","#f97316","#ef4444"]},"miDistribution":{"labels":["85-100 (A)","65-84 (B)","40-64 (C)","20-39 (D)","0-19 (F)"],"values":[20,17,9,2,0],"colors":["#22c55e","#84cc16","#eab308","#f97316","#ef4444"]},"lcomDistribution":{"labels":["0-0.2 (A)","0.2-0.4 (B)","0.4-0.6 (C)","0.6-0.8 (D)","0.8-1.0 (F)"],"values":[40,0,1,5,2],"colors":["#22c55e","#84cc16","#eab308","#f97316","#ef4444"]},"scatterData":[{"name":"PhpQualityBundle","ccn":1,"mi":100,"lcom":0,"loc":16},{"name":"Configuration","ccn":1,"mi":100,"lcom":0,"loc":24},{"name":"PhpQualityExtension","ccn":1,"mi":100,"lcom":0,"loc":48},{"name":"AnalyzeCommand","ccn":21,"mi":43.93,"lcom":0,"loc":404},{"name":"ConsoleReportGenerator","ccn":9,"mi":73.54,"lcom":0,"loc":127},{"name":"HtmlReportGenerator","ccn":57,"mi":25.7,"lcom":0.9333,"loc":905},{"name":"GitBlameAnalyzer","ccn":12,"mi":53.42,"lcom":0,"loc":273},{"name":"ProjectAnalyzer","ccn":10,"mi":61.71,"lcom":0.8571,"loc":238},{"name":"DependenciesAnalyzer","ccn":39,"mi":35.12,"lcom":0,"loc":549},{"name":"ClassResult","ccn":2,"mi":100,"lcom":0,"loc":59},{"name":"DependenciesResult","ccn":1,"mi":100,"lcom":0,"loc":71},{"name":"FileResult","ccn":2,"mi":93.14,"lcom":0,"loc":111},{"name":"LayerViolation","ccn":1,"mi":100,"lcom":0,"loc":53},{"name":"CoverageResult","ccn":1,"mi":100,"lcom":0,"loc":48},{"name":"ArchitectureResult","ccn":8,"mi":78.56,"lcom":0,"loc":147},{"name":"ProjectResult","ccn":4,"mi":80.38,"lcom":0,"loc":133},{"name":"SolidViolation","ccn":6,"mi":100,"lcom":0,"loc":62},{"name":"MethodResult","ccn":1,"mi":100,"lcom":0,"loc":38},{"name":"ArchitectureAnalyzer","ccn":24,"mi":46.77,"lcom":0,"loc":369},{"name":"FileAnalyzer","ccn":14,"mi":65.85,"lcom":0,"loc":212},{"name":"DrupalProjectType","ccn":11,"mi":82.31,"lcom":0,"loc":108},{"name":"LaravelProjectType","ccn":7,"mi":87.59,"lcom":0,"loc":101},{"name":"PhpProjectType","ccn":4,"mi":100,"lcom":0,"loc":39},{"name":"SymfonyProjectType","ccn":7,"mi":86.42,"lcom":0,"loc":115},{"name":"PrestashopProjectType","ccn":9,"mi":85.87,"lcom":0,"loc":105},{"name":"SuluProjectType","ccn":7,"mi":88.35,"lcom":0,"loc":99},{"name":"CodeIgniterProjectType","ccn":9,"mi":84.74,"lcom":0,"loc":102},{"name":"Typo3ProjectType","ccn":9,"mi":84.48,"lcom":0,"loc":104},{"name":"AbstractProjectType","ccn":6,"mi":83.87,"lcom":0,"loc":106},{"name":"SyliusProjectType","ccn":7,"mi":88.09,"lcom":0,"loc":100},{"name":"ProjectTypeDetector","ccn":4,"mi":92.99,"lcom":0,"loc":90},{"name":"WooCommerceProjectType","ccn":12,"mi":83.59,"lcom":0,"loc":99},{"name":"MagentoProjectType","ccn":11,"mi":81.6,"lcom":0,"loc":115},{"name":"CakePHPProjectType","ccn":9,"mi":84.17,"lcom":0,"loc":106},{"name":"WordpressProjectType","ccn":13,"mi":80.55,"lcom":0,"loc":111},{"name":"JoomlaProjectType","ccn":14,"mi":79.71,"lcom":0,"loc":108},{"name":"LayerDetector","ccn":7,"mi":69.61,"lcom":0,"loc":250},{"name":"SolidAnalyzer","ccn":13,"mi":53.72,"lcom":0,"loc":313},{"name":"MetricResult","ccn":6,"mi":100,"lcom":0,"loc":55},{"name":"MaintainabilityIndex","ccn":9,"mi":81.31,"lcom":0,"loc":111},{"name":"CoverageAnalyzer","ccn":27,"mi":42.65,"lcom":0,"loc":403},{"name":"HalsteadVisitor","ccn":14,"mi":59,"lcom":0.7273,"loc":269},{"name":"CyclomaticComplexityVisitor","ccn":8,"mi":66.28,"lcom":0.6769,"loc":211},{"name":"AbstractMetricVisitor","ccn":1,"mi":100,"lcom":0,"loc":29},{"name":"DependencyVisitor","ccn":48,"mi":45.06,"lcom":0.6143,"loc":365},{"name":"CohesionVisitor","ccn":10,"mi":61.21,"lcom":0.6182,"loc":224},{"name":"LinesOfCodeVisitor","ccn":6,"mi":74.26,"lcom":0.7667,"loc":142},{"name":"AstParser","ccn":4,"mi":95.49,"lcom":0.5,"loc":72}]};
+
+    // LCOM Distribution Chart
+    new Chart(document.getElementById('lcomDistChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: chartData.lcomDistribution.labels,
+            datasets: [{
+                data: chartData.lcomDistribution.values,
+                backgroundColor: chartData.lcomDistribution.colors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const tbody = document.querySelector('#classesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const rating = ratingFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const rowRating = row.dataset.rating;
+            const matchesSearch = text.includes(search);
+            const matchesRating = !rating || rowRating === rating;
+            row.style.display = matchesSearch && matchesRating ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    ratingFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 2, asc: true };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('#classesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+</body>
+</html>

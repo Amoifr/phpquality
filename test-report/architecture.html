@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Analysis - PhpQuality</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+            </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link ">Dashboard</a></li>
+                <li><a href="metrics.html" class="nav-link ">Documentation</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Metrics
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link ">CCN - Complexity</a></li>
+                        <li><a href="mi.html" class="nav-link ">MI - Maintainability</a></li>
+                        <li><a href="lcom.html" class="nav-link ">LCOM - Cohesion</a></li>
+                        <li><a href="loc.html" class="nav-link ">LOC - Lines of Code</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Analysis
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link ">Halstead Metrics</a></li>
+                        <li><a href="analysis.html" class="nav-link ">Multi-dimensional</a></li>
+                        <li><a href="recommendations.html" class="nav-link ">Recommendations</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Architecture
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link active">Layers &amp; SOLID</a></li>
+                        <li><a href="coverage.html" class="nav-link ">Test Coverage</a></li>
+                        <li><a href="dependencies.html" class="nav-link ">Dependencies</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+            <div class="page-header">
+        <h1>Architecture Analysis</h1>
+        <p>Layer analysis, dependencies and SOLID principle violations</p>
+    </div>
+
+    <!-- Architecture Score Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="metric-card">
+                <div class="metric-value">
+                    <span class="rating-badge rating-B">B</span>
+                </div>
+                <div class="metric-label">Architecture Score</div>
+                <div class="metric-detail">70/100</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value text-success">
+                    0
+                </div>
+                <div class="metric-label">Layer Violations</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value text-warning">
+                    22
+                </div>
+                <div class="metric-label">SOLID Violations</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value text-success">
+                    0
+                </div>
+                <div class="metric-label">Circular Dependencies</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Layer Distribution -->
+    <section class="section">
+        <div class="card">
+            <h2>Layer Distribution</h2>
+            <div class="grid grid-5" style="margin-top: 1rem;">
+                                <div class="layer-stat layer-controller">
+                    <div class="layer-count">0</div>
+                    <div class="layer-name">Controller</div>
+                </div>
+                                <div class="layer-stat layer-application">
+                    <div class="layer-count">1</div>
+                    <div class="layer-name">Application</div>
+                </div>
+                                <div class="layer-stat layer-domain">
+                    <div class="layer-count">0</div>
+                    <div class="layer-name">Domain</div>
+                </div>
+                                <div class="layer-stat layer-infrastructure">
+                    <div class="layer-count">0</div>
+                    <div class="layer-name">Infrastructure</div>
+                </div>
+                                <div class="layer-stat layer-other">
+                    <div class="layer-count">50</div>
+                    <div class="layer-name">Other</div>
+                </div>
+                            </div>
+        </div>
+    </section>
+
+    <!-- Dependency Graph -->
+    <section class="section">
+        <div class="card">
+            <h2>Dependency Graph</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">Interactive visualization of class dependencies. Red edges indicate violations.</p>
+            <div class="graph-controls">
+                <button class="btn btn-sm" onclick="resetZoom()">Reset View</button>
+                <label><input type="checkbox" id="showLabels" checked onchange="toggleLabels()"> Show labels</label>
+                <label><input type="checkbox" id="showViolationsOnly" onchange="filterGraph()"> Show violations only</label>
+            </div>
+            <div id="dependencyGraph" class="dependency-graph"></div>
+            <div class="graph-legend">
+                <span class="legend-item"><span class="legend-dot layer-controller"></span> Controller</span>
+                <span class="legend-item"><span class="legend-dot layer-application"></span> Application</span>
+                <span class="legend-item"><span class="legend-dot layer-domain"></span> Domain</span>
+                <span class="legend-item"><span class="legend-dot layer-infrastructure"></span> Infrastructure</span>
+                <span class="legend-item"><span class="legend-dot layer-other"></span> Other</span>
+                <span class="legend-item"><span class="legend-line violation"></span> Violation</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Layer Violations -->
+    
+    <!-- SOLID Violations -->
+        <section class="section">
+        <div class="card">
+            <h2>SOLID Violations</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">Classes that violate SOLID principles (Single Responsibility, Open/Closed, Interface Segregation, Dependency Inversion).</p>
+
+            <div class="solid-tabs">
+                                                                <button class="solid-tab active" onclick="showSolidTab('SRP')">
+                    SRP
+                    <span class="badge">3</span>
+                </button>
+                                                                                                <button class="solid-tab " onclick="showSolidTab('ISP')">
+                    ISP
+                    <span class="badge">1</span>
+                </button>
+                                                                <button class="solid-tab " onclick="showSolidTab('DIP')">
+                    DIP
+                    <span class="badge">18</span>
+                </button>
+                                            </div>
+
+                                    <div class="solid-panel" id="panel-SRP" >
+                <div class="solid-principle-info">
+                    <strong>Single Responsibility Principle</strong>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Message</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                                <tr>
+                            <td class="text-mono">HtmlReportGenerator</td>
+                            <td>Class HtmlReportGenerator may have too many responsibilities: low cohesion (LCOM: 0.93), 905 lines. Consider splitting into smaller, focused classes.</td>
+                            <td><span class="label label-warning">warning</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">HalsteadVisitor</td>
+                            <td>Class HalsteadVisitor may have too many responsibilities: low cohesion (LCOM: 0.73), 83 dependencies. Consider splitting into smaller, focused classes.</td>
+                            <td><span class="label label-warning">warning</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">LinesOfCodeVisitor</td>
+                            <td>Class LinesOfCodeVisitor may have too many responsibilities: low cohesion (LCOM: 0.77), 20 dependencies. Consider splitting into smaller, focused classes.</td>
+                            <td><span class="label label-warning">warning</span></td>
+                        </tr>
+                                            </tbody>
+                </table>
+            </div>
+                                                                        <div class="solid-panel" id="panel-ISP" style="display: none;">
+                <div class="solid-principle-info">
+                    <strong>Interface Segregation Principle</strong>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Message</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                                <tr>
+                            <td class="text-mono">ProjectTypeInterface</td>
+                            <td>Interface ProjectTypeInterface has 8 methods (max recommended: 5). Consider splitting into smaller, more focused interfaces.</td>
+                            <td><span class="label label-warning">warning</span></td>
+                        </tr>
+                                            </tbody>
+                </table>
+            </div>
+                                                <div class="solid-panel" id="panel-DIP" style="display: none;">
+                <div class="solid-principle-info">
+                    <strong>Dependency Inversion Principle</strong>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Message</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                                <tr>
+                            <td class="text-mono">PhpQualityExtension</td>
+                            <td>Class PhpQualityExtension has low abstraction ratio (17%). 5 of 6 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">AnalyzeCommand</td>
+                            <td>Class AnalyzeCommand has low abstraction ratio (8%). 33 of 36 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">HtmlReportGenerator</td>
+                            <td>Class HtmlReportGenerator has low abstraction ratio (13%). 13 of 15 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">ProjectAnalyzer</td>
+                            <td>Class ProjectAnalyzer has low abstraction ratio (31%). 9 of 13 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-warning">warning</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">DependenciesAnalyzer</td>
+                            <td>Class DependenciesAnalyzer has low abstraction ratio (0%). 27 of 27 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">ProjectResult</td>
+                            <td>Class ProjectResult has low abstraction ratio (20%). 4 of 5 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">SolidViolation</td>
+                            <td>Class SolidViolation has low abstraction ratio (0%). 6 of 6 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">ArchitectureAnalyzer</td>
+                            <td>Class ArchitectureAnalyzer has low abstraction ratio (9%). 10 of 11 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">FileAnalyzer</td>
+                            <td>Class FileAnalyzer has low abstraction ratio (12%). 14 of 16 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">LayerDetector</td>
+                            <td>Class LayerDetector has low abstraction ratio (10%). 28 of 31 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">SolidAnalyzer</td>
+                            <td>Class SolidAnalyzer has low abstraction ratio (0%). 20 of 20 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">CoverageAnalyzer</td>
+                            <td>Class CoverageAnalyzer has low abstraction ratio (0%). 20 of 20 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">HalsteadVisitor</td>
+                            <td>Class HalsteadVisitor has low abstraction ratio (1%). 91 of 92 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">CyclomaticComplexityVisitor</td>
+                            <td>Class CyclomaticComplexityVisitor has low abstraction ratio (3%). 30 of 31 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">DependencyVisitor</td>
+                            <td>Class DependencyVisitor has low abstraction ratio (3%). 33 of 34 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">CohesionVisitor</td>
+                            <td>Class CohesionVisitor has low abstraction ratio (7%). 14 of 15 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">LinesOfCodeVisitor</td>
+                            <td>Class LinesOfCodeVisitor has low abstraction ratio (5%). 19 of 20 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                                <tr>
+                            <td class="text-mono">AstParser</td>
+                            <td>Class AstParser has low abstraction ratio (0%). 7 of 7 dependencies are to concrete classes. Consider depending on interfaces instead.</td>
+                            <td><span class="label label-error">error</span></td>
+                        </tr>
+                                            </tbody>
+                </table>
+            </div>
+                                </div>
+    </section>
+    
+    <!-- Circular Dependencies -->
+    
+    <!-- Dependency Matrix -->
+    <section class="section">
+        <div class="card">
+            <h2>Dependency Matrix</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">Number of dependencies between each layer. Highlighted cells indicate potentially problematic dependencies.</p>
+            <div class="matrix-container">
+                                                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                                                        <th class="matrix-header">Other</th>
+                                                        <th class="matrix-header">Application</th>
+                                                    </tr>
+                    </thead>
+                    <tbody>
+                                                <tr>
+                            <th class="matrix-row-header">Other</th>
+                                                                                    <td class="matrix-cell has-deps high-deps">
+                                263
+                            </td>
+                                                                                    <td class="matrix-cell  ">
+                                -
+                            </td>
+                                                    </tr>
+                                                <tr>
+                            <th class="matrix-row-header">Application</th>
+                                                                                    <td class="matrix-cell has-deps high-deps">
+                                13
+                            </td>
+                                                                                    <td class="matrix-cell  ">
+                                -
+                            </td>
+                                                    </tr>
+                                            </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+        <footer>
+            <p>Generated by <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> on 2026-03-26 06:49:34</p>
+            <p style="margin-top: 0.5rem;">Developed by <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    // Graph data
+    const graphData = {"nodes":{"PhpQuality\\PhpQualityBundle":{"name":"PhpQualityBundle","fqn":"PhpQuality\\PhpQualityBundle","type":"class","file":"PhpQualityBundle.php","extends":"Symfony\\Component\\HttpKernel\\Bundle\\Bundle","implements":[]},"PhpQuality\\DependencyInjection\\Configuration":{"name":"Configuration","fqn":"PhpQuality\\DependencyInjection\\Configuration","type":"class","file":"DependencyInjection\/Configuration.php","extends":null,"implements":["Symfony\\Component\\Config\\Definition\\ConfigurationInterface"]},"PhpQuality\\DependencyInjection\\PhpQualityExtension":{"name":"PhpQualityExtension","fqn":"PhpQuality\\DependencyInjection\\PhpQualityExtension","type":"class","file":"DependencyInjection\/PhpQualityExtension.php","extends":"Symfony\\Component\\DependencyInjection\\Extension\\Extension","implements":["Symfony\\Component\\DependencyInjection\\Extension\\PrependExtensionInterface"]},"PhpQuality\\Command\\AnalyzeCommand":{"name":"AnalyzeCommand","fqn":"PhpQuality\\Command\\AnalyzeCommand","type":"class","file":"Command\/AnalyzeCommand.php","extends":"Symfony\\Component\\Console\\Command\\Command","implements":[]},"PhpQuality\\Report\\ConsoleReportGenerator":{"name":"ConsoleReportGenerator","fqn":"PhpQuality\\Report\\ConsoleReportGenerator","type":"class","file":"Report\/ConsoleReportGenerator.php","extends":null,"implements":["PhpQuality\\Report\\ReportGeneratorInterface"]},"PhpQuality\\Report\\ReportGeneratorInterface":{"name":"ReportGeneratorInterface","fqn":"PhpQuality\\Report\\ReportGeneratorInterface","type":"interface","file":"Report\/ReportGeneratorInterface.php","methods":1},"PhpQuality\\Report\\HtmlReportGenerator":{"name":"HtmlReportGenerator","fqn":"PhpQuality\\Report\\HtmlReportGenerator","type":"class","file":"Report\/HtmlReportGenerator.php","extends":null,"implements":["PhpQuality\\Report\\ReportGeneratorInterface"]},"PhpQuality\\Analyzer\\GitBlameAnalyzer":{"name":"GitBlameAnalyzer","fqn":"PhpQuality\\Analyzer\\GitBlameAnalyzer","type":"class","file":"Analyzer\/GitBlameAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\ProjectAnalyzer":{"name":"ProjectAnalyzer","fqn":"PhpQuality\\Analyzer\\ProjectAnalyzer","type":"class","file":"Analyzer\/ProjectAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\DependenciesAnalyzer":{"name":"DependenciesAnalyzer","fqn":"PhpQuality\\Analyzer\\DependenciesAnalyzer","type":"class","file":"Analyzer\/DependenciesAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\ClassResult":{"name":"ClassResult","fqn":"PhpQuality\\Analyzer\\Result\\ClassResult","type":"class","file":"Analyzer\/Result\/ClassResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\DependenciesResult":{"name":"DependenciesResult","fqn":"PhpQuality\\Analyzer\\Result\\DependenciesResult","type":"class","file":"Analyzer\/Result\/DependenciesResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\FileResult":{"name":"FileResult","fqn":"PhpQuality\\Analyzer\\Result\\FileResult","type":"class","file":"Analyzer\/Result\/FileResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\LayerViolation":{"name":"LayerViolation","fqn":"PhpQuality\\Analyzer\\Result\\LayerViolation","type":"class","file":"Analyzer\/Result\/LayerViolation.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\CoverageResult":{"name":"CoverageResult","fqn":"PhpQuality\\Analyzer\\Result\\CoverageResult","type":"class","file":"Analyzer\/Result\/CoverageResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\ArchitectureResult":{"name":"ArchitectureResult","fqn":"PhpQuality\\Analyzer\\Result\\ArchitectureResult","type":"class","file":"Analyzer\/Result\/ArchitectureResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\ProjectResult":{"name":"ProjectResult","fqn":"PhpQuality\\Analyzer\\Result\\ProjectResult","type":"class","file":"Analyzer\/Result\/ProjectResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\SolidViolation":{"name":"SolidViolation","fqn":"PhpQuality\\Analyzer\\Result\\SolidViolation","type":"class","file":"Analyzer\/Result\/SolidViolation.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Result\\MethodResult":{"name":"MethodResult","fqn":"PhpQuality\\Analyzer\\Result\\MethodResult","type":"class","file":"Analyzer\/Result\/MethodResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\ArchitectureAnalyzer":{"name":"ArchitectureAnalyzer","fqn":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","type":"class","file":"Analyzer\/ArchitectureAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\FileAnalyzer":{"name":"FileAnalyzer","fqn":"PhpQuality\\Analyzer\\FileAnalyzer","type":"class","file":"Analyzer\/FileAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\ProjectType\\DrupalProjectType":{"name":"DrupalProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\DrupalProjectType","type":"class","file":"Analyzer\/ProjectType\/DrupalProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\LaravelProjectType":{"name":"LaravelProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\LaravelProjectType","type":"class","file":"Analyzer\/ProjectType\/LaravelProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\PhpProjectType":{"name":"PhpProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\PhpProjectType","type":"class","file":"Analyzer\/ProjectType\/PhpProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\SymfonyProjectType":{"name":"SymfonyProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\SymfonyProjectType","type":"class","file":"Analyzer\/ProjectType\/SymfonyProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\PrestashopProjectType":{"name":"PrestashopProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\PrestashopProjectType","type":"class","file":"Analyzer\/ProjectType\/PrestashopProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface":{"name":"ProjectTypeInterface","fqn":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","type":"interface","file":"Analyzer\/ProjectType\/ProjectTypeInterface.php","methods":8},"PhpQuality\\Analyzer\\ProjectType\\SuluProjectType":{"name":"SuluProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\SuluProjectType","type":"class","file":"Analyzer\/ProjectType\/SuluProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\CodeIgniterProjectType":{"name":"CodeIgniterProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\CodeIgniterProjectType","type":"class","file":"Analyzer\/ProjectType\/CodeIgniterProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\Typo3ProjectType":{"name":"Typo3ProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\Typo3ProjectType","type":"class","file":"Analyzer\/ProjectType\/Typo3ProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType":{"name":"AbstractProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","type":"class","file":"Analyzer\/ProjectType\/AbstractProjectType.php","extends":null,"implements":["PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface"]},"PhpQuality\\Analyzer\\ProjectType\\SyliusProjectType":{"name":"SyliusProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\SyliusProjectType","type":"class","file":"Analyzer\/ProjectType\/SyliusProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector":{"name":"ProjectTypeDetector","fqn":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector","type":"class","file":"Analyzer\/ProjectType\/ProjectTypeDetector.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\ProjectType\\WooCommerceProjectType":{"name":"WooCommerceProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\WooCommerceProjectType","type":"class","file":"Analyzer\/ProjectType\/WooCommerceProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\MagentoProjectType":{"name":"MagentoProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\MagentoProjectType","type":"class","file":"Analyzer\/ProjectType\/MagentoProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\CakePHPProjectType":{"name":"CakePHPProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\CakePHPProjectType","type":"class","file":"Analyzer\/ProjectType\/CakePHPProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\WordpressProjectType":{"name":"WordpressProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\WordpressProjectType","type":"class","file":"Analyzer\/ProjectType\/WordpressProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\ProjectType\\JoomlaProjectType":{"name":"JoomlaProjectType","fqn":"PhpQuality\\Analyzer\\ProjectType\\JoomlaProjectType","type":"class","file":"Analyzer\/ProjectType\/JoomlaProjectType.php","extends":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","implements":[]},"PhpQuality\\Analyzer\\Architecture\\LayerDetector":{"name":"LayerDetector","fqn":"PhpQuality\\Analyzer\\Architecture\\LayerDetector","type":"class","file":"Analyzer\/Architecture\/LayerDetector.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer":{"name":"SolidAnalyzer","fqn":"PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer","type":"class","file":"Analyzer\/Architecture\/SolidAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Metric\\MetricResult":{"name":"MetricResult","fqn":"PhpQuality\\Analyzer\\Metric\\MetricResult","type":"class","file":"Analyzer\/Metric\/MetricResult.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Metric\\MaintainabilityIndex":{"name":"MaintainabilityIndex","fqn":"PhpQuality\\Analyzer\\Metric\\MaintainabilityIndex","type":"class","file":"Analyzer\/Metric\/MaintainabilityIndex.php","extends":null,"implements":["PhpQuality\\Analyzer\\Metric\\MetricInterface"]},"PhpQuality\\Analyzer\\Metric\\MetricInterface":{"name":"MetricInterface","fqn":"PhpQuality\\Analyzer\\Metric\\MetricInterface","type":"interface","file":"Analyzer\/Metric\/MetricInterface.php","methods":3},"PhpQuality\\Analyzer\\CoverageAnalyzer":{"name":"CoverageAnalyzer","fqn":"PhpQuality\\Analyzer\\CoverageAnalyzer","type":"class","file":"Analyzer\/CoverageAnalyzer.php","extends":null,"implements":[]},"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor":{"name":"HalsteadVisitor","fqn":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","type":"class","file":"Analyzer\/Ast\/Visitor\/HalsteadVisitor.php","extends":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","implements":[]},"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor":{"name":"CyclomaticComplexityVisitor","fqn":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","type":"class","file":"Analyzer\/Ast\/Visitor\/CyclomaticComplexityVisitor.php","extends":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","implements":[]},"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor":{"name":"AbstractMetricVisitor","fqn":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","type":"class","file":"Analyzer\/Ast\/Visitor\/AbstractMetricVisitor.php","extends":"PhpParser\\NodeVisitorAbstract","implements":[]},"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor":{"name":"DependencyVisitor","fqn":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","type":"class","file":"Analyzer\/Ast\/Visitor\/DependencyVisitor.php","extends":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","implements":[]},"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor":{"name":"CohesionVisitor","fqn":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","type":"class","file":"Analyzer\/Ast\/Visitor\/CohesionVisitor.php","extends":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","implements":[]},"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor":{"name":"LinesOfCodeVisitor","fqn":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","type":"class","file":"Analyzer\/Ast\/Visitor\/LinesOfCodeVisitor.php","extends":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","implements":[]},"PhpQuality\\Analyzer\\Ast\\AstParser":{"name":"AstParser","fqn":"PhpQuality\\Analyzer\\Ast\\AstParser","type":"class","file":"Analyzer\/Ast\/AstParser.php","extends":null,"implements":[]}},"edges":[{"from":"PhpQuality\\PhpQualityBundle","to":"Symfony\\Component\\HttpKernel\\Bundle\\Bundle","types":["extends"],"lines":[9]},{"from":"PhpQuality\\DependencyInjection\\Configuration","to":"Symfony\\Component\\Config\\Definition\\ConfigurationInterface","types":["implements"],"lines":[10]},{"from":"PhpQuality\\DependencyInjection\\Configuration","to":"Symfony\\Component\\Config\\Definition\\Builder\\TreeBuilder","types":["type_hint","new"],"lines":[12,14]},{"from":"PhpQuality\\DependencyInjection\\PhpQualityExtension","to":"Symfony\\Component\\DependencyInjection\\Extension\\Extension","types":["extends"],"lines":[13]},{"from":"PhpQuality\\DependencyInjection\\PhpQualityExtension","to":"Symfony\\Component\\DependencyInjection\\Extension\\PrependExtensionInterface","types":["implements"],"lines":[13]},{"from":"PhpQuality\\DependencyInjection\\PhpQualityExtension","to":"Symfony\\Component\\DependencyInjection\\ContainerBuilder","types":["type_hint","type_hint"],"lines":[15,29]},{"from":"PhpQuality\\DependencyInjection\\PhpQualityExtension","to":"Symfony\\Component\\DependencyInjection\\Loader\\YamlFileLoader","types":["new"],"lines":[17]},{"from":"PhpQuality\\DependencyInjection\\PhpQualityExtension","to":"Symfony\\Component\\Config\\FileLocator","types":["new"],"lines":[19]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"Symfony\\Component\\Console\\Command\\Command","types":["extends","const","const","const","const","const","const"],"lines":[19,243,256,334,338,358,401]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"PhpQuality\\Analyzer\\ProjectAnalyzer","types":["type_hint"],"lines":[26]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector","types":["type_hint"],"lines":[26]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"PhpQuality\\Report\\HtmlReportGenerator","types":["type_hint"],"lines":[26]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"PhpQuality\\Report\\ConsoleReportGenerator","types":["type_hint"],"lines":[26]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"PhpQuality\\Command\\parent","types":["static_call"],"lines":[32]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"Symfony\\Component\\Console\\Input\\InputOption","types":["const","const","const","const","const","const","const","const","const","const","const","const","const","const"],"lines":[43,49,56,62,69,75,81,87,93,100,106,112,118,124]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"Symfony\\Component\\Console\\Input\\InputInterface","types":["type_hint","type_hint"],"lines":[129,220]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"Symfony\\Component\\Console\\Style\\SymfonyStyle","types":["type_hint","new","type_hint","type_hint"],"lines":[129,222,341,361]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"RuntimeException","types":["new"],"lines":[139]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"Symfony\\Component\\Console\\Output\\OutputInterface","types":["type_hint"],"lines":[220]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"InvalidArgumentException","types":["catch"],"lines":[254]},{"from":"PhpQuality\\Command\\AnalyzeCommand","to":"Symfony\\Component\\Console\\Helper\\ProgressBar","types":["new"],"lines":[282]},{"from":"PhpQuality\\Report\\ConsoleReportGenerator","to":"PhpQuality\\Report\\ReportGeneratorInterface","types":["implements"],"lines":[10]},{"from":"PhpQuality\\Report\\ConsoleReportGenerator","to":"PhpQuality\\Analyzer\\Result\\ProjectResult","types":["type_hint"],"lines":[12]},{"from":"PhpQuality\\Report\\ConsoleReportGenerator","to":"Symfony\\Component\\Console\\Style\\SymfonyStyle","types":["instanceof"],"lines":[14]},{"from":"PhpQuality\\Report\\ConsoleReportGenerator","to":"InvalidArgumentException","types":["new"],"lines":[15]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"PhpQuality\\Report\\ReportGeneratorInterface","types":["implements"],"lines":[13]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"Twig\\Environment","types":["type_hint"],"lines":[24]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"Symfony\\Component\\Filesystem\\Filesystem","types":["type_hint"],"lines":[24]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"Symfony\\Contracts\\Translation\\TranslatorInterface","types":["type_hint"],"lines":[24]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"PhpQuality\\Analyzer\\GitBlameAnalyzer","types":["type_hint"],"lines":[24]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"PhpQuality\\Analyzer\\Result\\ProjectResult","types":["type_hint","type_hint","type_hint","type_hint","type_hint","type_hint","type_hint","type_hint"],"lines":[32,148,479,506,553,577,638,810]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"InvalidArgumentException","types":["new"],"lines":[35]},{"from":"PhpQuality\\Report\\HtmlReportGenerator","to":"PhpQuality\\Report\\self","types":["const"],"lines":[39]},{"from":"PhpQuality\\Analyzer\\GitBlameAnalyzer","to":"PhpQuality\\Analyzer\\Result\\ProjectResult","types":["type_hint"],"lines":[31]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\FileAnalyzer","types":["type_hint"],"lines":[17]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector","types":["type_hint"],"lines":[17]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\DependenciesAnalyzer","types":["type_hint"],"lines":[17]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","types":["type_hint"],"lines":[17]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\CoverageAnalyzer","types":["type_hint"],"lines":[17]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\Result\\ProjectResult","types":["type_hint","new"],"lines":[33,52]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"DateTimeImmutable","types":["new"],"lines":[57]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["type_hint","type_hint","type_hint","type_hint"],"lines":[64,72,90,119]},{"from":"PhpQuality\\Analyzer\\ProjectAnalyzer","to":"Symfony\\Component\\Finder\\Finder","types":["new"],"lines":[76]},{"from":"PhpQuality\\Analyzer\\DependenciesAnalyzer","to":"PhpQuality\\Analyzer\\Result\\DependenciesResult","types":["type_hint","static_call","new"],"lines":[67,78,169]},{"from":"PhpQuality\\Analyzer\\DependenciesAnalyzer","to":"DateTimeImmutable","types":["new","new","new","new","new","new","new","new","new"],"lines":[192,199,217,236,254,494,501,518,535]},{"from":"PhpQuality\\Analyzer\\DependenciesAnalyzer","to":"PhpQuality\\Analyzer\\self","types":["const","const","const","const","const","const","const","const","const","const","const","const","const","const","const"],"lines":[197,198,215,216,234,235,252,253,371,499,500,516,517,533,534]},{"from":"PhpQuality\\Analyzer\\Result\\DependenciesResult","to":"PhpQuality\\Analyzer\\Result\\self","types":["type_hint","new"],"lines":[28,30]},{"from":"PhpQuality\\Analyzer\\Result\\ArchitectureResult","to":"PhpQuality\\Analyzer\\Result\\SolidViolation","types":["const","const","const","const"],"lines":[60,61,62,63]},{"from":"PhpQuality\\Analyzer\\Result\\ProjectResult","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["type_hint"],"lines":[14]},{"from":"PhpQuality\\Analyzer\\Result\\ProjectResult","to":"DateTimeImmutable","types":["type_hint"],"lines":[14]},{"from":"PhpQuality\\Analyzer\\Result\\ProjectResult","to":"PhpQuality\\Analyzer\\Result\\DependenciesResult","types":["type_hint"],"lines":[14]},{"from":"PhpQuality\\Analyzer\\Result\\ProjectResult","to":"PhpQuality\\Analyzer\\Result\\ArchitectureResult","types":["type_hint"],"lines":[14]},{"from":"PhpQuality\\Analyzer\\Result\\ProjectResult","to":"PhpQuality\\Analyzer\\Result\\CoverageResult","types":["type_hint"],"lines":[14]},{"from":"PhpQuality\\Analyzer\\Result\\SolidViolation","to":"PhpQuality\\Analyzer\\Result\\self","types":["const","const","const","const","const","const"],"lines":[33,40,41,42,43,44]},{"from":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","to":"PhpQuality\\Analyzer\\Architecture\\LayerDetector","types":["type_hint","const","const","const","const","const"],"lines":[27,173,174,319,324,325]},{"from":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","to":"PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer","types":["type_hint"],"lines":[27]},{"from":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["type_hint"],"lines":[37]},{"from":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","to":"PhpQuality\\Analyzer\\Result\\ArchitectureResult","types":["type_hint","new"],"lines":[37,66]},{"from":"PhpQuality\\Analyzer\\ArchitectureAnalyzer","to":"PhpQuality\\Analyzer\\Result\\LayerViolation","types":["new"],"lines":[187]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Ast\\AstParser","types":["type_hint"],"lines":[21]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Metric\\MaintainabilityIndex","types":["type_hint"],"lines":[21]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["type_hint","type_hint"],"lines":[26,111]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Result\\FileResult","types":["type_hint","new","new"],"lines":[26,79,92]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"RuntimeException","types":["new"],"lines":[33]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","types":["new"],"lines":[39]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","types":["new"],"lines":[41]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","types":["new"],"lines":[42]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","types":["new"],"lines":[43]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","types":["new"],"lines":[44]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"Throwable","types":["catch"],"lines":[91]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Result\\MethodResult","types":["new"],"lines":[155]},{"from":"PhpQuality\\Analyzer\\FileAnalyzer","to":"PhpQuality\\Analyzer\\Result\\ClassResult","types":["new"],"lines":[168]},{"from":"PhpQuality\\Analyzer\\ProjectType\\DrupalProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\DrupalProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[73]},{"from":"PhpQuality\\Analyzer\\ProjectType\\LaravelProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\LaravelProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[60]},{"from":"PhpQuality\\Analyzer\\ProjectType\\PhpProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\SymfonyProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\SymfonyProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[62]},{"from":"PhpQuality\\Analyzer\\ProjectType\\PrestashopProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\PrestashopProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[67]},{"from":"PhpQuality\\Analyzer\\ProjectType\\SuluProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\SuluProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[64]},{"from":"PhpQuality\\Analyzer\\ProjectType\\CodeIgniterProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\CodeIgniterProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[70]},{"from":"PhpQuality\\Analyzer\\ProjectType\\Typo3ProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\Typo3ProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[70]},{"from":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["implements"],"lines":[7]},{"from":"PhpQuality\\Analyzer\\ProjectType\\SyliusProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\SyliusProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[63]},{"from":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["type_hint","type_hint"],"lines":[30,57]},{"from":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector","to":"InvalidArgumentException","types":["new"],"lines":[60]},{"from":"PhpQuality\\Analyzer\\ProjectType\\WooCommerceProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\WooCommerceProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[68]},{"from":"PhpQuality\\Analyzer\\ProjectType\\MagentoProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\MagentoProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[76]},{"from":"PhpQuality\\Analyzer\\ProjectType\\CakePHPProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\CakePHPProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[69]},{"from":"PhpQuality\\Analyzer\\ProjectType\\WordpressProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\WordpressProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[75]},{"from":"PhpQuality\\Analyzer\\ProjectType\\JoomlaProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType","types":["extends"],"lines":[10]},{"from":"PhpQuality\\Analyzer\\ProjectType\\JoomlaProjectType","to":"PhpQuality\\Analyzer\\ProjectType\\parent","types":["static_call"],"lines":[77]},{"from":"PhpQuality\\Analyzer\\Architecture\\LayerDetector","to":"PhpQuality\\Analyzer\\Architecture\\self","types":["const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const","const"],"lines":[31,35,39,43,53,57,61,65,75,79,83,87,107,131,132,133,134,135,142,210,216,217,218,228,229,230,231,232]},{"from":"PhpQuality\\Analyzer\\Architecture\\LayerDetector","to":"PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface","types":["type_hint","type_hint","type_hint"],"lines":[96,116,207]},{"from":"PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer","to":"PhpQuality\\Analyzer\\Result\\FileResult","types":["type_hint","type_hint","type_hint","type_hint"],"lines":[80,132,166,230]},{"from":"PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer","to":"PhpQuality\\Analyzer\\Architecture\\self","types":["const","const","const","const","const","const","const"],"lines":[87,93,99,106,140,149,202]},{"from":"PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer","to":"PhpQuality\\Analyzer\\Result\\SolidViolation","types":["const","new","const","new","const","const","new","const","const"],"lines":[113,116,117,141,142,151,203,204,214]},{"from":"PhpQuality\\Analyzer\\Metric\\MaintainabilityIndex","to":"PhpQuality\\Analyzer\\Metric\\MetricInterface","types":["implements"],"lines":[19]},{"from":"PhpQuality\\Analyzer\\Metric\\MaintainabilityIndex","to":"PhpQuality\\Analyzer\\Metric\\MetricResult","types":["type_hint","new"],"lines":[34,68]},{"from":"PhpQuality\\Analyzer\\CoverageAnalyzer","to":"PhpQuality\\Analyzer\\Result\\CoverageResult","types":["type_hint","new","new","new","type_hint","new","type_hint","new","new","type_hint","new","new","new"],"lines":[17,20,25,38,45,74,133,139,166,184,190,195,206]},{"from":"PhpQuality\\Analyzer\\CoverageAnalyzer","to":"SimpleXMLElement","types":["type_hint","type_hint","type_hint","type_hint","type_hint","type_hint","type_hint"],"lines":[133,184,224,253,318,352,371]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","types":["extends"],"lines":[26]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\UnaryMinus","types":["const"],"lines":[36]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\UnaryPlus","types":["const"],"lines":[37]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BooleanNot","types":["const"],"lines":[38]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BitwiseNot","types":["const"],"lines":[39]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\PreInc","types":["const"],"lines":[40]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\PostInc","types":["const"],"lines":[41]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\PreDec","types":["const"],"lines":[42]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\PostDec","types":["const"],"lines":[43]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\If_","types":["const"],"lines":[45]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Else_","types":["const"],"lines":[46]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\ElseIf_","types":["const"],"lines":[47]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\For_","types":["const"],"lines":[48]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Foreach_","types":["const"],"lines":[49]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\While_","types":["const"],"lines":[50]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Do_","types":["const"],"lines":[51]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Switch_","types":["const"],"lines":[52]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Return_","types":["const"],"lines":[53]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Throw_","types":["const"],"lines":[54]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\TryCatch","types":["const"],"lines":[55]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Catch_","types":["const"],"lines":[56]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Stmt\\Finally_","types":["const"],"lines":[57]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\FuncCall","types":["const","instanceof"],"lines":[59,199]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\MethodCall","types":["const","instanceof"],"lines":[60,204]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\StaticCall","types":["const"],"lines":[61]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\New_","types":["const"],"lines":[62]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\PropertyFetch","types":["const"],"lines":[63]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\StaticPropertyFetch","types":["const"],"lines":[64]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\ArrayDimFetch","types":["const"],"lines":[65]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\Ternary","types":["const"],"lines":[66]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\Instanceof_","types":["const"],"lines":[67]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\Assign","types":["const"],"lines":[68]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Plus","types":["const"],"lines":[73]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Minus","types":["const"],"lines":[74]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Mul","types":["const"],"lines":[75]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Div","types":["const"],"lines":[76]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Mod","types":["const"],"lines":[77]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Pow","types":["const"],"lines":[78]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Concat","types":["const"],"lines":[79]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Equal","types":["const"],"lines":[80]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\NotEqual","types":["const"],"lines":[81]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Identical","types":["const"],"lines":[82]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\NotIdentical","types":["const"],"lines":[83]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Smaller","types":["const"],"lines":[84]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\SmallerOrEqual","types":["const"],"lines":[85]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Greater","types":["const"],"lines":[86]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\GreaterOrEqual","types":["const"],"lines":[87]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Spaceship","types":["const"],"lines":[88]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BooleanAnd","types":["const"],"lines":[89]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BooleanOr","types":["const"],"lines":[90]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\LogicalAnd","types":["const"],"lines":[91]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\LogicalOr","types":["const"],"lines":[92]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\LogicalXor","types":["const"],"lines":[93]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BitwiseAnd","types":["const"],"lines":[94]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BitwiseOr","types":["const"],"lines":[95]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BitwiseXor","types":["const"],"lines":[96]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\ShiftLeft","types":["const"],"lines":[97]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\ShiftRight","types":["const"],"lines":[98]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Coalesce","types":["const"],"lines":[99]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Plus","types":["const"],"lines":[104]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Minus","types":["const"],"lines":[105]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Mul","types":["const"],"lines":[106]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Div","types":["const"],"lines":[107]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Mod","types":["const"],"lines":[108]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Concat","types":["const"],"lines":[109]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\BitwiseAnd","types":["const"],"lines":[110]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\BitwiseOr","types":["const"],"lines":[111]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\BitwiseXor","types":["const"],"lines":[112]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\ShiftLeft","types":["const"],"lines":[113]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\ShiftRight","types":["const"],"lines":[114]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp\\Coalesce","types":["const"],"lines":[115]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node","types":["type_hint","type_hint","type_hint"],"lines":[127,140,164]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\self","types":["const","const","const","const"],"lines":[145,146,152,159]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp","types":["instanceof"],"lines":[151]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\AssignOp","types":["instanceof"],"lines":[158]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\Variable","types":["instanceof"],"lines":[166]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\ConstFetch","types":["instanceof"],"lines":[172]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Expr\\ClassConstFetch","types":["instanceof"],"lines":[177]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Name","types":["instanceof","instanceof"],"lines":[178,199]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Identifier","types":["instanceof","instanceof"],"lines":[179,204]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Scalar\\String_","types":["instanceof"],"lines":[184]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Scalar\\Int_","types":["instanceof"],"lines":[189]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor","to":"PhpParser\\Node\\Scalar\\Float_","types":["instanceof"],"lines":[194]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","types":["extends"],"lines":[25]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\If_","types":["const"],"lines":[35]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\ElseIf_","types":["const"],"lines":[36]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\For_","types":["const"],"lines":[37]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Foreach_","types":["const"],"lines":[38]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\While_","types":["const"],"lines":[39]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Do_","types":["const"],"lines":[40]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Catch_","types":["const"],"lines":[41]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\Ternary","types":["const"],"lines":[42]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\Coalesce","types":["const"],"lines":[43]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BooleanAnd","types":["const"],"lines":[44]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\BooleanOr","types":["const"],"lines":[45]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\LogicalAnd","types":["const"],"lines":[46]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\BinaryOp\\LogicalOr","types":["const"],"lines":[47]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node","types":["type_hint","type_hint","type_hint","type_hint","type_hint","type_hint"],"lines":[60,67,84,101,129,157]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Class_","types":["instanceof","instanceof"],"lines":[86,159]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Trait_","types":["instanceof","instanceof"],"lines":[86,159]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\ClassMethod","types":["instanceof","instanceof"],"lines":[95,131]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Function_","types":["instanceof","instanceof"],"lines":[95,131]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\self","types":["const"],"lines":[108]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Stmt\\Case_","types":["instanceof"],"lines":[114]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor","to":"PhpParser\\Node\\Expr\\Match_","types":["instanceof"],"lines":[120]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","to":"PhpParser\\NodeVisitorAbstract","types":["extends"],"lines":[9]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","types":["extends"],"lines":[27]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node","types":["type_hint","type_hint","type_hint"],"lines":[59,221,278]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Namespace_","types":["instanceof"],"lines":[62]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Use_","types":["instanceof"],"lines":[67]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\GroupUse","types":["instanceof"],"lines":[77]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Class_","types":["instanceof","instanceof"],"lines":[88,223]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Interface_","types":["instanceof","instanceof"],"lines":[115,223]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Trait_","types":["instanceof","instanceof"],"lines":[134,223]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\TraitUse","types":["instanceof"],"lines":[140]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Expr\\New_","types":["instanceof"],"lines":[149]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Name","types":["instanceof","instanceof","instanceof","instanceof","instanceof","type_hint","instanceof"],"lines":[150,160,170,180,204,245,284]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Expr\\StaticCall","types":["instanceof"],"lines":[159]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Expr\\StaticPropertyFetch","types":["instanceof"],"lines":[169]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Expr\\ClassConstFetch","types":["instanceof"],"lines":[179]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\ClassMethod","types":["instanceof"],"lines":[189]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Function_","types":["instanceof"],"lines":[189]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Property","types":["instanceof"],"lines":[198]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Expr\\Instanceof_","types":["instanceof"],"lines":[203]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Stmt\\Catch_","types":["instanceof"],"lines":[211]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\NullableType","types":["instanceof"],"lines":[289]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\UnionType","types":["instanceof"],"lines":[291]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\IntersectionType","types":["instanceof"],"lines":[291]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor","to":"PhpParser\\Node\\Identifier","types":["instanceof"],"lines":[295]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","types":["extends"],"lines":[24]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node","types":["type_hint","type_hint","type_hint"],"lines":[42,76,99]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Stmt\\Class_","types":["instanceof","instanceof"],"lines":[45,82]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Stmt\\Property","types":["instanceof"],"lines":[52]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Stmt\\ClassMethod","types":["instanceof","instanceof"],"lines":[60,78]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Expr\\PropertyFetch","types":["instanceof"],"lines":[102]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Expr\\Variable","types":["instanceof"],"lines":[103]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Identifier","types":["instanceof"],"lines":[105]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Expr\\StaticPropertyFetch","types":["instanceof"],"lines":[113]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\Name","types":["instanceof"],"lines":[114]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor","to":"PhpParser\\Node\\VarLikeIdentifier","types":["instanceof"],"lines":[116]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor","types":["extends"],"lines":[16]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Expression","types":["const"],"lines":[24]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Return_","types":["const"],"lines":[25]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\If_","types":["const"],"lines":[26]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\For_","types":["const"],"lines":[27]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Foreach_","types":["const"],"lines":[28]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\While_","types":["const"],"lines":[29]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Do_","types":["const"],"lines":[30]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Switch_","types":["const"],"lines":[31]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Case_","types":["const"],"lines":[32]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Break_","types":["const"],"lines":[33]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Continue_","types":["const"],"lines":[34]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Throw_","types":["const"],"lines":[35]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\TryCatch","types":["const"],"lines":[36]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Echo_","types":["const"],"lines":[37]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Unset_","types":["const"],"lines":[38]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Global_","types":["const"],"lines":[39]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node\\Stmt\\Static_","types":["const"],"lines":[40]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpParser\\Node","types":["type_hint"],"lines":[55]},{"from":"PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor","to":"PhpQuality\\Analyzer\\Ast\\Visitor\\self","types":["const"],"lines":[57]},{"from":"PhpQuality\\Analyzer\\Ast\\AstParser","to":"PhpParser\\Parser","types":["type_hint"],"lines":[15]},{"from":"PhpQuality\\Analyzer\\Ast\\AstParser","to":"PhpParser\\ParserFactory","types":["new"],"lines":[19]},{"from":"PhpQuality\\Analyzer\\Ast\\AstParser","to":"PhpParser\\Error","types":["catch"],"lines":[33]},{"from":"PhpQuality\\Analyzer\\Ast\\AstParser","to":"RuntimeException","types":["new","new","new"],"lines":[34,46,51]},{"from":"PhpQuality\\Analyzer\\Ast\\AstParser","to":"PhpParser\\NodeTraverser","types":["new"],"lines":[65]}]};
+    const layerAssignments = {"PhpQuality\\PhpQualityBundle":"Other","PhpQuality\\DependencyInjection\\Configuration":"Other","PhpQuality\\DependencyInjection\\PhpQualityExtension":"Other","PhpQuality\\Command\\AnalyzeCommand":"Application","PhpQuality\\Report\\ConsoleReportGenerator":"Other","PhpQuality\\Report\\ReportGeneratorInterface":"Other","PhpQuality\\Report\\HtmlReportGenerator":"Other","PhpQuality\\Analyzer\\GitBlameAnalyzer":"Other","PhpQuality\\Analyzer\\ProjectAnalyzer":"Other","PhpQuality\\Analyzer\\DependenciesAnalyzer":"Other","PhpQuality\\Analyzer\\Result\\ClassResult":"Other","PhpQuality\\Analyzer\\Result\\DependenciesResult":"Other","PhpQuality\\Analyzer\\Result\\FileResult":"Other","PhpQuality\\Analyzer\\Result\\LayerViolation":"Other","PhpQuality\\Analyzer\\Result\\CoverageResult":"Other","PhpQuality\\Analyzer\\Result\\ArchitectureResult":"Other","PhpQuality\\Analyzer\\Result\\ProjectResult":"Other","PhpQuality\\Analyzer\\Result\\SolidViolation":"Other","PhpQuality\\Analyzer\\Result\\MethodResult":"Other","PhpQuality\\Analyzer\\ArchitectureAnalyzer":"Other","PhpQuality\\Analyzer\\FileAnalyzer":"Other","PhpQuality\\Analyzer\\ProjectType\\DrupalProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\LaravelProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\PhpProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\SymfonyProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\PrestashopProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\ProjectTypeInterface":"Other","PhpQuality\\Analyzer\\ProjectType\\SuluProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\CodeIgniterProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\Typo3ProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\AbstractProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\SyliusProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\ProjectTypeDetector":"Other","PhpQuality\\Analyzer\\ProjectType\\WooCommerceProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\MagentoProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\CakePHPProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\WordpressProjectType":"Other","PhpQuality\\Analyzer\\ProjectType\\JoomlaProjectType":"Other","PhpQuality\\Analyzer\\Architecture\\LayerDetector":"Other","PhpQuality\\Analyzer\\Architecture\\SolidAnalyzer":"Other","PhpQuality\\Analyzer\\Metric\\MetricResult":"Other","PhpQuality\\Analyzer\\Metric\\MaintainabilityIndex":"Other","PhpQuality\\Analyzer\\Metric\\MetricInterface":"Other","PhpQuality\\Analyzer\\CoverageAnalyzer":"Other","PhpQuality\\Analyzer\\Ast\\Visitor\\HalsteadVisitor":"Other","PhpQuality\\Analyzer\\Ast\\Visitor\\CyclomaticComplexityVisitor":"Other","PhpQuality\\Analyzer\\Ast\\Visitor\\AbstractMetricVisitor":"Other","PhpQuality\\Analyzer\\Ast\\Visitor\\DependencyVisitor":"Other","PhpQuality\\Analyzer\\Ast\\Visitor\\CohesionVisitor":"Other","PhpQuality\\Analyzer\\Ast\\Visitor\\LinesOfCodeVisitor":"Other","PhpQuality\\Analyzer\\Ast\\AstParser":"Other"};
+    const layerViolations = [];
+
+    // Layer colors
+    const layerColors = {
+        'Controller': '#8b5cf6',
+        'Application': '#3b82f6',
+        'Domain': '#22c55e',
+        'Infrastructure': '#f97316',
+        'Other': '#6b7280'
+    };
+
+    // Build violation set for quick lookup
+    const violationEdges = new Set();
+    layerViolations.forEach(v => {
+        violationEdges.add(v.sourceClass + '->' + v.targetClass);
+    });
+
+    // Prepare nodes and links for D3
+    let nodes = Object.entries(graphData.nodes || {}).map(([fqn, data]) => ({
+        id: fqn,
+        name: data.name,
+        layer: layerAssignments[fqn] || 'Other',
+        type: data.type,
+        file: data.file
+    }));
+
+    let links = (graphData.edges || []).map(edge => ({
+        source: edge.from,
+        target: edge.to,
+        types: edge.types,
+        violation: violationEdges.has(edge.from + '->' + edge.to)
+    }));
+
+    // Filter out nodes that don't exist in both nodes array
+    const nodeIds = new Set(nodes.map(n => n.id));
+    links = links.filter(l => nodeIds.has(l.source) && nodeIds.has(l.target));
+
+    // Setup SVG
+    const container = document.getElementById('dependencyGraph');
+    const width = container.clientWidth;
+    const height = 500;
+
+    const svg = d3.select('#dependencyGraph')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', [0, 0, width, height]);
+
+    // Add zoom behavior
+    const g = svg.append('g');
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 4])
+        .on('zoom', (event) => g.attr('transform', event.transform));
+    svg.call(zoom);
+
+    // Create force simulation with better spacing for labels
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(150))
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(60))
+        .force('x', d3.forceX(width / 2).strength(0.05))
+        .force('y', d3.forceY(height / 2).strength(0.05));
+
+    // Draw links
+    const link = g.append('g')
+        .attr('class', 'links')
+        .selectAll('line')
+        .data(links)
+        .join('line')
+        .attr('stroke', d => d.violation ? '#ef4444' : '#64748b')
+        .attr('stroke-opacity', d => d.violation ? 0.8 : 0.3)
+        .attr('stroke-width', d => d.violation ? 2 : 1)
+        .attr('marker-end', 'url(#arrowhead)');
+
+    // Add arrowhead marker
+    svg.append('defs').append('marker')
+        .attr('id', 'arrowhead')
+        .attr('viewBox', '-0 -5 10 10')
+        .attr('refX', 20)
+        .attr('refY', 0)
+        .attr('orient', 'auto')
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .append('path')
+        .attr('d', 'M 0,-5 L 10,0 L 0,5')
+        .attr('fill', '#64748b');
+
+    // Draw nodes
+    const node = g.append('g')
+        .attr('class', 'nodes')
+        .selectAll('g')
+        .data(nodes)
+        .join('g')
+        .attr('class', 'node')
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
+        .on('mouseover', showNodeInfo)
+        .on('mouseout', hideNodeInfo)
+        .style('cursor', 'pointer');
+
+    node.append('circle')
+        .attr('r', 12)
+        .attr('fill', d => layerColors[d.layer] || layerColors['Other'])
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2);
+
+    // Add text labels
+    node.append('text')
+        .attr('dx', 16)
+        .attr('dy', 4)
+        .attr('font-size', '11px')
+        .attr('font-family', 'system-ui, sans-serif')
+        .attr('fill', 'currentColor')
+        .text(d => d.name);
+
+    // Node info panel
+    const infoPanel = d3.select('#dependencyGraph')
+        .append('div')
+        .attr('class', 'node-info-panel')
+        .style('display', 'none');
+
+    function showNodeInfo(event, d) {
+        const deps = links.filter(l => l.source.id === d.id || l.target.id === d.id);
+        const outgoing = deps.filter(l => l.source.id === d.id);
+        const incoming = deps.filter(l => l.target.id === d.id);
+        const violations = deps.filter(l => l.violation);
+
+        infoPanel.html(`
+            <div class="node-info-header" style="background: ${layerColors[d.layer] || layerColors['Other']}">
+                <strong>${d.name}</strong>
+            </div>
+            <div class="node-info-body">
+                <div><span class="node-info-label">Layer:</span> ${d.layer}</div>
+                <div><span class="node-info-label">Type:</span> ${d.type || 'class'}</div>
+                <div><span class="node-info-label">File:</span> ${d.file}</div>
+                <hr style="border-color: var(--color-border); margin: 0.5rem 0;">
+                <div><span class="node-info-label">Dependencies:</span> ${outgoing.length} outgoing, ${incoming.length} incoming</div>
+                ${violations.length > 0 ? `<div style="color: var(--color-danger);"><span class="node-info-label">Violations:</span> ${violations.length}</div>` : ''}
+            </div>
+        `)
+        .style('display', 'block')
+        .style('left', (event.pageX - container.getBoundingClientRect().left + 20) + 'px')
+        .style('top', (event.pageY - container.getBoundingClientRect().top - 10) + 'px');
+    }
+
+    function hideNodeInfo() {
+        infoPanel.style('display', 'none');
+    }
+
+    // Update positions on tick
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+    // Drag functions
+    function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+    }
+
+    function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+
+    function resetZoom() {
+        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+    }
+
+    function filterGraph() {
+        const showViolationsOnly = document.getElementById('showViolationsOnly').checked;
+        link.attr('visibility', d => {
+            if (showViolationsOnly && !d.violation) return 'hidden';
+            return 'visible';
+        });
+        // Also filter nodes when showing violations only
+        node.attr('visibility', d => {
+            if (!showViolationsOnly) return 'visible';
+            // Show node if it has any violation link
+            const hasViolation = links.some(l => l.violation && (l.source.id === d.id || l.target.id === d.id));
+            return hasViolation ? 'visible' : 'hidden';
+        });
+    }
+
+    function toggleLabels() {
+        const showLabels = document.getElementById('showLabels').checked;
+        node.selectAll('text').attr('visibility', showLabels ? 'visible' : 'hidden');
+    }
+
+    // SOLID tabs
+    function showSolidTab(principle) {
+        document.querySelectorAll('.solid-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.solid-panel').forEach(p => p.style.display = 'none');
+
+        document.querySelector(`.solid-tab[onclick*="${principle}"]`).classList.add('active');
+        document.getElementById('panel-' + principle).style.display = 'block';
+    }
+</script>
+</body>
+</html>

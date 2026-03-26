@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lines of Code (LOC) - PhpQuality</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+            </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link ">Dashboard</a></li>
+                <li><a href="metrics.html" class="nav-link ">Documentation</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Metrics
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link ">CCN - Complexity</a></li>
+                        <li><a href="mi.html" class="nav-link ">MI - Maintainability</a></li>
+                        <li><a href="lcom.html" class="nav-link ">LCOM - Cohesion</a></li>
+                        <li><a href="loc.html" class="nav-link active">LOC - Lines of Code</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Analysis
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link ">Halstead Metrics</a></li>
+                        <li><a href="analysis.html" class="nav-link ">Multi-dimensional</a></li>
+                        <li><a href="recommendations.html" class="nav-link ">Recommendations</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Architecture
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link ">Layers &amp; SOLID</a></li>
+                        <li><a href="coverage.html" class="nav-link ">Test Coverage</a></li>
+                        <li><a href="dependencies.html" class="nav-link ">Dependencies</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+            <div class="page-header">
+        <h1>Lines of Code (LOC)</h1>
+        <p>Detailed breakdown of code size by file</p>
+    </div>
+
+    <!-- Summary -->
+    <section class="section">
+        <div class="grid grid-4">
+            <div class="card">
+                <div class="metric-label">Total LOC</div>
+                <div class="metric-value">8045</div>
+                <div class="text-muted">All lines including blank &amp; comments</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Logical Lines (LLOC)</div>
+                <div class="metric-value">2053</div>
+                <div class="text-muted">loc.executable</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Comment Lines (CLOC)</div>
+                <div class="metric-value">832</div>
+                <div class="text-muted">10.34% loc.ratio</div>
+            </div>
+            <div class="card">
+                <div class="metric-label">Files Analyzed</div>
+                <div class="metric-value">51</div>
+                <div class="text-muted">0 with errors</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="section">
+        <div class="grid grid-2">
+            <div class="card">
+                <h3>loc.composition</h3>
+                <div class="chart-container">
+                    <canvas id="compositionChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>LOC Metrics Explained</h3>
+                <table>
+                    <tr>
+                        <td><strong>LOC</strong></td>
+                        <td>loc.total_lines_desc</td>
+                    </tr>
+                    <tr>
+                        <td><strong>LLOC</strong></td>
+                        <td>loc.lloc_desc</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CLOC</strong></td>
+                        <td>loc.cloc_desc</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Blank</strong></td>
+                        <td>Empty lines for readability</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code</strong></td>
+                        <td>LOC - CLOC - Blank = actual code lines</td>
+                    </tr>
+                </table>
+                <div class="info-box" style="margin-top: 1rem;">
+                    <strong>comment ratio:</strong> A healthy ratio is 10-30%. Below 10% may indicate poor documentation, above 30% might suggest overly verbose comments.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Breakdown -->
+    <section class="section">
+        <div class="card">
+            <h3>loc.distribution</h3>
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Executable Code (LLOC)</span>
+                    <span>2053 (25.5%)</span>
+                </div>
+                <div class="progress-bar" style="height: 24px;">
+                    <div class="progress-fill rating-B" style="width: 25.518955873213%;"></div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Comments (CLOC)</span>
+                    <span>832 (10.34%)</span>
+                </div>
+                <div class="progress-bar" style="height: 24px;">
+                    <div class="progress-fill rating-A" style="width: 10.34%;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Files Table -->
+    <section class="section">
+        <div class="card">
+            <h2>All Files</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" class="filter-input" placeholder="loc.search_file">
+                <select id="sizeFilter" class="filter-select">
+                    <option value="">All sizes</option>
+                    <option value="small">Small (&lt;100 LOC) (&lt;100 LOC)</option>
+                    <option value="medium">Medium (100-300 LOC) (100-300 LOC)</option>
+                    <option value="large">Large (300-500 LOC) (300-500 LOC)</option>
+                    <option value="xlarge">Very Large (&gt;500 LOC) (&gt;500 LOC)</option>
+                </select>
+            </div>
+            <table id="filesTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">File <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(1)" class="sorted">LOC <span class="sort-icon">&#9660;</span></th>
+                        <th onclick="sortTable(2)">LLOC <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(3)">CLOC <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(4)">loc.comment_pct <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(5)">Classes <span class="sort-icon">&#9650;</span></th>
+                        <th onclick="sortTable(6)">MI <span class="sort-icon">&#9650;</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                                                            <tr data-loc="16">
+                        <td>PhpQualityBundle.php</td>
+                        <td data-sort="16">16</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="0">0%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="24">
+                        <td>DependencyInjection/Configuration.php</td>
+                        <td data-sort="24">24</td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="0">0%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="48">
+                        <td>DependencyInjection/PhpQualityExtension.php</td>
+                        <td data-sort="48">48</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="4.17">4.17%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="404">
+                        <td>Command/AnalyzeCommand.php</td>
+                        <td data-sort="404">404</td>
+                        <td data-sort="131">131</td>
+                        <td data-sort="22">22</td>
+                        <td data-sort="5.45">5.45%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="43.93">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="127">
+                        <td>Report/ConsoleReportGenerator.php</td>
+                        <td data-sort="127">127</td>
+                        <td data-sort="34">34</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="4.72">4.72%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="73.54">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="16">
+                        <td>Report/ReportGeneratorInterface.php</td>
+                        <td data-sort="16">16</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="18.75">18.75%</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="905">
+                        <td>Report/HtmlReportGenerator.php</td>
+                        <td data-sort="905">905</td>
+                        <td data-sort="272">272</td>
+                        <td data-sort="54">54</td>
+                        <td data-sort="5.97">5.97%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="25.7">
+                            <span class="label label-D">D</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="273">
+                        <td>Analyzer/GitBlameAnalyzer.php</td>
+                        <td data-sort="273">273</td>
+                        <td data-sort="90">90</td>
+                        <td data-sort="44">44</td>
+                        <td data-sort="16.12">16.12%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="53.42">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="238">
+                        <td>Analyzer/ProjectAnalyzer.php</td>
+                        <td data-sort="238">238</td>
+                        <td data-sort="56">56</td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="2.94">2.94%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="61.71">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="549">
+                        <td>Analyzer/DependenciesAnalyzer.php</td>
+                        <td data-sort="549">549</td>
+                        <td data-sort="184">184</td>
+                        <td data-sort="41">41</td>
+                        <td data-sort="7.47">7.47%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="35.12">
+                            <span class="label label-D">D</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="59">
+                        <td>Analyzer/Result/ClassResult.php</td>
+                        <td data-sort="59">59</td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="5.08">5.08%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="71">
+                        <td>Analyzer/Result/DependenciesResult.php</td>
+                        <td data-sort="71">71</td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="0">0%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="111">
+                        <td>Analyzer/Result/FileResult.php</td>
+                        <td data-sort="111">111</td>
+                        <td data-sort="14">14</td>
+                        <td data-sort="19">19</td>
+                        <td data-sort="17.12">17.12%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="93.14">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="53">
+                        <td>Analyzer/Result/LayerViolation.php</td>
+                        <td data-sort="53">53</td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="11.32">11.32%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="48">
+                        <td>Analyzer/Result/CoverageResult.php</td>
+                        <td data-sort="48">48</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="6.25">6.25%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="147">
+                        <td>Analyzer/Result/ArchitectureResult.php</td>
+                        <td data-sort="147">147</td>
+                        <td data-sort="30">30</td>
+                        <td data-sort="33">33</td>
+                        <td data-sort="22.45">22.45%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="78.56">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="133">
+                        <td>Analyzer/Result/ProjectResult.php</td>
+                        <td data-sort="133">133</td>
+                        <td data-sort="27">27</td>
+                        <td data-sort="18">18</td>
+                        <td data-sort="13.53">13.53%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="80.39">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="62">
+                        <td>Analyzer/Result/SolidViolation.php</td>
+                        <td data-sort="62">62</td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="9">9</td>
+                        <td data-sort="14.52">14.52%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="38">
+                        <td>Analyzer/Result/MethodResult.php</td>
+                        <td data-sort="38">38</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="0">0%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="369">
+                        <td>Analyzer/ArchitectureAnalyzer.php</td>
+                        <td data-sort="369">369</td>
+                        <td data-sort="122">122</td>
+                        <td data-sort="62">62</td>
+                        <td data-sort="16.8">16.8%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="46.77">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="212">
+                        <td>Analyzer/FileAnalyzer.php</td>
+                        <td data-sort="212">212</td>
+                        <td data-sort="49">49</td>
+                        <td data-sort="13">13</td>
+                        <td data-sort="6.13">6.13%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="65.85">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="108">
+                        <td>Analyzer/ProjectType/DrupalProjectType.php</td>
+                        <td data-sort="108">108</td>
+                        <td data-sort="26">26</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="5.56">5.56%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="82.31">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="101">
+                        <td>Analyzer/ProjectType/LaravelProjectType.php</td>
+                        <td data-sort="101">101</td>
+                        <td data-sort="20">20</td>
+                        <td data-sort="3">3</td>
+                        <td data-sort="2.97">2.97%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="87.59">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="39">
+                        <td>Analyzer/ProjectType/PhpProjectType.php</td>
+                        <td data-sort="39">39</td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="12.82">12.82%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="115">
+                        <td>Analyzer/ProjectType/SymfonyProjectType.php</td>
+                        <td data-sort="115">115</td>
+                        <td data-sort="21">21</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="4.35">4.35%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="86.42">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="105">
+                        <td>Analyzer/ProjectType/PrestashopProjectType.php</td>
+                        <td data-sort="105">105</td>
+                        <td data-sort="22">22</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="5.71">5.71%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="85.87">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="64">
+                        <td>Analyzer/ProjectType/ProjectTypeInterface.php</td>
+                        <td data-sort="64">64</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="39">39</td>
+                        <td data-sort="60.94">60.94%</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="99">
+                        <td>Analyzer/ProjectType/SuluProjectType.php</td>
+                        <td data-sort="99">99</td>
+                        <td data-sort="20">20</td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="7.07">7.07%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="88.35">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="102">
+                        <td>Analyzer/ProjectType/CodeIgniterProjectType.php</td>
+                        <td data-sort="102">102</td>
+                        <td data-sort="24">24</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="4.9">4.9%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="84.74">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="104">
+                        <td>Analyzer/ProjectType/Typo3ProjectType.php</td>
+                        <td data-sort="104">104</td>
+                        <td data-sort="24">24</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="4.81">4.81%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="84.48">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="106">
+                        <td>Analyzer/ProjectType/AbstractProjectType.php</td>
+                        <td data-sort="106">106</td>
+                        <td data-sort="25">25</td>
+                        <td data-sort="12">12</td>
+                        <td data-sort="11.32">11.32%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="83.87">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="100">
+                        <td>Analyzer/ProjectType/SyliusProjectType.php</td>
+                        <td data-sort="100">100</td>
+                        <td data-sort="20">20</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="6">6%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="88.08">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="90">
+                        <td>Analyzer/ProjectType/ProjectTypeDetector.php</td>
+                        <td data-sort="90">90</td>
+                        <td data-sort="17">17</td>
+                        <td data-sort="28">28</td>
+                        <td data-sort="31.11">31.11%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="92.99">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="99">
+                        <td>Analyzer/ProjectType/WooCommerceProjectType.php</td>
+                        <td data-sort="99">99</td>
+                        <td data-sort="25">25</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="6.06">6.06%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="83.59">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="115">
+                        <td>Analyzer/ProjectType/MagentoProjectType.php</td>
+                        <td data-sort="115">115</td>
+                        <td data-sort="27">27</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="4.35">4.35%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="81.6">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="106">
+                        <td>Analyzer/ProjectType/CakePHPProjectType.php</td>
+                        <td data-sort="106">106</td>
+                        <td data-sort="24">24</td>
+                        <td data-sort="4">4</td>
+                        <td data-sort="3.77">3.77%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="84.17">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="111">
+                        <td>Analyzer/ProjectType/WordpressProjectType.php</td>
+                        <td data-sort="111">111</td>
+                        <td data-sort="28">28</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="5.41">5.41%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="80.55">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="108">
+                        <td>Analyzer/ProjectType/JoomlaProjectType.php</td>
+                        <td data-sort="108">108</td>
+                        <td data-sort="30">30</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="5.56">5.56%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="79.71">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="250">
+                        <td>Analyzer/Architecture/LayerDetector.php</td>
+                        <td data-sort="250">250</td>
+                        <td data-sort="41">41</td>
+                        <td data-sort="56">56</td>
+                        <td data-sort="22.4">22.4%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="69.61">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="313">
+                        <td>Analyzer/Architecture/SolidAnalyzer.php</td>
+                        <td data-sort="313">313</td>
+                        <td data-sort="90">90</td>
+                        <td data-sort="59">59</td>
+                        <td data-sort="18.85">18.85%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="53.72">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="55">
+                        <td>Analyzer/Metric/MetricResult.php</td>
+                        <td data-sort="55">55</td>
+                        <td data-sort="5">5</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="0">0%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="111">
+                        <td>Analyzer/Metric/MaintainabilityIndex.php</td>
+                        <td data-sort="111">111</td>
+                        <td data-sort="24">24</td>
+                        <td data-sort="23">23</td>
+                        <td data-sort="20.72">20.72%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="81.31">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="26">
+                        <td>Analyzer/Metric/MetricInterface.php</td>
+                        <td data-sort="26">26</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="11">11</td>
+                        <td data-sort="42.31">42.31%</td>
+                        <td data-sort="0">0</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="403">
+                        <td>Analyzer/CoverageAnalyzer.php</td>
+                        <td data-sort="403">403</td>
+                        <td data-sort="140">140</td>
+                        <td data-sort="32">32</td>
+                        <td data-sort="7.94">7.94%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="42.65">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="269">
+                        <td>Analyzer/Ast/Visitor/HalsteadVisitor.php</td>
+                        <td data-sort="269">269</td>
+                        <td data-sort="66">66</td>
+                        <td data-sort="23">23</td>
+                        <td data-sort="8.55">8.55%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="59">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="211">
+                        <td>Analyzer/Ast/Visitor/CyclomaticComplexityVisitor.php</td>
+                        <td data-sort="211">211</td>
+                        <td data-sort="52">52</td>
+                        <td data-sort="18">18</td>
+                        <td data-sort="8.53">8.53%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="66.28">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="29">
+                        <td>Analyzer/Ast/Visitor/AbstractMetricVisitor.php</td>
+                        <td data-sort="29">29</td>
+                        <td data-sort="2">2</td>
+                        <td data-sort="6">6</td>
+                        <td data-sort="20.69">20.69%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="100">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="365">
+                        <td>Analyzer/Ast/Visitor/DependencyVisitor.php</td>
+                        <td data-sort="365">365</td>
+                        <td data-sort="131">131</td>
+                        <td data-sort="57">57</td>
+                        <td data-sort="15.62">15.62%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="45.06">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="224">
+                        <td>Analyzer/Ast/Visitor/CohesionVisitor.php</td>
+                        <td data-sort="224">224</td>
+                        <td data-sort="63">63</td>
+                        <td data-sort="24">24</td>
+                        <td data-sort="10.71">10.71%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="61.21">
+                            <span class="label label-C">C</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="142">
+                        <td>Analyzer/Ast/Visitor/LinesOfCodeVisitor.php</td>
+                        <td data-sort="142">142</td>
+                        <td data-sort="36">36</td>
+                        <td data-sort="7">7</td>
+                        <td data-sort="4.93">4.93%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="74.26">
+                            <span class="label label-B">B</span>
+                        </td>
+                    </tr>
+                                                                                <tr data-loc="72">
+                        <td>Analyzer/Ast/AstParser.php</td>
+                        <td data-sort="72">72</td>
+                        <td data-sort="15">15</td>
+                        <td data-sort="17">17</td>
+                        <td data-sort="23.61">23.61%</td>
+                        <td data-sort="1">1</td>
+                        <td data-sort="95.49">
+                            <span class="label label-A">A</span>
+                        </td>
+                    </tr>
+                                                        </tbody>
+            </table>
+            <p class="text-muted" style="padding: 1rem;">Total: 51 files</p>
+        </div>
+    </section>
+
+    <!-- Large Files Warning -->
+        <section class="section">
+        <div class="card">
+            <h3 style="color: var(--color-warning);">Large Files (&gt;300 LOC) (&gt;300 LOC)</h3>
+            <p class="text-muted" style="margin-bottom: 1rem;">loc.large_files_hint</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>LOC</th>
+                        <th>Classes</th>
+                        <th>Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                                        <tr>
+                        <td>Command/AnalyzeCommand.php</td>
+                        <td>404</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                        <tr>
+                        <td>Report/HtmlReportGenerator.php</td>
+                        <td>905</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                        <tr>
+                        <td>Analyzer/DependenciesAnalyzer.php</td>
+                        <td>549</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                        <tr>
+                        <td>Analyzer/ArchitectureAnalyzer.php</td>
+                        <td>369</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                        <tr>
+                        <td>Analyzer/Architecture/SolidAnalyzer.php</td>
+                        <td>313</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                        <tr>
+                        <td>Analyzer/CoverageAnalyzer.php</td>
+                        <td>403</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                        <tr>
+                        <td>Analyzer/Ast/Visitor/DependencyVisitor.php</td>
+                        <td>365</td>
+                        <td>1</td>
+                        <td class="text-muted">
+                                                        Consider extracting helper classes
+                                                    </td>
+                    </tr>
+                                    </tbody>
+            </table>
+        </div>
+    </section>
+    
+        <footer>
+            <p>Generated by <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> on 2026-03-26 06:49:34</p>
+            <p style="margin-top: 0.5rem;">Developed by <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    <script>
+    // Composition Chart
+    const codeLines = 2053;
+    const blankLines = 5160;
+
+    new Chart(document.getElementById('compositionChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['loc.executable', 'Comments (CLOC)', 'Other (Blank, declarations)'],
+            datasets: [{
+                data: [2053, 832, 5160],
+                backgroundColor: ['#3b82f6', '#22c55e', '#64748b'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { color: '#94a3b8', font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Filter functionality
+    const searchInput = document.getElementById('searchInput');
+    const sizeFilter = document.getElementById('sizeFilter');
+    const tbody = document.querySelector('#filesTable tbody');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const size = sizeFilter.value;
+        const rows = tbody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const loc = parseInt(row.dataset.loc) || 0;
+            let matchesSize = true;
+
+            if (size === 'small') matchesSize = loc < 100;
+            else if (size === 'medium') matchesSize = loc >= 100 && loc < 300;
+            else if (size === 'large') matchesSize = loc >= 300 && loc < 500;
+            else if (size === 'xlarge') matchesSize = loc >= 500;
+
+            const matchesSearch = text.includes(search);
+            row.style.display = matchesSearch && matchesSize ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    sizeFilter.addEventListener('change', filterTable);
+
+    // Sort functionality
+    let currentSort = { col: 1, asc: false };
+
+    function sortTable(col) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isAsc = currentSort.col === col ? !currentSort.asc : true;
+        currentSort = { col, asc: isAsc };
+
+        rows.sort((a, b) => {
+            const aVal = a.cells[col].dataset.sort || a.cells[col].textContent;
+            const bVal = b.cells[col].dataset.sort || b.cells[col].textContent;
+            const aNum = parseFloat(aVal);
+            const bNum = parseFloat(bVal);
+
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+                return isAsc ? aNum - bNum : bNum - aNum;
+            }
+            return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+
+        document.querySelectorAll('#filesTable th').forEach((th, i) => {
+            th.classList.toggle('sorted', i === col);
+            const icon = th.querySelector('.sort-icon');
+            if (icon) icon.innerHTML = i === col ? (isAsc ? '&#9650;' : '&#9660;') : '&#9650;';
+        });
+    }
+</script>
+</body>
+</html>

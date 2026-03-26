@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-dimensional Analysis - PhpQuality</title>
+    <link rel="stylesheet" href="report.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+            </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span class="navbar-title">PhpQuality</span>
+                                <span class="navbar-author">by <a href="https://moi.ruedesjasses.fr" target="_blank" rel="noopener">Pascal CESCON</a></span>
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link ">Dashboard</a></li>
+                <li><a href="metrics.html" class="nav-link ">Documentation</a></li>
+
+                <!-- Metrics Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Metrics
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="ccn.html" class="nav-link ">CCN - Complexity</a></li>
+                        <li><a href="mi.html" class="nav-link ">MI - Maintainability</a></li>
+                        <li><a href="lcom.html" class="nav-link ">LCOM - Cohesion</a></li>
+                        <li><a href="loc.html" class="nav-link ">LOC - Lines of Code</a></li>
+                    </ul>
+                </li>
+
+                <!-- Analysis Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Analysis
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="halstead.html" class="nav-link ">Halstead Metrics</a></li>
+                        <li><a href="analysis.html" class="nav-link active">Multi-dimensional</a></li>
+                        <li><a href="recommendations.html" class="nav-link ">Recommendations</a></li>
+                    </ul>
+                </li>
+
+                <!-- Architecture Dropdown -->
+                <li class="nav-dropdown">
+                    <button class="nav-link nav-dropdown-toggle ">
+                        Architecture
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="nav-dropdown-menu">
+                        <li><a href="architecture.html" class="nav-link ">Layers &amp; SOLID</a></li>
+                        <li><a href="coverage.html" class="nav-link ">Test Coverage</a></li>
+                        <li><a href="dependencies.html" class="nav-link ">Dependencies</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle light/dark theme">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+            <div class="page-header">
+        <h1>Multi-dimensional Analysis</h1>
+        <p>Cross-visualization of code quality metrics</p>
+    </div>
+
+    <!-- CrossDimension Charts -->
+    <section class="section">
+        <div class="grid grid-2">
+            <!-- Complexity vs Size (LOC x CCN, size=methods, color=MI) -->
+            <div class="card chart-card">
+                <h3>Complexity vs Size</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                    X=LOC, Y=CCN, Size=Methods, Color=MI
+                </p>
+                <div class="cross-chart-wrapper">
+                    <div class="cross-chart-container">
+                        <canvas id="chartComplexitySize"></canvas>
+                    </div>
+                </div>
+                <!-- Size Legend -->
+                <div class="size-legend">
+                    <span class="size-legend-title">Bubble size:</span>
+                    <div class="size-circles">
+                        <div class="size-circle size-circle-12"></div>
+                        <span class="size-label">1</span>
+                        <div class="size-circle size-circle-20"></div>
+                        <span class="size-label">5</span>
+                        <div class="size-circle size-circle-32"></div>
+                        <span class="size-label">15</span>
+                        <div class="size-circle size-circle-48"></div>
+                        <span class="size-label">30+</span>
+                    </div>
+                </div>
+                <!-- Color Legend -->
+                <div class="color-legend">
+                    <span class="color-legend-title">Color (rating):</span>
+                    <div class="color-gradient-wrapper">
+                        <div class="color-gradient"></div>
+                        <div class="color-labels">
+                            <span>F (Critical)</span>
+                            <span>D</span>
+                            <span>C</span>
+                            <span>B</span>
+                            <span>A (Excellent)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintainability vs Volume (MI x Halstead Volume, size=methods, color=Difficulty) -->
+            <div class="card chart-card">
+                <h3>Maintainability vs Volume</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                    X=MI, Y=Halstead Volume, Size=Methods, Color=Difficulty
+                </p>
+                <div class="cross-chart-wrapper">
+                    <div class="cross-chart-container">
+                        <canvas id="chartMaintainabilityVolume"></canvas>
+                    </div>
+                </div>
+                <div class="size-legend">
+                    <span class="size-legend-title">Methods:</span>
+                    <div class="size-circles">
+                        <div class="size-circle size-circle-12"></div>
+                        <span class="size-label">1-3</span>
+                        <div class="size-circle size-circle-20"></div>
+                        <span class="size-label">4-8</span>
+                        <div class="size-circle size-circle-32"></div>
+                        <span class="size-label">9-15</span>
+                        <div class="size-circle size-circle-48"></div>
+                        <span class="size-label">16+</span>
+                    </div>
+                </div>
+                <div class="color-legend">
+                    <span class="color-legend-title">Difficulty:</span>
+                    <div class="color-gradient-wrapper">
+                        <div class="color-gradient" style="background: linear-gradient(to right, var(--color-a), var(--color-c), var(--color-f));"></div>
+                        <div class="color-labels">
+                            <span>Easy to understand</span>
+                            <span></span>
+                            <span>Very difficult</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Correlation Bubble Charts Grid -->
+    <section class="section">
+        <h2>Correlation Analysis</h2>
+        <div class="grid grid-2">
+            <!-- CCN vs MI -->
+            <div class="card chart-card">
+                <h3>CCN vs MI</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Cyclomatic complexity vs Maintainability index</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartCcnMi"></canvas>
+                </div>
+            </div>
+
+            <!-- LCOM vs MI -->
+            <div class="card chart-card">
+                <h3>LCOM vs MI</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Lack of cohesion vs Maintainability index</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartLcomMi"></canvas>
+                </div>
+            </div>
+
+            <!-- CCN vs LOC -->
+            <div class="card chart-card">
+                <h3>CCN vs LOC</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Cyclomatic complexity vs Lines of code</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartCcnLoc"></canvas>
+                </div>
+            </div>
+
+            <!-- LCOM vs LOC -->
+            <div class="card chart-card">
+                <h3>LCOM vs LOC</h3>
+                <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Lack of cohesion vs Lines of code</p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="chartLcomLoc"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Correlation Coefficients -->
+    <section class="section">
+        <div class="card">
+            <h2>Correlation coefficient</h2>
+            <div class="grid grid-3" style="margin-top: 1rem;">
+                <div class="correlation-card">
+                    <div class="correlation-metrics">CCN ↔ MI</div>
+                    <div class="correlation-value" id="corrCcnMi">-</div>
+                    <div class="correlation-label text-muted">Correlation coefficient</div>
+                </div>
+                <div class="correlation-card">
+                    <div class="correlation-metrics">LCOM ↔ MI</div>
+                    <div class="correlation-value" id="corrLcomMi">-</div>
+                    <div class="correlation-label text-muted">Correlation coefficient</div>
+                </div>
+                <div class="correlation-card">
+                    <div class="correlation-metrics">CCN ↔ LOC</div>
+                    <div class="correlation-value" id="corrCcnLoc">-</div>
+                    <div class="correlation-label text-muted">Correlation coefficient</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quadrant Analysis -->
+    <section class="section">
+        <div class="card">
+            <h2>Quadrant Analysis</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">Class distribution by complexity and maintainability</p>
+            <div class="grid grid-4">
+                <div class="quadrant-card quadrant-good">
+                    <div class="quadrant-icon">&#10003;</div>
+                    <div class="quadrant-title">Safe Zone</div>
+                    <div class="quadrant-desc">Good quality code</div>
+                    <div class="quadrant-count" id="countSafe">0</div>
+                </div>
+                <div class="quadrant-card quadrant-complex">
+                    <div class="quadrant-icon">&#9888;</div>
+                    <div class="quadrant-title">Watch Zone</div>
+                    <div class="quadrant-desc">Acceptable metrics but watch closely</div>
+                    <div class="quadrant-count" id="countWatch">0</div>
+                </div>
+                <div class="quadrant-card quadrant-large">
+                    <div class="quadrant-icon">&#128207;</div>
+                    <div class="quadrant-title">Risk Zone</div>
+                    <div class="quadrant-desc">Refactoring recommended</div>
+                    <div class="quadrant-count" id="countRisk">0</div>
+                </div>
+                <div class="quadrant-card quadrant-critical">
+                    <div class="quadrant-icon">&#10007;</div>
+                    <div class="quadrant-title">Critical Zone</div>
+                    <div class="quadrant-desc">Urgent refactoring needed</div>
+                    <div class="quadrant-count" id="countCritical">0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Classes needing attention -->
+    <section class="section">
+        <div class="card">
+            <h2>Classes Needing Attention</h2>
+            <table id="attentionTable">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>CCN</th>
+                        <th>MI</th>
+                        <th>LCOM</th>
+                        <th>LOC</th>
+                        <th>Issues</th>
+                    </tr>
+                </thead>
+                <tbody id="attentionBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Code Tree -->
+    <section class="section">
+        <div class="card">
+            <h2>Code Tree</h2>
+            <p class="text-muted" style="margin-bottom: 1rem;">Hierarchical code structure with metrics per node</p>
+            <div class="tree-controls">
+                <button class="tree-btn" onclick="expandAll()">Expand all</button>
+                <button class="tree-btn" onclick="collapseAll()">Collapse all</button>
+            </div>
+            <div class="tree-container" id="codeTree"></div>
+        </div>
+    </section>
+
+    
+        <footer>
+            <p>Generated by <a href="https://github.com/amoifr/PhpQuality">PhpQuality</a> on 2026-03-26 06:49:34</p>
+            <p style="margin-top: 0.5rem;">Developed by <a href="https://moi.ruedesjasses.fr">Pascal CESCON</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle
+        function initTheme() {
+            const savedTheme = localStorage.getItem('phpquality-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            if (newTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('phpquality-theme', newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+    </script>
+
+    <script>
+    // Class data for bubble charts
+    const classData = [{"name":"PhpQualityBundle","fqn":"PhpQualityBundle","loc":16,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":1,"propertyCount":0,"ccnRating":"A","halsteadVolume":8,"halsteadDifficulty":1,"halsteadBugs":0.0027},{"name":"Configuration","fqn":"Configuration","loc":24,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":1,"propertyCount":0,"ccnRating":"A","halsteadVolume":83.76,"halsteadDifficulty":2.6,"halsteadBugs":0.0279},{"name":"PhpQualityExtension","fqn":"PhpQualityExtension","loc":48,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"ccnRating":"A","halsteadVolume":197.15,"halsteadDifficulty":3.82,"halsteadBugs":0.0657},{"name":"AnalyzeCommand","fqn":"AnalyzeCommand","loc":404,"maxCcn":21,"avgCcn":7.67,"mi":43.93,"miRating":"C","lcom":0,"lcomRating":"A","methodCount":6,"propertyCount":0,"ccnRating":"F","halsteadVolume":7399.73,"halsteadDifficulty":28.98,"halsteadBugs":2.4666},{"name":"ConsoleReportGenerator","fqn":"ConsoleReportGenerator","loc":127,"maxCcn":9,"avgCcn":4.33,"mi":73.54,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"ccnRating":"C","halsteadVolume":1929.73,"halsteadDifficulty":14.78,"halsteadBugs":0.6432},{"name":"HtmlReportGenerator","fqn":"HtmlReportGenerator","loc":905,"maxCcn":57,"avgCcn":11.87,"mi":25.7,"miRating":"D","lcom":0.9333,"lcomRating":"F","methodCount":15,"propertyCount":2,"ccnRating":"F","halsteadVolume":21028.63,"halsteadDifficulty":58.95,"halsteadBugs":7.0095},{"name":"GitBlameAnalyzer","fqn":"GitBlameAnalyzer","loc":273,"maxCcn":12,"avgCcn":5.67,"mi":53.42,"miRating":"C","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"ccnRating":"D","halsteadVolume":4199.15,"halsteadDifficulty":45,"halsteadBugs":1.3997},{"name":"ProjectAnalyzer","fqn":"ProjectAnalyzer","loc":238,"maxCcn":10,"avgCcn":3.14,"mi":61.71,"miRating":"C","lcom":0.8571,"lcomRating":"F","methodCount":14,"propertyCount":1,"ccnRating":"C","halsteadVolume":4180.07,"halsteadDifficulty":38.1,"halsteadBugs":1.3934},{"name":"DependenciesAnalyzer","fqn":"DependenciesAnalyzer","loc":549,"maxCcn":39,"avgCcn":9.54,"mi":35.12,"miRating":"D","lcom":0,"lcomRating":"A","methodCount":13,"propertyCount":0,"ccnRating":"F","halsteadVolume":12859.96,"halsteadDifficulty":53.3,"halsteadBugs":4.2867},{"name":"ClassResult","fqn":"ClassResult","loc":59,"maxCcn":2,"avgCcn":1.33,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"ccnRating":"A","halsteadVolume":499.91,"halsteadDifficulty":4.54,"halsteadBugs":0.1666},{"name":"DependenciesResult","fqn":"DependenciesResult","loc":71,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"ccnRating":"A","halsteadVolume":391.1,"halsteadDifficulty":2.13,"halsteadBugs":0.1304},{"name":"FileResult","fqn":"FileResult","loc":111,"maxCcn":2,"avgCcn":1.82,"mi":93.14,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":11,"propertyCount":0,"ccnRating":"A","halsteadVolume":788.42,"halsteadDifficulty":6.87,"halsteadBugs":0.2628},{"name":"LayerViolation","fqn":"LayerViolation","loc":53,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"ccnRating":"A","halsteadVolume":252.01,"halsteadDifficulty":3.13,"halsteadBugs":0.084},{"name":"CoverageResult","fqn":"CoverageResult","loc":48,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"ccnRating":"A","halsteadVolume":364.66,"halsteadDifficulty":1.57,"halsteadBugs":0.1216},{"name":"ArchitectureResult","fqn":"ArchitectureResult","loc":147,"maxCcn":8,"avgCcn":2.22,"mi":78.56,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"ccnRating":"C","halsteadVolume":1190.84,"halsteadDifficulty":12.29,"halsteadBugs":0.3969},{"name":"ProjectResult","fqn":"ProjectResult","loc":133,"maxCcn":4,"avgCcn":2.08,"mi":80.38,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":12,"propertyCount":0,"ccnRating":"A","halsteadVolume":1171.55,"halsteadDifficulty":10.85,"halsteadBugs":0.3905},{"name":"SolidViolation","fqn":"SolidViolation","loc":62,"maxCcn":6,"avgCcn":2.67,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"ccnRating":"B","halsteadVolume":283.39,"halsteadDifficulty":1.84,"halsteadBugs":0.0945},{"name":"MethodResult","fqn":"MethodResult","loc":38,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"ccnRating":"A","halsteadVolume":192.57,"halsteadDifficulty":1.41,"halsteadBugs":0.0642},{"name":"ArchitectureAnalyzer","fqn":"ArchitectureAnalyzer","loc":369,"maxCcn":24,"avgCcn":7.4,"mi":46.77,"miRating":"C","lcom":0,"lcomRating":"A","methodCount":10,"propertyCount":0,"ccnRating":"F","halsteadVolume":5414.15,"halsteadDifficulty":44.1,"halsteadBugs":1.8047},{"name":"FileAnalyzer","fqn":"FileAnalyzer","loc":212,"maxCcn":14,"avgCcn":5.2,"mi":65.85,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":0,"ccnRating":"D","halsteadVolume":2610.82,"halsteadDifficulty":24.26,"halsteadBugs":0.8703},{"name":"DrupalProjectType","fqn":"DrupalProjectType","loc":108,"maxCcn":11,"avgCcn":2.43,"mi":82.31,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"D","halsteadVolume":896.95,"halsteadDifficulty":7.62,"halsteadBugs":0.299},{"name":"LaravelProjectType","fqn":"LaravelProjectType","loc":101,"maxCcn":7,"avgCcn":1.86,"mi":87.59,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"B","halsteadVolume":753.69,"halsteadDifficulty":4.74,"halsteadBugs":0.2512},{"name":"PhpProjectType","fqn":"PhpProjectType","loc":39,"maxCcn":4,"avgCcn":1.75,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":4,"propertyCount":0,"ccnRating":"A","halsteadVolume":149.28,"halsteadDifficulty":5.07,"halsteadBugs":0.0498},{"name":"SymfonyProjectType","fqn":"SymfonyProjectType","loc":115,"maxCcn":7,"avgCcn":1.75,"mi":86.42,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":8,"propertyCount":0,"ccnRating":"B","halsteadVolume":815.53,"halsteadDifficulty":4.75,"halsteadBugs":0.2718},{"name":"PrestashopProjectType","fqn":"PrestashopProjectType","loc":105,"maxCcn":9,"avgCcn":2.14,"mi":85.87,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"C","halsteadVolume":769.67,"halsteadDifficulty":6.03,"halsteadBugs":0.2566},{"name":"SuluProjectType","fqn":"SuluProjectType","loc":99,"maxCcn":7,"avgCcn":1.86,"mi":88.35,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"B","halsteadVolume":651.52,"halsteadDifficulty":5,"halsteadBugs":0.2172},{"name":"CodeIgniterProjectType","fqn":"CodeIgniterProjectType","loc":102,"maxCcn":9,"avgCcn":2.14,"mi":84.74,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"C","halsteadVolume":729.48,"halsteadDifficulty":5.7,"halsteadBugs":0.2432},{"name":"Typo3ProjectType","fqn":"Typo3ProjectType","loc":104,"maxCcn":9,"avgCcn":2.14,"mi":84.48,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"C","halsteadVolume":767.64,"halsteadDifficulty":5.46,"halsteadBugs":0.2559},{"name":"AbstractProjectType","fqn":"AbstractProjectType","loc":106,"maxCcn":6,"avgCcn":2,"mi":83.87,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":8,"propertyCount":0,"ccnRating":"B","halsteadVolume":765.14,"halsteadDifficulty":9.35,"halsteadBugs":0.255},{"name":"SyliusProjectType","fqn":"SyliusProjectType","loc":100,"maxCcn":7,"avgCcn":1.86,"mi":88.09,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"B","halsteadVolume":685.47,"halsteadDifficulty":4.9,"halsteadBugs":0.2285},{"name":"ProjectTypeDetector","fqn":"ProjectTypeDetector","loc":90,"maxCcn":4,"avgCcn":2,"mi":92.99,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":1,"ccnRating":"A","halsteadVolume":440,"halsteadDifficulty":12.57,"halsteadBugs":0.1467},{"name":"WooCommerceProjectType","fqn":"WooCommerceProjectType","loc":99,"maxCcn":12,"avgCcn":2.57,"mi":83.59,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"D","halsteadVolume":787.17,"halsteadDifficulty":9.53,"halsteadBugs":0.2624},{"name":"MagentoProjectType","fqn":"MagentoProjectType","loc":115,"maxCcn":11,"avgCcn":2.43,"mi":81.6,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"D","halsteadVolume":913.26,"halsteadDifficulty":6.06,"halsteadBugs":0.3044},{"name":"CakePHPProjectType","fqn":"CakePHPProjectType","loc":106,"maxCcn":9,"avgCcn":2.14,"mi":84.17,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"C","halsteadVolume":814.43,"halsteadDifficulty":5.22,"halsteadBugs":0.2715},{"name":"WordpressProjectType","fqn":"WordpressProjectType","loc":111,"maxCcn":13,"avgCcn":2.71,"mi":80.55,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"D","halsteadVolume":985.42,"halsteadDifficulty":9.17,"halsteadBugs":0.3285},{"name":"JoomlaProjectType","fqn":"JoomlaProjectType","loc":108,"maxCcn":14,"avgCcn":2.86,"mi":79.71,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"D","halsteadVolume":928.47,"halsteadDifficulty":9.84,"halsteadBugs":0.3095},{"name":"LayerDetector","fqn":"LayerDetector","loc":250,"maxCcn":7,"avgCcn":3.44,"mi":69.61,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"ccnRating":"B","halsteadVolume":2382.23,"halsteadDifficulty":16.14,"halsteadBugs":0.7941},{"name":"SolidAnalyzer","fqn":"SolidAnalyzer","loc":313,"maxCcn":13,"avgCcn":7.29,"mi":53.72,"miRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"ccnRating":"D","halsteadVolume":3685.84,"halsteadDifficulty":33.7,"halsteadBugs":1.2286},{"name":"MetricResult","fqn":"MetricResult","loc":55,"maxCcn":6,"avgCcn":1.83,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":6,"propertyCount":0,"ccnRating":"B","halsteadVolume":292.3,"halsteadDifficulty":3.11,"halsteadBugs":0.0974},{"name":"MaintainabilityIndex","fqn":"MaintainabilityIndex","loc":111,"maxCcn":9,"avgCcn":3.4,"mi":81.31,"miRating":"B","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":0,"ccnRating":"C","halsteadVolume":1334.54,"halsteadDifficulty":18.49,"halsteadBugs":0.4448},{"name":"CoverageAnalyzer","fqn":"CoverageAnalyzer","loc":403,"maxCcn":27,"avgCcn":10.73,"mi":42.65,"miRating":"C","lcom":0,"lcomRating":"A","methodCount":11,"propertyCount":0,"ccnRating":"F","halsteadVolume":6724.43,"halsteadDifficulty":49.91,"halsteadBugs":2.2415},{"name":"HalsteadVisitor","fqn":"HalsteadVisitor","loc":269,"maxCcn":14,"avgCcn":3.36,"mi":59,"miRating":"C","lcom":0.7273,"lcomRating":"D","methodCount":11,"propertyCount":4,"ccnRating":"D","halsteadVolume":4177.81,"halsteadDifficulty":14.84,"halsteadBugs":1.3926},{"name":"CyclomaticComplexityVisitor","fqn":"CyclomaticComplexityVisitor","loc":211,"maxCcn":8,"avgCcn":2.92,"mi":66.28,"miRating":"B","lcom":0.6769,"lcomRating":"D","methodCount":13,"propertyCount":5,"ccnRating":"C","halsteadVolume":2206.07,"halsteadDifficulty":29.1,"halsteadBugs":0.7354},{"name":"AbstractMetricVisitor","fqn":"AbstractMetricVisitor","loc":29,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":1,"ccnRating":"A","halsteadVolume":16.25,"halsteadDifficulty":2.25,"halsteadBugs":0.0054},{"name":"DependencyVisitor","fqn":"DependencyVisitor","loc":365,"maxCcn":48,"avgCcn":7.8,"mi":45.06,"miRating":"C","lcom":0.6143,"lcomRating":"D","methodCount":10,"propertyCount":7,"ccnRating":"F","halsteadVolume":5915.63,"halsteadDifficulty":44.99,"halsteadBugs":1.9719},{"name":"CohesionVisitor","fqn":"CohesionVisitor","loc":224,"maxCcn":10,"avgCcn":4.09,"mi":61.21,"miRating":"C","lcom":0.6182,"lcomRating":"D","methodCount":11,"propertyCount":5,"ccnRating":"C","halsteadVolume":3057.66,"halsteadDifficulty":39.41,"halsteadBugs":1.0192},{"name":"LinesOfCodeVisitor","fqn":"LinesOfCodeVisitor","loc":142,"maxCcn":6,"avgCcn":2.5,"mi":74.26,"miRating":"B","lcom":0.7667,"lcomRating":"D","methodCount":10,"propertyCount":3,"ccnRating":"B","halsteadVolume":1525.44,"halsteadDifficulty":21.45,"halsteadBugs":0.5085},{"name":"AstParser","fqn":"AstParser","loc":72,"maxCcn":4,"avgCcn":2.5,"mi":95.49,"miRating":"A","lcom":0.5,"lcomRating":"C","methodCount":4,"propertyCount":1,"ccnRating":"A","halsteadVolume":392.91,"halsteadDifficulty":14.64,"halsteadBugs":0.131}];
+
+    // Theme detection
+    const isDarkMode = !document.documentElement.hasAttribute('data-theme') ||
+                       document.documentElement.getAttribute('data-theme') !== 'light';
+    const gridColor = isDarkMode ? '#334155' : '#e2e8f0';
+    const textColor = isDarkMode ? '#94a3b8' : '#64748b';
+
+    // Rating colors
+    const ratingColors = {
+        'A': { bg: 'rgba(22, 163, 74, 0.75)', border: 'rgba(22, 163, 74, 1)' },
+        'B': { bg: 'rgba(101, 163, 13, 0.75)', border: 'rgba(101, 163, 13, 1)' },
+        'C': { bg: 'rgba(202, 138, 4, 0.75)', border: 'rgba(202, 138, 4, 1)' },
+        'D': { bg: 'rgba(234, 88, 12, 0.75)', border: 'rgba(234, 88, 12, 1)' },
+        'F': { bg: 'rgba(220, 38, 38, 0.75)', border: 'rgba(220, 38, 38, 1)' }
+    };
+
+    // Logarithmic bubble size scaling (12px min to 80px max diameter)
+    function calculateBubbleRadius(value, minVal, maxVal) {
+        if (maxVal === minVal || maxVal === 0) return 12;
+        const minR = 6;  // 12px diameter / 2
+        const maxR = 40; // 80px diameter / 2
+        const normalized = Math.max(0, Math.min(1, (value - minVal) / (maxVal - minVal)));
+        const logScaled = Math.log(1 + normalized * 9) / Math.log(10);
+        return minR + logScaled * (maxR - minR);
+    }
+
+    // Get color by rating
+    function getColorByRating(rating) {
+        return ratingColors[rating] || ratingColors['C'];
+    }
+
+    // Get color by continuous value (for difficulty)
+    function getColorByValue(value, min, max) {
+        if (max === min) return 'rgba(202, 138, 4, 0.75)';
+        const normalized = Math.min(1, Math.max(0, (value - min) / (max - min)));
+        // Green -> Yellow -> Red gradient
+        if (normalized < 0.5) {
+            const t = normalized * 2;
+            return `rgba(${Math.round(22 + (202-22)*t)}, ${Math.round(163 + (138-163)*t)}, ${Math.round(74 + (4-74)*t)}, 0.75)`;
+        } else {
+            const t = (normalized - 0.5) * 2;
+            return `rgba(${Math.round(202 + (220-202)*t)}, ${Math.round(138 + (38-138)*t)}, ${Math.round(4 + (38-4)*t)}, 0.75)`;
+        }
+    }
+
+    // Determine quadrant zone
+    function getZone(x, y, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter) {
+        const xGood = xHigherIsBetter ? x >= xThreshold : x <= xThreshold;
+        const yGood = yHigherIsBetter ? y >= yThreshold : y <= yThreshold;
+
+        if (xGood && yGood) return 'safe';
+        if (xGood && !yGood) return 'watch';
+        if (!xGood && yGood) return 'risk';
+        return 'critical';
+    }
+
+    // Quadrant background plugin for Chart.js
+    function createQuadrantPlugin(xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter) {
+        return {
+            id: 'quadrantBackground',
+            beforeDraw: (chart) => {
+                const { ctx, chartArea, scales } = chart;
+                if (!chartArea) return;
+
+                const xScale = scales.x;
+                const yScale = scales.y;
+
+                // Clamp threshold to visible range
+                const xMin = xScale.min;
+                const xMax = xScale.max;
+                const yMin = yScale.min;
+                const yMax = yScale.max;
+
+                const clampedXThreshold = Math.max(xMin, Math.min(xMax, xThreshold));
+                const clampedYThreshold = Math.max(yMin, Math.min(yMax, yThreshold));
+
+                const xThresholdPixel = xScale.getPixelForValue(clampedXThreshold);
+                const yThresholdPixel = yScale.getPixelForValue(clampedYThreshold);
+
+                ctx.save();
+                ctx.globalAlpha = isDarkMode ? 0.08 : 0.12;
+
+                const colors = {
+                    safe: '#22c55e',
+                    watch: '#eab308',
+                    risk: '#f97316',
+                    critical: '#ef4444'
+                };
+
+                // Calculate zones based on orientation
+                // Top-left quadrant (low X, high Y)
+                const topLeftZone = getZone(xMin, yMax, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[topLeftZone];
+                ctx.fillRect(chartArea.left, chartArea.top, xThresholdPixel - chartArea.left, yThresholdPixel - chartArea.top);
+
+                // Top-right quadrant (high X, high Y)
+                const topRightZone = getZone(xMax, yMax, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[topRightZone];
+                ctx.fillRect(xThresholdPixel, chartArea.top, chartArea.right - xThresholdPixel, yThresholdPixel - chartArea.top);
+
+                // Bottom-left quadrant (low X, low Y)
+                const bottomLeftZone = getZone(xMin, yMin, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[bottomLeftZone];
+                ctx.fillRect(chartArea.left, yThresholdPixel, xThresholdPixel - chartArea.left, chartArea.bottom - yThresholdPixel);
+
+                // Bottom-right quadrant (high X, low Y)
+                const bottomRightZone = getZone(xMax, yMin, xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+                ctx.fillStyle = colors[bottomRightZone];
+                ctx.fillRect(xThresholdPixel, yThresholdPixel, chartArea.right - xThresholdPixel, chartArea.bottom - yThresholdPixel);
+
+                ctx.restore();
+            }
+        };
+    }
+
+    // CrossDimensionChart factory
+    function createCrossDimensionChart(config) {
+        const {
+            canvasId,
+            xKey, yKey, sizeKey, colorKey,
+            xLabel, yLabel,
+            xThreshold, yThreshold,
+            xHigherIsBetter = true,
+            yHigherIsBetter = true,
+            colorByRating = true,
+            colorMin = 0, colorMax = 100
+        } = config;
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+
+        // Calculate size range
+        const sizes = classData.map(c => c[sizeKey]).filter(s => s > 0);
+        const minSize = sizes.length > 0 ? Math.min(...sizes) : 1;
+        const maxSize = sizes.length > 0 ? Math.max(...sizes) : 1;
+
+        // Prepare data points
+        const dataPoints = classData.map(c => {
+            const colorVal = colorByRating ? c[colorKey] : c[colorKey];
+            const color = colorByRating
+                ? getColorByRating(colorVal)
+                : { bg: getColorByValue(colorVal, colorMin, colorMax), border: getColorByValue(colorVal, colorMin, colorMax) };
+
+            return {
+                x: c[xKey],
+                y: c[yKey],
+                r: calculateBubbleRadius(c[sizeKey], minSize, maxSize),
+                name: c.name,
+                fqn: c.fqn,
+                sizeValue: c[sizeKey],
+                colorValue: colorByRating ? colorVal : (typeof colorVal === 'number' ? colorVal.toFixed(1) : colorVal),
+                zone: getZone(c[xKey], c[yKey], xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter),
+                backgroundColor: color.bg,
+                borderColor: color.border,
+                raw: c
+            };
+        });
+
+        const quadrantPlugin = createQuadrantPlugin(xThreshold, yThreshold, xHigherIsBetter, yHigherIsBetter);
+
+        return new Chart(ctx, {
+            type: 'bubble',
+            plugins: [quadrantPlugin],
+            data: {
+                datasets: [{
+                    data: dataPoints,
+                    backgroundColor: dataPoints.map(d => d.backgroundColor),
+                    borderColor: dataPoints.map(d => d.borderColor),
+                    borderWidth: 1.5,
+                    hoverBorderWidth: 2.5,
+                    hoverBorderColor: isDarkMode ? '#f1f5f9' : '#1e293b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            title: (items) => items[0]?.raw?.name || '',
+                            label: (context) => {
+                                const d = context.raw;
+                                return [
+                                    `${xLabel}: ${typeof d.x === 'number' ? d.x.toFixed(1) : d.x}`,
+                                    `${yLabel}: ${typeof d.y === 'number' ? d.y.toFixed(1) : d.y}`,
+                                    `Bubble size: ${d.sizeValue}`,
+                                    `Color (rating): ${d.colorValue}`
+                                ];
+                            },
+                            afterBody: (items) => {
+                                const zone = items[0]?.raw?.zone;
+                                const zoneLabels = {
+                                    safe: 'Safe Zone',
+                                    watch: 'Watch Zone',
+                                    risk: 'Risk Zone',
+                                    critical: 'Critical Zone'
+                                };
+                                return [`Zone: ${zoneLabels[zone] || zone}`];
+                            }
+                        },
+                        backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+                        titleColor: isDarkMode ? '#f1f5f9' : '#1e293b',
+                        bodyColor: isDarkMode ? '#94a3b8' : '#64748b',
+                        borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: xLabel, color: textColor },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor }
+                    },
+                    y: {
+                        title: { display: true, text: yLabel, color: textColor },
+                        grid: { color: gridColor },
+                        ticks: { color: textColor }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
+            }
+        });
+    }
+
+    // Create CrossDimension charts
+
+    // 1. Complexity vs Size (LOC x CCN, size=methods, color=MI rating)
+    createCrossDimensionChart({
+        canvasId: 'chartComplexitySize',
+        xKey: 'loc',
+        yKey: 'maxCcn',
+        sizeKey: 'methodCount',
+        colorKey: 'miRating',
+        xLabel: 'LOC',
+        yLabel: 'CCN',
+        xThreshold: 300,
+        yThreshold: 10,
+        xHigherIsBetter: false,
+        yHigherIsBetter: false,
+        colorByRating: true
+    });
+
+    // 2. Maintainability vs Volume (MI x Halstead Volume, size=methods, color=difficulty)
+    const difficulties = classData.map(c => c.halsteadDifficulty).filter(d => d > 0);
+    const minDiff = difficulties.length > 0 ? Math.min(...difficulties) : 0;
+    const maxDiff = difficulties.length > 0 ? Math.max(...difficulties) : 30;
+
+    createCrossDimensionChart({
+        canvasId: 'chartMaintainabilityVolume',
+        xKey: 'mi',
+        yKey: 'halsteadVolume',
+        sizeKey: 'methodCount',
+        colorKey: 'halsteadDifficulty',
+        xLabel: 'MI',
+        yLabel: 'Volume',
+        xThreshold: 65,
+        yThreshold: 1000,
+        xHigherIsBetter: true,
+        yHigherIsBetter: false,
+        colorByRating: false,
+        colorMin: minDiff,
+        colorMax: maxDiff
+    });
+
+    // Simple bubble chart for correlation views
+    function createSimpleBubbleChart(canvasId, xLabel, yLabel, data) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'bubble',
+            data: {
+                datasets: [{
+                    data: data,
+                    backgroundColor: data.map(d => d.backgroundColor),
+                    borderColor: data.map(d => d.borderColor),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const d = ctx.raw;
+                                return `${d.name}: ${xLabel}=${typeof d.x === 'number' ? d.x.toFixed(1) : d.x}, ${yLabel}=${typeof d.y === 'number' ? d.y.toFixed(1) : d.y}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: xLabel, color: textColor }, grid: { color: gridColor }, ticks: { color: textColor } },
+                    y: { title: { display: true, text: yLabel, color: textColor }, grid: { color: gridColor }, ticks: { color: textColor } }
+                }
+            }
+        });
+    }
+
+    // Prepare data for legacy charts
+    function prepareLegacyData(xKey, yKey, rKey, ratingKey) {
+        return classData.map(c => {
+            const color = getColorByRating(c[ratingKey]);
+            return {
+                x: c[xKey],
+                y: c[yKey],
+                r: Math.max(4, Math.min(25, Math.sqrt(c[rKey]) * 1.5)),
+                name: c.name,
+                backgroundColor: color.bg,
+                borderColor: color.border
+            };
+        });
+    }
+
+    createSimpleBubbleChart('chartCcnMi', 'CCN', 'MI', prepareLegacyData('maxCcn', 'mi', 'loc', 'miRating'));
+    createSimpleBubbleChart('chartLcomMi', 'LCOM', 'MI', prepareLegacyData('lcom', 'mi', 'loc', 'miRating'));
+    createSimpleBubbleChart('chartCcnLoc', 'CCN', 'LOC', prepareLegacyData('maxCcn', 'loc', 'methodCount', 'ccnRating'));
+    createSimpleBubbleChart('chartLcomLoc', 'LCOM', 'LOC', prepareLegacyData('lcom', 'loc', 'methodCount', 'lcomRating'));
+
+    // Calculate correlations
+    function correlation(x, y) {
+        const n = x.length;
+        if (n === 0) return 0;
+        const sumX = x.reduce((a, b) => a + b, 0);
+        const sumY = y.reduce((a, b) => a + b, 0);
+        const sumXY = x.reduce((total, xi, i) => total + xi * y[i], 0);
+        const sumX2 = x.reduce((total, xi) => total + xi * xi, 0);
+        const sumY2 = y.reduce((total, yi) => total + yi * yi, 0);
+        const num = n * sumXY - sumX * sumY;
+        const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+        return den === 0 ? 0 : num / den;
+    }
+
+    const ccnValues = classData.map(c => c.maxCcn);
+    const miValues = classData.map(c => c.mi);
+    const lcomValues = classData.map(c => c.lcom);
+    const locValues = classData.map(c => c.loc);
+
+    function displayCorrelation(elementId, value) {
+        const el = document.getElementById(elementId);
+        el.textContent = value.toFixed(3);
+        if (value > 0.3) el.classList.add('positive');
+        else if (value < -0.3) el.classList.add('negative');
+        else el.classList.add('neutral');
+    }
+
+    displayCorrelation('corrCcnMi', correlation(ccnValues, miValues));
+    displayCorrelation('corrLcomMi', correlation(lcomValues, miValues));
+    displayCorrelation('corrCcnLoc', correlation(ccnValues, locValues));
+
+    // Calculate quadrant counts based on LOC and CCN
+    const locThreshold = 300;
+    const ccnThreshold = 10;
+    let countSafe = 0, countWatch = 0, countRisk = 0, countCritical = 0;
+    const attentionClasses = [];
+
+    classData.forEach(c => {
+        const issues = [];
+        const miThreshold = 65;
+        const lcomThreshold = 0.7;
+
+        if (c.maxCcn > ccnThreshold) issues.push('CCN');
+        if (c.mi < miThreshold) issues.push('MI');
+        if (c.lcom > lcomThreshold) issues.push('LCOM');
+        if (c.loc > locThreshold) issues.push('LOC');
+
+        // Zone based on LOC (x, lower better) and CCN (y, lower better)
+        const zone = getZone(c.loc, c.maxCcn, locThreshold, ccnThreshold, false, false);
+        if (zone === 'safe') countSafe++;
+        else if (zone === 'watch') countWatch++;
+        else if (zone === 'risk') countRisk++;
+        else countCritical++;
+
+        if (issues.length > 0) {
+            attentionClasses.push({ ...c, issues });
+        }
+    });
+
+    document.getElementById('countSafe').textContent = countSafe;
+    document.getElementById('countWatch').textContent = countWatch;
+    document.getElementById('countRisk').textContent = countRisk;
+    document.getElementById('countCritical').textContent = countCritical;
+
+    // Populate attention table
+    attentionClasses.sort((a, b) => b.issues.length - a.issues.length);
+    const tbody = document.getElementById('attentionBody');
+
+    attentionClasses.slice(0, 20).forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${c.name}</td>
+            <td><span class="label label-${c.ccnRating}">${c.maxCcn}</span></td>
+            <td><span class="label label-${c.miRating}">${c.mi.toFixed(0)}</span></td>
+            <td><span class="label label-${c.lcomRating}">${c.lcom.toFixed(2)}</span></td>
+            <td>${c.loc}</td>
+            <td>${c.issues.map(i => `<span class="label label-warning" style="font-size: 0.65rem;">${i}</span>`).join(' ')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (attentionClasses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-muted" style="text-align: center;">No issues detected</td></tr>';
+    }
+
+    // ===== Code Tree =====
+    const treeData = [{"name":"Analyzer","type":"directory","children":[{"name":"Architecture","type":"directory","children":[{"name":"LayerDetector.php","type":"file","path":"Analyzer\/Architecture\/LayerDetector.php","loc":250,"lloc":41,"cloc":56,"maxCcn":7,"avgCcn":3.44,"mi":69.61,"miRating":"B","ccnRating":"B","classCount":1,"methodCount":9,"hasErrors":false,"classes":[{"name":"LayerDetector","type":"class","loc":250,"maxCcn":7,"avgCcn":3.44,"mi":69.61,"miRating":"B","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"methods":[{"name":"detectLayer","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detectLayers","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLayerStats","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"matchesLayer","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"namespaceContains","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"classNameEndsWith","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getPatternsForProjectType","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAllowedDependencies","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"isDependencyAllowed","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SolidAnalyzer.php","type":"file","path":"Analyzer\/Architecture\/SolidAnalyzer.php","loc":313,"lloc":90,"cloc":59,"maxCcn":13,"avgCcn":7.29,"mi":53.72,"miRating":"C","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"SolidAnalyzer","type":"class","loc":313,"maxCcn":13,"avgCcn":7.29,"mi":53.72,"miRating":"C","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":97.24,"miRating":"A"},{"name":"detectSrpViolations","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":96.55,"miRating":"A"},{"name":"detectIspViolations","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":96.55,"miRating":"A"},{"name":"detectDipViolations","type":"method","loc":0,"ccn":13,"ccnRating":"D","mi":95.17,"miRating":"A"},{"name":"getClassDependencyCount","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":97.01,"miRating":"A"},{"name":"isLikelyAbstraction","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":95.86,"miRating":"A"},{"name":"buildSrpMessage","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":97.01,"miRating":"A"}]}]},{"name":"LayerDetector.php","type":"file","path":"Analyzer\/Architecture\/LayerDetector.php","loc":250,"lloc":41,"cloc":56,"maxCcn":7,"avgCcn":3.44,"mi":69.61,"miRating":"B","ccnRating":"B","classCount":1,"methodCount":9,"hasErrors":false,"classes":[{"name":"LayerDetector","type":"class","loc":250,"maxCcn":7,"avgCcn":3.44,"mi":69.61,"miRating":"B","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"methods":[{"name":"detectLayer","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detectLayers","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLayerStats","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"matchesLayer","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"namespaceContains","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"classNameEndsWith","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getPatternsForProjectType","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAllowedDependencies","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"isDependencyAllowed","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SolidAnalyzer.php","type":"file","path":"Analyzer\/Architecture\/SolidAnalyzer.php","loc":313,"lloc":90,"cloc":59,"maxCcn":13,"avgCcn":7.29,"mi":53.72,"miRating":"C","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"SolidAnalyzer","type":"class","loc":313,"maxCcn":13,"avgCcn":7.29,"mi":53.72,"miRating":"C","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":97.24,"miRating":"A"},{"name":"detectSrpViolations","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":96.55,"miRating":"A"},{"name":"detectIspViolations","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":96.55,"miRating":"A"},{"name":"detectDipViolations","type":"method","loc":0,"ccn":13,"ccnRating":"D","mi":95.17,"miRating":"A"},{"name":"getClassDependencyCount","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":97.01,"miRating":"A"},{"name":"isLikelyAbstraction","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":95.86,"miRating":"A"},{"name":"buildSrpMessage","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":97.01,"miRating":"A"}]}]}],"loc":1126,"maxCcn":13,"miCount":4,"fileCount":4,"classCount":4,"avgMi":61.665,"miRating":"C","ccnRating":"D"},{"name":"Ast","type":"directory","children":[{"name":"Visitor","type":"directory","children":[{"name":"AbstractMetricVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/AbstractMetricVisitor.php","loc":29,"lloc":2,"cloc":6,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"AbstractMetricVisitor","type":"class","loc":29,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":1,"methods":[{"name":"getResults","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"reset","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CohesionVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/CohesionVisitor.php","loc":224,"lloc":63,"cloc":24,"maxCcn":10,"avgCcn":4.09,"mi":61.21,"miRating":"C","ccnRating":"C","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"CohesionVisitor","type":"class","loc":224,"maxCcn":10,"avgCcn":4.09,"mi":61.21,"miRating":"C","ccnRating":"C","lcom":0.6182,"lcomRating":"D","methodCount":11,"propertyCount":5,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"leaveNode","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"trackPropertyUsage","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"calculateClassLCOM","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getMethodDetails","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"calculateSummary","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassLCOM","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageLCOM","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CyclomaticComplexityVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/CyclomaticComplexityVisitor.php","loc":211,"lloc":52,"cloc":18,"maxCcn":8,"avgCcn":2.92,"mi":66.28,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":13,"hasErrors":false,"classes":[{"name":"CyclomaticComplexityVisitor","type":"class","loc":211,"maxCcn":8,"avgCcn":2.92,"mi":66.28,"miRating":"B","ccnRating":"C","lcom":0.6769,"lcomRating":"D","methodCount":13,"propertyCount":5,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"leaveNode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"trackClassAndMethod","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"countDecisionPoint","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"storeMethodComplexity","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"leaveClass","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"calculateSummary","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMethodComplexities","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMaxCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"DependencyVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/DependencyVisitor.php","loc":365,"lloc":131,"cloc":57,"maxCcn":48,"avgCcn":7.8,"mi":45.06,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":10,"hasErrors":false,"classes":[{"name":"DependencyVisitor","type":"class","loc":365,"maxCcn":48,"avgCcn":7.8,"mi":45.06,"miRating":"C","ccnRating":"F","lcom":0.6143,"lcomRating":"D","methodCount":10,"propertyCount":7,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":96.03,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":48,"ccnRating":"F","mi":85.22,"miRating":"A"},{"name":"leaveNode","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":95.34,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":96.03,"miRating":"A"},{"name":"resolveClassName","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":95.11,"miRating":"A"},{"name":"extractTypeHints","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":94.19,"miRating":"A"},{"name":"isBuiltinType","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":96.03,"miRating":"A"},{"name":"addDependency","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":95.34,"miRating":"A"},{"name":"getDependenciesByClass","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":95.57,"miRating":"A"},{"name":"getUniqueDependencyCount","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":95.8,"miRating":"A"}]}]},{"name":"HalsteadVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/HalsteadVisitor.php","loc":269,"lloc":66,"cloc":23,"maxCcn":14,"avgCcn":3.36,"mi":59,"miRating":"C","ccnRating":"D","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"HalsteadVisitor","type":"class","loc":269,"maxCcn":14,"avgCcn":3.36,"mi":59,"miRating":"C","ccnRating":"D","lcom":0.7273,"lcomRating":"D","methodCount":11,"propertyCount":4,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"collectOperators","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"collectOperands","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"addOperator","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"addOperand","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculateMetrics","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getVolume","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDifficulty","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getEffort","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"LinesOfCodeVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/LinesOfCodeVisitor.php","loc":142,"lloc":36,"cloc":7,"maxCcn":6,"avgCcn":2.5,"mi":74.26,"miRating":"B","ccnRating":"B","classCount":1,"methodCount":10,"hasErrors":false,"classes":[{"name":"LinesOfCodeVisitor","type":"class","loc":142,"maxCcn":6,"avgCcn":2.5,"mi":74.26,"miRating":"B","ccnRating":"B","lcom":0.7667,"lcomRating":"D","methodCount":10,"propertyCount":3,"methods":[{"name":"setSourceCode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyzeSourceCode","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"countLineTypes","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"isCommentLine","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getLOC","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getCLOC","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLLOC","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"HalsteadVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/HalsteadVisitor.php","loc":269,"lloc":66,"cloc":23,"maxCcn":14,"avgCcn":3.36,"mi":59,"miRating":"C","ccnRating":"D","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"HalsteadVisitor","type":"class","loc":269,"maxCcn":14,"avgCcn":3.36,"mi":59,"miRating":"C","ccnRating":"D","lcom":0.7273,"lcomRating":"D","methodCount":11,"propertyCount":4,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"collectOperators","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"collectOperands","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"addOperator","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"addOperand","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculateMetrics","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getVolume","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDifficulty","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getEffort","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CyclomaticComplexityVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/CyclomaticComplexityVisitor.php","loc":211,"lloc":52,"cloc":18,"maxCcn":8,"avgCcn":2.92,"mi":66.28,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":13,"hasErrors":false,"classes":[{"name":"CyclomaticComplexityVisitor","type":"class","loc":211,"maxCcn":8,"avgCcn":2.92,"mi":66.28,"miRating":"B","ccnRating":"C","lcom":0.6769,"lcomRating":"D","methodCount":13,"propertyCount":5,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"leaveNode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"trackClassAndMethod","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"countDecisionPoint","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"storeMethodComplexity","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"leaveClass","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"calculateSummary","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMethodComplexities","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMaxCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"AbstractMetricVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/AbstractMetricVisitor.php","loc":29,"lloc":2,"cloc":6,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"AbstractMetricVisitor","type":"class","loc":29,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":1,"methods":[{"name":"getResults","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"reset","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"DependencyVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/DependencyVisitor.php","loc":365,"lloc":131,"cloc":57,"maxCcn":48,"avgCcn":7.8,"mi":45.06,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":10,"hasErrors":false,"classes":[{"name":"DependencyVisitor","type":"class","loc":365,"maxCcn":48,"avgCcn":7.8,"mi":45.06,"miRating":"C","ccnRating":"F","lcom":0.6143,"lcomRating":"D","methodCount":10,"propertyCount":7,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":96.03,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":48,"ccnRating":"F","mi":85.22,"miRating":"A"},{"name":"leaveNode","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":95.34,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":96.03,"miRating":"A"},{"name":"resolveClassName","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":95.11,"miRating":"A"},{"name":"extractTypeHints","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":94.19,"miRating":"A"},{"name":"isBuiltinType","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":96.03,"miRating":"A"},{"name":"addDependency","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":95.34,"miRating":"A"},{"name":"getDependenciesByClass","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":95.57,"miRating":"A"},{"name":"getUniqueDependencyCount","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":95.8,"miRating":"A"}]}]},{"name":"CohesionVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/CohesionVisitor.php","loc":224,"lloc":63,"cloc":24,"maxCcn":10,"avgCcn":4.09,"mi":61.21,"miRating":"C","ccnRating":"C","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"CohesionVisitor","type":"class","loc":224,"maxCcn":10,"avgCcn":4.09,"mi":61.21,"miRating":"C","ccnRating":"C","lcom":0.6182,"lcomRating":"D","methodCount":11,"propertyCount":5,"methods":[{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"leaveNode","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"trackPropertyUsage","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"calculateClassLCOM","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getMethodDetails","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"calculateSummary","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassLCOM","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageLCOM","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"LinesOfCodeVisitor.php","type":"file","path":"Analyzer\/Ast\/Visitor\/LinesOfCodeVisitor.php","loc":142,"lloc":36,"cloc":7,"maxCcn":6,"avgCcn":2.5,"mi":74.26,"miRating":"B","ccnRating":"B","classCount":1,"methodCount":10,"hasErrors":false,"classes":[{"name":"LinesOfCodeVisitor","type":"class","loc":142,"maxCcn":6,"avgCcn":2.5,"mi":74.26,"miRating":"B","ccnRating":"B","lcom":0.7667,"lcomRating":"D","methodCount":10,"propertyCount":3,"methods":[{"name":"setSourceCode","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"beforeTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"enterNode","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"afterTraverse","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyzeSourceCode","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"countLineTypes","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"isCommentLine","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getLOC","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getCLOC","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLLOC","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]}],"loc":2480,"maxCcn":48,"miCount":12,"fileCount":12,"classCount":12,"avgMi":67.635,"miRating":"B","ccnRating":"F"},{"name":"AstParser.php","type":"file","path":"Analyzer\/Ast\/AstParser.php","loc":72,"lloc":15,"cloc":17,"maxCcn":4,"avgCcn":2.5,"mi":95.49,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":4,"hasErrors":false,"classes":[{"name":"AstParser","type":"class","loc":72,"maxCcn":4,"avgCcn":2.5,"mi":95.49,"miRating":"A","ccnRating":"A","lcom":0.5,"lcomRating":"C","methodCount":4,"propertyCount":1,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"parse","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"parseFile","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"traverse","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"AstParser.php","type":"file","path":"Analyzer\/Ast\/AstParser.php","loc":72,"lloc":15,"cloc":17,"maxCcn":4,"avgCcn":2.5,"mi":95.49,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":4,"hasErrors":false,"classes":[{"name":"AstParser","type":"class","loc":72,"maxCcn":4,"avgCcn":2.5,"mi":95.49,"miRating":"A","ccnRating":"A","lcom":0.5,"lcomRating":"C","methodCount":4,"propertyCount":1,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"parse","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"parseFile","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"traverse","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]}],"loc":2624,"maxCcn":48,"miCount":14,"fileCount":14,"classCount":14,"avgMi":71.61428571428573,"miRating":"B","ccnRating":"F"},{"name":"Metric","type":"directory","children":[{"name":"MaintainabilityIndex.php","type":"file","path":"Analyzer\/Metric\/MaintainabilityIndex.php","loc":111,"lloc":24,"cloc":23,"maxCcn":9,"avgCcn":3.4,"mi":81.31,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":5,"hasErrors":false,"classes":[{"name":"MaintainabilityIndex","type":"class","loc":111,"maxCcn":9,"avgCcn":3.4,"mi":81.31,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculate","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"calculateForUnit","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"MetricInterface.php","type":"file","path":"Analyzer\/Metric\/MetricInterface.php","loc":26,"lloc":0,"cloc":11,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":0,"methodCount":0,"hasErrors":false,"classes":[]},{"name":"MetricResult.php","type":"file","path":"Analyzer\/Metric\/MetricResult.php","loc":55,"lloc":5,"cloc":0,"maxCcn":6,"avgCcn":1.83,"mi":100,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":6,"hasErrors":false,"classes":[{"name":"MetricResult","type":"class","loc":55,"maxCcn":6,"avgCcn":1.83,"mi":100,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":6,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"isGood","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"isWarning","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"isBad","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRatingColor","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"MetricResult.php","type":"file","path":"Analyzer\/Metric\/MetricResult.php","loc":55,"lloc":5,"cloc":0,"maxCcn":6,"avgCcn":1.83,"mi":100,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":6,"hasErrors":false,"classes":[{"name":"MetricResult","type":"class","loc":55,"maxCcn":6,"avgCcn":1.83,"mi":100,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":6,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"isGood","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"isWarning","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"isBad","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRatingColor","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"MaintainabilityIndex.php","type":"file","path":"Analyzer\/Metric\/MaintainabilityIndex.php","loc":111,"lloc":24,"cloc":23,"maxCcn":9,"avgCcn":3.4,"mi":81.31,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":5,"hasErrors":false,"classes":[{"name":"MaintainabilityIndex","type":"class","loc":111,"maxCcn":9,"avgCcn":3.4,"mi":81.31,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculate","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"calculateForUnit","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"MetricInterface.php","type":"file","path":"Analyzer\/Metric\/MetricInterface.php","loc":26,"lloc":0,"cloc":11,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":0,"methodCount":0,"hasErrors":false,"classes":[]}],"loc":384,"maxCcn":9,"miCount":6,"fileCount":6,"classCount":4,"avgMi":93.77,"miRating":"A","ccnRating":"C"},{"name":"ProjectType","type":"directory","children":[{"name":"AbstractProjectType.php","type":"file","path":"Analyzer\/ProjectType\/AbstractProjectType.php","loc":106,"lloc":25,"cloc":12,"maxCcn":6,"avgCcn":2,"mi":83.87,"miRating":"B","ccnRating":"B","classCount":1,"methodCount":8,"hasErrors":false,"classes":[{"name":"AbstractProjectType","type":"class","loc":106,"maxCcn":6,"avgCcn":2,"mi":83.87,"miRating":"B","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":8,"propertyCount":0,"methods":[{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getArchitecturalPatterns","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"fileExists","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"dirExists","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"hasComposerPackage","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"hasComposerType","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CakePHPProjectType.php","type":"file","path":"Analyzer\/ProjectType\/CakePHPProjectType.php","loc":106,"lloc":24,"cloc":4,"maxCcn":9,"avgCcn":2.14,"mi":84.17,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"CakePHPProjectType","type":"class","loc":106,"maxCcn":9,"avgCcn":2.14,"mi":84.17,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CodeIgniterProjectType.php","type":"file","path":"Analyzer\/ProjectType\/CodeIgniterProjectType.php","loc":102,"lloc":24,"cloc":5,"maxCcn":9,"avgCcn":2.14,"mi":84.74,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"CodeIgniterProjectType","type":"class","loc":102,"maxCcn":9,"avgCcn":2.14,"mi":84.74,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"DrupalProjectType.php","type":"file","path":"Analyzer\/ProjectType\/DrupalProjectType.php","loc":108,"lloc":26,"cloc":6,"maxCcn":11,"avgCcn":2.43,"mi":82.31,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"DrupalProjectType","type":"class","loc":108,"maxCcn":11,"avgCcn":2.43,"mi":82.31,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"JoomlaProjectType.php","type":"file","path":"Analyzer\/ProjectType\/JoomlaProjectType.php","loc":108,"lloc":30,"cloc":6,"maxCcn":14,"avgCcn":2.86,"mi":79.71,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"JoomlaProjectType","type":"class","loc":108,"maxCcn":14,"avgCcn":2.86,"mi":79.71,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"LaravelProjectType.php","type":"file","path":"Analyzer\/ProjectType\/LaravelProjectType.php","loc":101,"lloc":20,"cloc":3,"maxCcn":7,"avgCcn":1.86,"mi":87.59,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"LaravelProjectType","type":"class","loc":101,"maxCcn":7,"avgCcn":1.86,"mi":87.59,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"MagentoProjectType.php","type":"file","path":"Analyzer\/ProjectType\/MagentoProjectType.php","loc":115,"lloc":27,"cloc":5,"maxCcn":11,"avgCcn":2.43,"mi":81.6,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"MagentoProjectType","type":"class","loc":115,"maxCcn":11,"avgCcn":2.43,"mi":81.6,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"PhpProjectType.php","type":"file","path":"Analyzer\/ProjectType\/PhpProjectType.php","loc":39,"lloc":7,"cloc":5,"maxCcn":4,"avgCcn":1.75,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":4,"hasErrors":false,"classes":[{"name":"PhpProjectType","type":"class","loc":39,"maxCcn":4,"avgCcn":1.75,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":4,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"PrestashopProjectType.php","type":"file","path":"Analyzer\/ProjectType\/PrestashopProjectType.php","loc":105,"lloc":22,"cloc":6,"maxCcn":9,"avgCcn":2.14,"mi":85.87,"miRating":"A","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"PrestashopProjectType","type":"class","loc":105,"maxCcn":9,"avgCcn":2.14,"mi":85.87,"miRating":"A","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ProjectTypeDetector.php","type":"file","path":"Analyzer\/ProjectType\/ProjectTypeDetector.php","loc":90,"lloc":17,"cloc":28,"maxCcn":4,"avgCcn":2,"mi":92.99,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":5,"hasErrors":false,"classes":[{"name":"ProjectTypeDetector","type":"class","loc":90,"maxCcn":4,"avgCcn":2,"mi":92.99,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":1,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getProjectType","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAvailableTypes","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getTypeNames","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ProjectTypeInterface.php","type":"file","path":"Analyzer\/ProjectType\/ProjectTypeInterface.php","loc":64,"lloc":0,"cloc":39,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":0,"methodCount":0,"hasErrors":false,"classes":[]},{"name":"SuluProjectType.php","type":"file","path":"Analyzer\/ProjectType\/SuluProjectType.php","loc":99,"lloc":20,"cloc":7,"maxCcn":7,"avgCcn":1.86,"mi":88.35,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"SuluProjectType","type":"class","loc":99,"maxCcn":7,"avgCcn":1.86,"mi":88.35,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SyliusProjectType.php","type":"file","path":"Analyzer\/ProjectType\/SyliusProjectType.php","loc":100,"lloc":20,"cloc":6,"maxCcn":7,"avgCcn":1.86,"mi":88.08,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"SyliusProjectType","type":"class","loc":100,"maxCcn":7,"avgCcn":1.86,"mi":88.09,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SymfonyProjectType.php","type":"file","path":"Analyzer\/ProjectType\/SymfonyProjectType.php","loc":115,"lloc":21,"cloc":5,"maxCcn":7,"avgCcn":1.75,"mi":86.42,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":8,"hasErrors":false,"classes":[{"name":"SymfonyProjectType","type":"class","loc":115,"maxCcn":7,"avgCcn":1.75,"mi":86.42,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":8,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getArchitecturalPatterns","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"Typo3ProjectType.php","type":"file","path":"Analyzer\/ProjectType\/Typo3ProjectType.php","loc":104,"lloc":24,"cloc":5,"maxCcn":9,"avgCcn":2.14,"mi":84.48,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"Typo3ProjectType","type":"class","loc":104,"maxCcn":9,"avgCcn":2.14,"mi":84.48,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"WooCommerceProjectType.php","type":"file","path":"Analyzer\/ProjectType\/WooCommerceProjectType.php","loc":99,"lloc":25,"cloc":6,"maxCcn":12,"avgCcn":2.57,"mi":83.59,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"WooCommerceProjectType","type":"class","loc":99,"maxCcn":12,"avgCcn":2.57,"mi":83.59,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":12,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"WordpressProjectType.php","type":"file","path":"Analyzer\/ProjectType\/WordpressProjectType.php","loc":111,"lloc":28,"cloc":6,"maxCcn":13,"avgCcn":2.71,"mi":80.55,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"WordpressProjectType","type":"class","loc":111,"maxCcn":13,"avgCcn":2.71,"mi":80.55,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":13,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"DrupalProjectType.php","type":"file","path":"Analyzer\/ProjectType\/DrupalProjectType.php","loc":108,"lloc":26,"cloc":6,"maxCcn":11,"avgCcn":2.43,"mi":82.31,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"DrupalProjectType","type":"class","loc":108,"maxCcn":11,"avgCcn":2.43,"mi":82.31,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"LaravelProjectType.php","type":"file","path":"Analyzer\/ProjectType\/LaravelProjectType.php","loc":101,"lloc":20,"cloc":3,"maxCcn":7,"avgCcn":1.86,"mi":87.59,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"LaravelProjectType","type":"class","loc":101,"maxCcn":7,"avgCcn":1.86,"mi":87.59,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"PhpProjectType.php","type":"file","path":"Analyzer\/ProjectType\/PhpProjectType.php","loc":39,"lloc":7,"cloc":5,"maxCcn":4,"avgCcn":1.75,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":4,"hasErrors":false,"classes":[{"name":"PhpProjectType","type":"class","loc":39,"maxCcn":4,"avgCcn":1.75,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":4,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SymfonyProjectType.php","type":"file","path":"Analyzer\/ProjectType\/SymfonyProjectType.php","loc":115,"lloc":21,"cloc":5,"maxCcn":7,"avgCcn":1.75,"mi":86.42,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":8,"hasErrors":false,"classes":[{"name":"SymfonyProjectType","type":"class","loc":115,"maxCcn":7,"avgCcn":1.75,"mi":86.42,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":8,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getArchitecturalPatterns","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"PrestashopProjectType.php","type":"file","path":"Analyzer\/ProjectType\/PrestashopProjectType.php","loc":105,"lloc":22,"cloc":6,"maxCcn":9,"avgCcn":2.14,"mi":85.87,"miRating":"A","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"PrestashopProjectType","type":"class","loc":105,"maxCcn":9,"avgCcn":2.14,"mi":85.87,"miRating":"A","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ProjectTypeInterface.php","type":"file","path":"Analyzer\/ProjectType\/ProjectTypeInterface.php","loc":64,"lloc":0,"cloc":39,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":0,"methodCount":0,"hasErrors":false,"classes":[]},{"name":"SuluProjectType.php","type":"file","path":"Analyzer\/ProjectType\/SuluProjectType.php","loc":99,"lloc":20,"cloc":7,"maxCcn":7,"avgCcn":1.86,"mi":88.35,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"SuluProjectType","type":"class","loc":99,"maxCcn":7,"avgCcn":1.86,"mi":88.35,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CodeIgniterProjectType.php","type":"file","path":"Analyzer\/ProjectType\/CodeIgniterProjectType.php","loc":102,"lloc":24,"cloc":5,"maxCcn":9,"avgCcn":2.14,"mi":84.74,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"CodeIgniterProjectType","type":"class","loc":102,"maxCcn":9,"avgCcn":2.14,"mi":84.74,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"Typo3ProjectType.php","type":"file","path":"Analyzer\/ProjectType\/Typo3ProjectType.php","loc":104,"lloc":24,"cloc":5,"maxCcn":9,"avgCcn":2.14,"mi":84.48,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"Typo3ProjectType","type":"class","loc":104,"maxCcn":9,"avgCcn":2.14,"mi":84.48,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"AbstractProjectType.php","type":"file","path":"Analyzer\/ProjectType\/AbstractProjectType.php","loc":106,"lloc":25,"cloc":12,"maxCcn":6,"avgCcn":2,"mi":83.87,"miRating":"B","ccnRating":"B","classCount":1,"methodCount":8,"hasErrors":false,"classes":[{"name":"AbstractProjectType","type":"class","loc":106,"maxCcn":6,"avgCcn":2,"mi":83.87,"miRating":"B","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":8,"propertyCount":0,"methods":[{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getArchitecturalPatterns","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"fileExists","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"dirExists","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"hasComposerPackage","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"hasComposerType","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SyliusProjectType.php","type":"file","path":"Analyzer\/ProjectType\/SyliusProjectType.php","loc":100,"lloc":20,"cloc":6,"maxCcn":7,"avgCcn":1.86,"mi":88.08,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"SyliusProjectType","type":"class","loc":100,"maxCcn":7,"avgCcn":1.86,"mi":88.09,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ProjectTypeDetector.php","type":"file","path":"Analyzer\/ProjectType\/ProjectTypeDetector.php","loc":90,"lloc":17,"cloc":28,"maxCcn":4,"avgCcn":2,"mi":92.99,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":5,"hasErrors":false,"classes":[{"name":"ProjectTypeDetector","type":"class","loc":90,"maxCcn":4,"avgCcn":2,"mi":92.99,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":1,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getProjectType","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAvailableTypes","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getTypeNames","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"WooCommerceProjectType.php","type":"file","path":"Analyzer\/ProjectType\/WooCommerceProjectType.php","loc":99,"lloc":25,"cloc":6,"maxCcn":12,"avgCcn":2.57,"mi":83.59,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"WooCommerceProjectType","type":"class","loc":99,"maxCcn":12,"avgCcn":2.57,"mi":83.59,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":12,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"MagentoProjectType.php","type":"file","path":"Analyzer\/ProjectType\/MagentoProjectType.php","loc":115,"lloc":27,"cloc":5,"maxCcn":11,"avgCcn":2.43,"mi":81.6,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"MagentoProjectType","type":"class","loc":115,"maxCcn":11,"avgCcn":2.43,"mi":81.6,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CakePHPProjectType.php","type":"file","path":"Analyzer\/ProjectType\/CakePHPProjectType.php","loc":106,"lloc":24,"cloc":4,"maxCcn":9,"avgCcn":2.14,"mi":84.17,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"CakePHPProjectType","type":"class","loc":106,"maxCcn":9,"avgCcn":2.14,"mi":84.17,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"WordpressProjectType.php","type":"file","path":"Analyzer\/ProjectType\/WordpressProjectType.php","loc":111,"lloc":28,"cloc":6,"maxCcn":13,"avgCcn":2.71,"mi":80.55,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"WordpressProjectType","type":"class","loc":111,"maxCcn":13,"avgCcn":2.71,"mi":80.55,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":13,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"JoomlaProjectType.php","type":"file","path":"Analyzer\/ProjectType\/JoomlaProjectType.php","loc":108,"lloc":30,"cloc":6,"maxCcn":14,"avgCcn":2.86,"mi":79.71,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":7,"hasErrors":false,"classes":[{"name":"JoomlaProjectType","type":"class","loc":108,"maxCcn":14,"avgCcn":2.86,"mi":79.71,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":7,"propertyCount":0,"methods":[{"name":"getName","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLabel","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDescription","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"detect","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":100,"miRating":"A"},{"name":"getExcludedPaths","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCategories","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getRecommendedThresholds","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]}],"loc":3344,"maxCcn":14,"miCount":34,"fileCount":34,"classCount":32,"avgMi":86.72470588235292,"miRating":"A","ccnRating":"D"},{"name":"Result","type":"directory","children":[{"name":"ArchitectureResult.php","type":"file","path":"Analyzer\/Result\/ArchitectureResult.php","loc":147,"lloc":30,"cloc":33,"maxCcn":8,"avgCcn":2.22,"mi":78.56,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":9,"hasErrors":false,"classes":[{"name":"ArchitectureResult","type":"class","loc":147,"maxCcn":8,"avgCcn":2.22,"mi":78.56,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLayerViolationCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getSolidViolationCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getCircularDependencyCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getSolidViolationsByPrinciple","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLayerViolationsBySource","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassesByLayer","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDependencyMatrix","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ClassResult.php","type":"file","path":"Analyzer\/Result\/ClassResult.php","loc":59,"lloc":2,"cloc":3,"maxCcn":2,"avgCcn":1.33,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"ClassResult","type":"class","loc":59,"maxCcn":2,"avgCcn":1.33,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getFullyQualifiedName","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CoverageResult.php","type":"file","path":"Analyzer\/Result\/CoverageResult.php","loc":48,"lloc":1,"cloc":3,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"CoverageResult","type":"class","loc":48,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"DependenciesResult.php","type":"file","path":"Analyzer\/Result\/DependenciesResult.php","loc":71,"lloc":2,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"DependenciesResult","type":"class","loc":71,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"notFound","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"FileResult.php","type":"file","path":"Analyzer\/Result\/FileResult.php","loc":111,"lloc":14,"cloc":19,"maxCcn":2,"avgCcn":1.82,"mi":93.14,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"FileResult","type":"class","loc":111,"maxCcn":2,"avgCcn":1.82,"mi":93.14,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":11,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getTotalLoc","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLogicalLoc","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getCommentLines","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMaxCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAvgCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getNamespace","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getUseStatements","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDependencies","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getUniqueDependencyCount","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"LayerViolation.php","type":"file","path":"Analyzer\/Result\/LayerViolation.php","loc":53,"lloc":2,"cloc":6,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"LayerViolation","type":"class","loc":53,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMessage","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"MethodResult.php","type":"file","path":"Analyzer\/Result\/MethodResult.php","loc":38,"lloc":1,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"MethodResult","type":"class","loc":38,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ProjectResult.php","type":"file","path":"Analyzer\/Result\/ProjectResult.php","loc":133,"lloc":27,"cloc":18,"maxCcn":4,"avgCcn":2.08,"mi":80.39,"miRating":"B","ccnRating":"A","classCount":1,"methodCount":12,"hasErrors":false,"classes":[{"name":"ProjectResult","type":"class","loc":133,"maxCcn":4,"avgCcn":2.08,"mi":80.38,"miRating":"B","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":12,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getFileCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMethodCount","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getTotalLoc","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageMi","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageLcom","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getWorstFiles","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAllClasses","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassesByCategory","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SolidViolation.php","type":"file","path":"Analyzer\/Result\/SolidViolation.php","loc":62,"lloc":2,"cloc":9,"maxCcn":6,"avgCcn":2.67,"mi":100,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"SolidViolation","type":"class","loc":62,"maxCcn":6,"avgCcn":2.67,"mi":100,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getPrincipleName","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ClassResult.php","type":"file","path":"Analyzer\/Result\/ClassResult.php","loc":59,"lloc":2,"cloc":3,"maxCcn":2,"avgCcn":1.33,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"ClassResult","type":"class","loc":59,"maxCcn":2,"avgCcn":1.33,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getFullyQualifiedName","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"DependenciesResult.php","type":"file","path":"Analyzer\/Result\/DependenciesResult.php","loc":71,"lloc":2,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"DependenciesResult","type":"class","loc":71,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"notFound","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"FileResult.php","type":"file","path":"Analyzer\/Result\/FileResult.php","loc":111,"lloc":14,"cloc":19,"maxCcn":2,"avgCcn":1.82,"mi":93.14,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"FileResult","type":"class","loc":111,"maxCcn":2,"avgCcn":1.82,"mi":93.14,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":11,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getTotalLoc","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLogicalLoc","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getCommentLines","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMaxCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAvgCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getNamespace","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getUseStatements","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDependencies","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getUniqueDependencyCount","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"LayerViolation.php","type":"file","path":"Analyzer\/Result\/LayerViolation.php","loc":53,"lloc":2,"cloc":6,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"LayerViolation","type":"class","loc":53,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMessage","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"CoverageResult.php","type":"file","path":"Analyzer\/Result\/CoverageResult.php","loc":48,"lloc":1,"cloc":3,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"CoverageResult","type":"class","loc":48,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ArchitectureResult.php","type":"file","path":"Analyzer\/Result\/ArchitectureResult.php","loc":147,"lloc":30,"cloc":33,"maxCcn":8,"avgCcn":2.22,"mi":78.56,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":9,"hasErrors":false,"classes":[{"name":"ArchitectureResult","type":"class","loc":147,"maxCcn":8,"avgCcn":2.22,"mi":78.56,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLayerViolationCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getSolidViolationCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getCircularDependencyCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getSolidViolationsByPrinciple","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getLayerViolationsBySource","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassesByLayer","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getDependencyMatrix","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"ProjectResult.php","type":"file","path":"Analyzer\/Result\/ProjectResult.php","loc":133,"lloc":27,"cloc":18,"maxCcn":4,"avgCcn":2.08,"mi":80.39,"miRating":"B","ccnRating":"A","classCount":1,"methodCount":12,"hasErrors":false,"classes":[{"name":"ProjectResult","type":"class","loc":133,"maxCcn":4,"avgCcn":2.08,"mi":80.38,"miRating":"B","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":12,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getFileCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassCount","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMethodCount","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getTotalLoc","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageMi","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageCcn","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAverageLcom","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getWorstFiles","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getAllClasses","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getClassesByCategory","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"SolidViolation.php","type":"file","path":"Analyzer\/Result\/SolidViolation.php","loc":62,"lloc":2,"cloc":9,"maxCcn":6,"avgCcn":2.67,"mi":100,"miRating":"A","ccnRating":"B","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"SolidViolation","type":"class","loc":62,"maxCcn":6,"avgCcn":2.67,"mi":100,"miRating":"A","ccnRating":"B","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getPrincipleName","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"MethodResult.php","type":"file","path":"Analyzer\/Result\/MethodResult.php","loc":38,"lloc":1,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"MethodResult","type":"class","loc":38,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"toArray","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]}],"loc":1444,"maxCcn":8,"miCount":18,"fileCount":18,"classCount":18,"avgMi":94.67666666666668,"miRating":"A","ccnRating":"C"},{"name":"ArchitectureAnalyzer.php","type":"file","path":"Analyzer\/ArchitectureAnalyzer.php","loc":369,"lloc":122,"cloc":62,"maxCcn":24,"avgCcn":7.4,"mi":46.77,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":10,"hasErrors":false,"classes":[{"name":"ArchitectureAnalyzer","type":"class","loc":369,"maxCcn":24,"avgCcn":7.4,"mi":46.77,"miRating":"C","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":10,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":97.78,"miRating":"A"},{"name":"analyze","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":97.78,"miRating":"A"},{"name":"buildDependencyGraph","type":"method","loc":0,"ccn":24,"ccnRating":"F","mi":92.49,"miRating":"A"},{"name":"detectLayerViolations","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":95.94,"miRating":"A"},{"name":"buildFilePathMap","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":96.4,"miRating":"A"},{"name":"detectCircularDependencies","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":96.17,"miRating":"A"},{"name":"tarjanSCC","type":"method","loc":0,"ccn":13,"ccnRating":"D","mi":95.02,"miRating":"A"},{"name":"getViolationSeverity","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":97.09,"miRating":"A"},{"name":"calculateScore","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":97.55,"miRating":"A"},{"name":"getScoreRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":96.86,"miRating":"A"}]}]},{"name":"CoverageAnalyzer.php","type":"file","path":"Analyzer\/CoverageAnalyzer.php","loc":403,"lloc":140,"cloc":32,"maxCcn":27,"avgCcn":10.73,"mi":42.65,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"CoverageAnalyzer","type":"class","loc":403,"maxCcn":27,"avgCcn":10.73,"mi":42.65,"miRating":"C","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":11,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":96.23,"miRating":"A"},{"name":"analyzeFromProject","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":96,"miRating":"A"},{"name":"generateCoverage","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":95.08,"miRating":"A"},{"name":"parseCloverFormat","type":"method","loc":0,"ccn":17,"ccnRating":"F","mi":93.47,"miRating":"A"},{"name":"parsePhpunitFormat","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":94.85,"miRating":"A"},{"name":"extractFileCoverage","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":95.08,"miRating":"A"},{"name":"parseFileElement","type":"method","loc":0,"ccn":27,"ccnRating":"F","mi":91.17,"miRating":"A"},{"name":"extractPackageCoverage","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":94.85,"miRating":"A"},{"name":"countFullyCoveredClasses","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":95.77,"miRating":"A"},{"name":"countFullyCoveredClassesInFile","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":95.31,"miRating":"A"},{"name":"calculateRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":96.23,"miRating":"A"}]}]},{"name":"DependenciesAnalyzer.php","type":"file","path":"Analyzer\/DependenciesAnalyzer.php","loc":549,"lloc":184,"cloc":41,"maxCcn":39,"avgCcn":9.54,"mi":35.12,"miRating":"D","ccnRating":"F","classCount":1,"methodCount":13,"hasErrors":false,"classes":[{"name":"DependenciesAnalyzer","type":"class","loc":549,"maxCcn":39,"avgCcn":9.54,"mi":35.12,"miRating":"D","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":13,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":39,"ccnRating":"F","mi":83.41,"miRating":"B"},{"name":"checkSupportStatus","type":"method","loc":0,"ccn":19,"ccnRating":"F","mi":88.01,"miRating":"A"},{"name":"extractMajorMinor","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":91.92,"miRating":"A"},{"name":"extractMajor","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":91.92,"miRating":"A"},{"name":"findFile","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":91.46,"miRating":"A"},{"name":"parseJson","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":91.69,"miRating":"A"},{"name":"checkOutdatedPackages","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":90.08,"miRating":"A"},{"name":"getLatestVersion","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":90.08,"miRating":"A"},{"name":"isOutdated","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":91,"miRating":"A"},{"name":"parseVersion","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":92.15,"miRating":"A"},{"name":"calculateSeverity","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":90.77,"miRating":"A"},{"name":"adjustSeverityBySupport","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":90.77,"miRating":"A"},{"name":"getPackageSupportStatus","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":89.16,"miRating":"A"}]}]},{"name":"FileAnalyzer.php","type":"file","path":"Analyzer\/FileAnalyzer.php","loc":212,"lloc":49,"cloc":13,"maxCcn":14,"avgCcn":5.2,"mi":65.85,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":5,"hasErrors":false,"classes":[{"name":"FileAnalyzer","type":"class","loc":212,"maxCcn":14,"avgCcn":5.2,"mi":65.85,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyze","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"buildClassResults","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":99.64,"miRating":"A"},{"name":"determineCategory","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMiRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"GitBlameAnalyzer.php","type":"file","path":"Analyzer\/GitBlameAnalyzer.php","loc":273,"lloc":90,"cloc":44,"maxCcn":12,"avgCcn":5.67,"mi":53.42,"miRating":"C","ccnRating":"D","classCount":1,"methodCount":9,"hasErrors":false,"classes":[{"name":"GitBlameAnalyzer","type":"class","loc":273,"maxCcn":12,"avgCcn":5.67,"mi":53.42,"miRating":"C","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":12,"ccnRating":"D","mi":98.98,"miRating":"A"},{"name":"isGitRepository","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getGitRoot","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getBlameData","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":99.21,"miRating":"A"},{"name":"getPrimaryAuthor","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"normalizeAuthorKey","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMiRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getCcnRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getScoreRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"ProjectAnalyzer.php","type":"file","path":"Analyzer\/ProjectAnalyzer.php","loc":238,"lloc":56,"cloc":7,"maxCcn":10,"avgCcn":3.14,"mi":61.71,"miRating":"C","ccnRating":"C","classCount":1,"methodCount":14,"hasErrors":false,"classes":[{"name":"ProjectAnalyzer","type":"class","loc":238,"maxCcn":10,"avgCcn":3.14,"mi":61.71,"miRating":"C","ccnRating":"C","lcom":0.8571,"lcomRating":"F","methodCount":14,"propertyCount":1,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"setCoveragePath","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyze","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"resolveProjectType","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"findPhpFiles","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyzeFiles","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculateSummary","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"aggregateMetrics","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"countViolations","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculateRatings","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"average","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"rateMi","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"rateCcn","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"rateLcom","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"GitBlameAnalyzer.php","type":"file","path":"Analyzer\/GitBlameAnalyzer.php","loc":273,"lloc":90,"cloc":44,"maxCcn":12,"avgCcn":5.67,"mi":53.42,"miRating":"C","ccnRating":"D","classCount":1,"methodCount":9,"hasErrors":false,"classes":[{"name":"GitBlameAnalyzer","type":"class","loc":273,"maxCcn":12,"avgCcn":5.67,"mi":53.42,"miRating":"C","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":9,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":12,"ccnRating":"D","mi":98.98,"miRating":"A"},{"name":"isGitRepository","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getGitRoot","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getBlameData","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":99.21,"miRating":"A"},{"name":"getPrimaryAuthor","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"normalizeAuthorKey","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMiRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getCcnRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"getScoreRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"ProjectAnalyzer.php","type":"file","path":"Analyzer\/ProjectAnalyzer.php","loc":238,"lloc":56,"cloc":7,"maxCcn":10,"avgCcn":3.14,"mi":61.71,"miRating":"C","ccnRating":"C","classCount":1,"methodCount":14,"hasErrors":false,"classes":[{"name":"ProjectAnalyzer","type":"class","loc":238,"maxCcn":10,"avgCcn":3.14,"mi":61.71,"miRating":"C","ccnRating":"C","lcom":0.8571,"lcomRating":"F","methodCount":14,"propertyCount":1,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"setCoveragePath","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyze","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"resolveProjectType","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"findPhpFiles","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyzeFiles","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculateSummary","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"aggregateMetrics","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":100,"miRating":"A"},{"name":"countViolations","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"calculateRatings","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"average","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"rateMi","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"rateCcn","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"},{"name":"rateLcom","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"DependenciesAnalyzer.php","type":"file","path":"Analyzer\/DependenciesAnalyzer.php","loc":549,"lloc":184,"cloc":41,"maxCcn":39,"avgCcn":9.54,"mi":35.12,"miRating":"D","ccnRating":"F","classCount":1,"methodCount":13,"hasErrors":false,"classes":[{"name":"DependenciesAnalyzer","type":"class","loc":549,"maxCcn":39,"avgCcn":9.54,"mi":35.12,"miRating":"D","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":13,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":39,"ccnRating":"F","mi":83.41,"miRating":"B"},{"name":"checkSupportStatus","type":"method","loc":0,"ccn":19,"ccnRating":"F","mi":88.01,"miRating":"A"},{"name":"extractMajorMinor","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":91.92,"miRating":"A"},{"name":"extractMajor","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":91.92,"miRating":"A"},{"name":"findFile","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":91.46,"miRating":"A"},{"name":"parseJson","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":91.69,"miRating":"A"},{"name":"checkOutdatedPackages","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":90.08,"miRating":"A"},{"name":"getLatestVersion","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":90.08,"miRating":"A"},{"name":"isOutdated","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":91,"miRating":"A"},{"name":"parseVersion","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":92.15,"miRating":"A"},{"name":"calculateSeverity","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":90.77,"miRating":"A"},{"name":"adjustSeverityBySupport","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":90.77,"miRating":"A"},{"name":"getPackageSupportStatus","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":89.16,"miRating":"A"}]}]},{"name":"ArchitectureAnalyzer.php","type":"file","path":"Analyzer\/ArchitectureAnalyzer.php","loc":369,"lloc":122,"cloc":62,"maxCcn":24,"avgCcn":7.4,"mi":46.77,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":10,"hasErrors":false,"classes":[{"name":"ArchitectureAnalyzer","type":"class","loc":369,"maxCcn":24,"avgCcn":7.4,"mi":46.77,"miRating":"C","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":10,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":97.78,"miRating":"A"},{"name":"analyze","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":97.78,"miRating":"A"},{"name":"buildDependencyGraph","type":"method","loc":0,"ccn":24,"ccnRating":"F","mi":92.49,"miRating":"A"},{"name":"detectLayerViolations","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":95.94,"miRating":"A"},{"name":"buildFilePathMap","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":96.4,"miRating":"A"},{"name":"detectCircularDependencies","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":96.17,"miRating":"A"},{"name":"tarjanSCC","type":"method","loc":0,"ccn":13,"ccnRating":"D","mi":95.02,"miRating":"A"},{"name":"getViolationSeverity","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":97.09,"miRating":"A"},{"name":"calculateScore","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":97.55,"miRating":"A"},{"name":"getScoreRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":96.86,"miRating":"A"}]}]},{"name":"FileAnalyzer.php","type":"file","path":"Analyzer\/FileAnalyzer.php","loc":212,"lloc":49,"cloc":13,"maxCcn":14,"avgCcn":5.2,"mi":65.85,"miRating":"B","ccnRating":"D","classCount":1,"methodCount":5,"hasErrors":false,"classes":[{"name":"FileAnalyzer","type":"class","loc":212,"maxCcn":14,"avgCcn":5.2,"mi":65.85,"miRating":"B","ccnRating":"D","lcom":0,"lcomRating":"A","methodCount":5,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"analyze","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"buildClassResults","type":"method","loc":0,"ccn":14,"ccnRating":"D","mi":99.64,"miRating":"A"},{"name":"determineCategory","type":"method","loc":0,"ccn":3,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"getMiRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":100,"miRating":"A"}]}]},{"name":"CoverageAnalyzer.php","type":"file","path":"Analyzer\/CoverageAnalyzer.php","loc":403,"lloc":140,"cloc":32,"maxCcn":27,"avgCcn":10.73,"mi":42.65,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":11,"hasErrors":false,"classes":[{"name":"CoverageAnalyzer","type":"class","loc":403,"maxCcn":27,"avgCcn":10.73,"mi":42.65,"miRating":"C","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":11,"propertyCount":0,"methods":[{"name":"analyze","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":96.23,"miRating":"A"},{"name":"analyzeFromProject","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":96,"miRating":"A"},{"name":"generateCoverage","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":95.08,"miRating":"A"},{"name":"parseCloverFormat","type":"method","loc":0,"ccn":17,"ccnRating":"F","mi":93.47,"miRating":"A"},{"name":"parsePhpunitFormat","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":94.85,"miRating":"A"},{"name":"extractFileCoverage","type":"method","loc":0,"ccn":10,"ccnRating":"C","mi":95.08,"miRating":"A"},{"name":"parseFileElement","type":"method","loc":0,"ccn":27,"ccnRating":"F","mi":91.17,"miRating":"A"},{"name":"extractPackageCoverage","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":94.85,"miRating":"A"},{"name":"countFullyCoveredClasses","type":"method","loc":0,"ccn":7,"ccnRating":"B","mi":95.77,"miRating":"A"},{"name":"countFullyCoveredClassesInFile","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":95.31,"miRating":"A"},{"name":"calculateRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":96.23,"miRating":"A"}]}]}],"loc":13010,"maxCcn":48,"miCount":88,"fileCount":88,"classCount":84,"avgMi":80.40613636363638,"miRating":"B","ccnRating":"F"},{"name":"Command","type":"directory","children":[{"name":"AnalyzeCommand.php","type":"file","path":"Command\/AnalyzeCommand.php","loc":404,"lloc":131,"cloc":22,"maxCcn":21,"avgCcn":7.67,"mi":43.93,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":6,"hasErrors":false,"classes":[{"name":"AnalyzeCommand","type":"class","loc":404,"maxCcn":21,"avgCcn":7.67,"mi":43.93,"miRating":"C","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":6,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":84.44,"miRating":"B"},{"name":"configure","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":84.44,"miRating":"B"},{"name":"runWizard","type":"method","loc":0,"ccn":20,"ccnRating":"F","mi":80.07,"miRating":"B"},{"name":"execute","type":"method","loc":0,"ccn":21,"ccnRating":"F","mi":79.84,"miRating":"B"},{"name":"listTypes","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":84.21,"miRating":"B"},{"name":"listLanguages","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":84.44,"miRating":"B"}]}]},{"name":"AnalyzeCommand.php","type":"file","path":"Command\/AnalyzeCommand.php","loc":404,"lloc":131,"cloc":22,"maxCcn":21,"avgCcn":7.67,"mi":43.93,"miRating":"C","ccnRating":"F","classCount":1,"methodCount":6,"hasErrors":false,"classes":[{"name":"AnalyzeCommand","type":"class","loc":404,"maxCcn":21,"avgCcn":7.67,"mi":43.93,"miRating":"C","ccnRating":"F","lcom":0,"lcomRating":"A","methodCount":6,"propertyCount":0,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":84.44,"miRating":"B"},{"name":"configure","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":84.44,"miRating":"B"},{"name":"runWizard","type":"method","loc":0,"ccn":20,"ccnRating":"F","mi":80.07,"miRating":"B"},{"name":"execute","type":"method","loc":0,"ccn":21,"ccnRating":"F","mi":79.84,"miRating":"B"},{"name":"listTypes","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":84.21,"miRating":"B"},{"name":"listLanguages","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":84.44,"miRating":"B"}]}]}],"loc":808,"maxCcn":21,"miCount":2,"fileCount":2,"classCount":2,"avgMi":43.93,"miRating":"C","ccnRating":"F"},{"name":"DependencyInjection","type":"directory","children":[{"name":"Configuration.php","type":"file","path":"DependencyInjection\/Configuration.php","loc":24,"lloc":3,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":1,"hasErrors":false,"classes":[{"name":"Configuration","type":"class","loc":24,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":1,"propertyCount":0,"methods":[{"name":"getConfigTreeBuilder","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"PhpQualityExtension.php","type":"file","path":"DependencyInjection\/PhpQualityExtension.php","loc":48,"lloc":5,"cloc":2,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"PhpQualityExtension","type":"class","loc":48,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"methods":[{"name":"load","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"prepend","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"Configuration.php","type":"file","path":"DependencyInjection\/Configuration.php","loc":24,"lloc":3,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":1,"hasErrors":false,"classes":[{"name":"Configuration","type":"class","loc":24,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":1,"propertyCount":0,"methods":[{"name":"getConfigTreeBuilder","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]},{"name":"PhpQualityExtension.php","type":"file","path":"DependencyInjection\/PhpQualityExtension.php","loc":48,"lloc":5,"cloc":2,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":2,"hasErrors":false,"classes":[{"name":"PhpQualityExtension","type":"class","loc":48,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":2,"propertyCount":0,"methods":[{"name":"load","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"},{"name":"prepend","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]}],"loc":144,"maxCcn":1,"miCount":4,"fileCount":4,"classCount":4,"avgMi":100,"miRating":"A","ccnRating":"A"},{"name":"Report","type":"directory","children":[{"name":"ConsoleReportGenerator.php","type":"file","path":"Report\/ConsoleReportGenerator.php","loc":127,"lloc":34,"cloc":6,"maxCcn":9,"avgCcn":4.33,"mi":73.54,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"ConsoleReportGenerator","type":"class","loc":127,"maxCcn":9,"avgCcn":4.33,"mi":73.54,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"generate","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":96.46,"miRating":"A"},{"name":"formatRating","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":98.07,"miRating":"A"},{"name":"formatViolations","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":98.07,"miRating":"A"}]}]},{"name":"HtmlReportGenerator.php","type":"file","path":"Report\/HtmlReportGenerator.php","loc":905,"lloc":272,"cloc":54,"maxCcn":57,"avgCcn":11.87,"mi":25.7,"miRating":"D","ccnRating":"F","classCount":1,"methodCount":15,"hasErrors":false,"classes":[{"name":"HtmlReportGenerator","type":"class","loc":905,"maxCcn":57,"avgCcn":11.87,"mi":25.7,"miRating":"D","ccnRating":"F","lcom":0.9333,"lcomRating":"F","methodCount":15,"propertyCount":2,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":86.27,"miRating":"A"},{"name":"generate","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":83.97,"miRating":"B"},{"name":"generateRecommendations","type":"method","loc":0,"ccn":57,"ccnRating":"F","mi":73.39,"miRating":"B"},{"name":"prepareCoverageData","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":85.12,"miRating":"A"},{"name":"generatePage","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":86.27,"miRating":"A"},{"name":"getAllMethods","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":85.58,"miRating":"A"},{"name":"getUniqueCategories","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":85.58,"miRating":"A"},{"name":"calculateHalsteadSummary","type":"method","loc":0,"ccn":15,"ccnRating":"D","mi":83.05,"miRating":"B"},{"name":"getTopOperators","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":84.66,"miRating":"B"},{"name":"prepareAnalysisData","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":84.43,"miRating":"B"},{"name":"getCcnRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":85.35,"miRating":"A"},{"name":"getMiRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":85.35,"miRating":"A"},{"name":"prepareTreeData","type":"method","loc":0,"ccn":15,"ccnRating":"D","mi":83.05,"miRating":"B"},{"name":"buildTreeArray","type":"method","loc":0,"ccn":22,"ccnRating":"F","mi":81.44,"miRating":"B"},{"name":"prepareChartData","type":"method","loc":0,"ccn":15,"ccnRating":"D","mi":83.05,"miRating":"B"}]}]},{"name":"ReportGeneratorInterface.php","type":"file","path":"Report\/ReportGeneratorInterface.php","loc":16,"lloc":0,"cloc":3,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":0,"methodCount":0,"hasErrors":false,"classes":[]},{"name":"ConsoleReportGenerator.php","type":"file","path":"Report\/ConsoleReportGenerator.php","loc":127,"lloc":34,"cloc":6,"maxCcn":9,"avgCcn":4.33,"mi":73.54,"miRating":"B","ccnRating":"C","classCount":1,"methodCount":3,"hasErrors":false,"classes":[{"name":"ConsoleReportGenerator","type":"class","loc":127,"maxCcn":9,"avgCcn":4.33,"mi":73.54,"miRating":"B","ccnRating":"C","lcom":0,"lcomRating":"A","methodCount":3,"propertyCount":0,"methods":[{"name":"generate","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":96.46,"miRating":"A"},{"name":"formatRating","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":98.07,"miRating":"A"},{"name":"formatViolations","type":"method","loc":0,"ccn":2,"ccnRating":"A","mi":98.07,"miRating":"A"}]}]},{"name":"ReportGeneratorInterface.php","type":"file","path":"Report\/ReportGeneratorInterface.php","loc":16,"lloc":0,"cloc":3,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":0,"methodCount":0,"hasErrors":false,"classes":[]},{"name":"HtmlReportGenerator.php","type":"file","path":"Report\/HtmlReportGenerator.php","loc":905,"lloc":272,"cloc":54,"maxCcn":57,"avgCcn":11.87,"mi":25.7,"miRating":"D","ccnRating":"F","classCount":1,"methodCount":15,"hasErrors":false,"classes":[{"name":"HtmlReportGenerator","type":"class","loc":905,"maxCcn":57,"avgCcn":11.87,"mi":25.7,"miRating":"D","ccnRating":"F","lcom":0.9333,"lcomRating":"F","methodCount":15,"propertyCount":2,"methods":[{"name":"__construct","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":86.27,"miRating":"A"},{"name":"generate","type":"method","loc":0,"ccn":11,"ccnRating":"D","mi":83.97,"miRating":"B"},{"name":"generateRecommendations","type":"method","loc":0,"ccn":57,"ccnRating":"F","mi":73.39,"miRating":"B"},{"name":"prepareCoverageData","type":"method","loc":0,"ccn":6,"ccnRating":"B","mi":85.12,"miRating":"A"},{"name":"generatePage","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":86.27,"miRating":"A"},{"name":"getAllMethods","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":85.58,"miRating":"A"},{"name":"getUniqueCategories","type":"method","loc":0,"ccn":4,"ccnRating":"A","mi":85.58,"miRating":"A"},{"name":"calculateHalsteadSummary","type":"method","loc":0,"ccn":15,"ccnRating":"D","mi":83.05,"miRating":"B"},{"name":"getTopOperators","type":"method","loc":0,"ccn":8,"ccnRating":"C","mi":84.66,"miRating":"B"},{"name":"prepareAnalysisData","type":"method","loc":0,"ccn":9,"ccnRating":"C","mi":84.43,"miRating":"B"},{"name":"getCcnRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":85.35,"miRating":"A"},{"name":"getMiRating","type":"method","loc":0,"ccn":5,"ccnRating":"B","mi":85.35,"miRating":"A"},{"name":"prepareTreeData","type":"method","loc":0,"ccn":15,"ccnRating":"D","mi":83.05,"miRating":"B"},{"name":"buildTreeArray","type":"method","loc":0,"ccn":22,"ccnRating":"F","mi":81.44,"miRating":"B"},{"name":"prepareChartData","type":"method","loc":0,"ccn":15,"ccnRating":"D","mi":83.05,"miRating":"B"}]}]}],"loc":2096,"maxCcn":57,"miCount":6,"fileCount":6,"classCount":4,"avgMi":66.41333333333334,"miRating":"B","ccnRating":"F"},{"name":"PhpQualityBundle.php","type":"file","path":"PhpQualityBundle.php","loc":16,"lloc":1,"cloc":0,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","classCount":1,"methodCount":1,"hasErrors":false,"classes":[{"name":"PhpQualityBundle","type":"class","loc":16,"maxCcn":1,"avgCcn":1,"mi":100,"miRating":"A","ccnRating":"A","lcom":0,"lcomRating":"A","methodCount":1,"propertyCount":0,"methods":[{"name":"getPath","type":"method","loc":0,"ccn":1,"ccnRating":"A","mi":100,"miRating":"A"}]}]}];
+
+    // SVG icons
+    const icons = {
+        folder: '<svg class="tree-icon tree-icon-folder" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
+        file: '<svg class="tree-icon tree-icon-file" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>',
+        class: '<svg class="tree-icon tree-icon-class" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+        method: '<svg class="tree-icon tree-icon-method" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
+        chevron: '<svg class="tree-toggle-icon" viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>'
+    };
+
+    // Calculate severity based on worst rating
+    function getSeverity(node) {
+        const ratingOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'F': 5 };
+        let worstRating = 'A';
+
+        if (node.type === 'directory') {
+            // Use MI rating and CCN rating
+            const ratings = [node.miRating, node.ccnRating].filter(r => r);
+            for (const r of ratings) {
+                if (ratingOrder[r] > ratingOrder[worstRating]) {
+                    worstRating = r;
+                }
+            }
+        } else if (node.type === 'file') {
+            const ratings = [node.miRating, node.ccnRating].filter(r => r);
+            for (const r of ratings) {
+                if (ratingOrder[r] > ratingOrder[worstRating]) {
+                    worstRating = r;
+                }
+            }
+        } else if (node.type === 'class') {
+            const ratings = [node.miRating, node.ccnRating, node.lcomRating].filter(r => r);
+            for (const r of ratings) {
+                if (ratingOrder[r] > ratingOrder[worstRating]) {
+                    worstRating = r;
+                }
+            }
+        } else if (node.type === 'method') {
+            worstRating = node.ccnRating || 'A';
+        }
+
+        return worstRating;
+    }
+
+    function renderTreeNode(node, depth = 0) {
+        const hasChildren = (node.type === 'directory' && node.children && node.children.length > 0) ||
+                           (node.type === 'file' && node.classes && node.classes.length > 0) ||
+                           (node.type === 'class' && node.methods && node.methods.length > 0);
+
+        const isCollapsed = depth > 1; // Collapse by default after depth 1
+        const severity = getSeverity(node);
+
+        let html = `<div class="tree-node ${isCollapsed && hasChildren ? 'collapsed' : ''}" data-type="${node.type}">`;
+        html += `<div class="tree-node-header severity-${severity}" ${hasChildren ? 'onclick="toggleNode(this)"' : ''}>`;
+
+        // Toggle icon
+        html += `<span class="tree-toggle ${hasChildren ? 'has-children' : ''}">`;
+        if (hasChildren) {
+            html += icons.chevron;
+        }
+        html += '</span>';
+
+        // Type icon
+        if (node.type === 'directory') {
+            html += icons.folder;
+        } else if (node.type === 'file') {
+            html += icons.file;
+        } else if (node.type === 'class') {
+            html += icons.class;
+        } else if (node.type === 'method') {
+            html += icons.method;
+        }
+
+        // Name
+        html += `<span class="tree-name tree-name-${node.type}">${node.name}</span>`;
+
+        // Metrics
+        html += '<div class="tree-metrics">';
+
+        if (node.type === 'directory') {
+            html += `<span class="tree-stats">`;
+            html += `<span>${node.fileCount} files</span>`;
+            html += `<span>${node.classCount} classes</span>`;
+            html += `</span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.maxCcn}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">MI:</span><span class="tree-metric-rating rating-${node.miRating}">${Math.round(node.avgMi)}</span></span>`;
+        } else if (node.type === 'file') {
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.maxCcn}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">MI:</span><span class="tree-metric-rating rating-${node.miRating}">${Math.round(node.mi)}</span></span>`;
+        } else if (node.type === 'class') {
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.maxCcn}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">MI:</span><span class="tree-metric-rating rating-${node.miRating}">${Math.round(node.mi)}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">LCOM:</span><span class="tree-metric-rating rating-${node.lcomRating}">${node.lcom.toFixed(2)}</span></span>`;
+        } else if (node.type === 'method') {
+            html += `<span class="tree-metric"><span class="tree-metric-label">LOC:</span><span class="tree-metric-value">${node.loc}</span></span>`;
+            html += `<span class="tree-metric"><span class="tree-metric-label">CCN:</span><span class="tree-metric-rating rating-${node.ccnRating}">${node.ccn}</span></span>`;
+        }
+
+        html += '</div>'; // tree-metrics
+        html += '</div>'; // tree-node-header
+
+        // Children
+        if (hasChildren) {
+            html += '<div class="tree-node-children">';
+            if (node.type === 'directory' && node.children) {
+                for (const child of node.children) {
+                    html += renderTreeNode(child, depth + 1);
+                }
+            } else if (node.type === 'file' && node.classes) {
+                for (const cls of node.classes) {
+                    html += renderTreeNode(cls, depth + 1);
+                }
+            } else if (node.type === 'class' && node.methods) {
+                for (const method of node.methods) {
+                    html += renderTreeNode(method, depth + 1);
+                }
+            }
+            html += '</div>';
+        }
+
+        html += '</div>'; // tree-node
+        return html;
+    }
+
+    function renderTree() {
+        const container = document.getElementById('codeTree');
+        let html = '';
+        for (const node of treeData) {
+            html += renderTreeNode(node, 0);
+        }
+        container.innerHTML = html;
+    }
+
+    function toggleNode(header) {
+        const node = header.parentElement;
+        node.classList.toggle('collapsed');
+    }
+
+    function expandAll() {
+        document.querySelectorAll('.tree-node.collapsed').forEach(node => {
+            node.classList.remove('collapsed');
+        });
+    }
+
+    function collapseAll() {
+        document.querySelectorAll('.tree-node').forEach(node => {
+            const hasChildren = node.querySelector('.tree-node-children');
+            if (hasChildren) {
+                node.classList.add('collapsed');
+            }
+        });
+    }
+
+    // Render tree on page load
+    renderTree();
+</script>
+</body>
+</html>

@@ -16,7 +16,8 @@ services:
         resource: '../../Config/'
 
     PhpQuality\Analyzer\Ast\AstParser: ~
-    PhpQuality\Analyzer\FileAnalyzer: ~
+    PhpQuality\Analyzer\FileAnalyzer:
+        public: true
     PhpQuality\Analyzer\ProjectAnalyzer: ~
 
     PhpQuality\Analyzer\ProjectType\ProjectTypeDetector:
