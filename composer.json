@@ -3,6 +3,11 @@
     "description": "Symfony bundle for PHP static code analysis, metrics, and quality reports",
     "type": "symfony-bundle",
     "license": "MIT",
+    "extra": {
+        "branch-alias": {
+            "dev-dev": "1.5.x-dev"
+        }
+    },
     "keywords": [
         "php",
         "metrics",
