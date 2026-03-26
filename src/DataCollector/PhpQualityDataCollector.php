@@ -31,7 +31,6 @@ class PhpQualityDataCollector extends AbstractDataCollector
     {
         // Use callstack tracer if available, otherwise fall back to all included files
         if ($this->callstackTracer !== null) {
-            $this->callstackTracer->captureBacktrace(); // Capture final state
             $includedFiles = $this->callstackTracer->getTracedFiles();
         } else {
             $includedFiles = get_included_files();
