@@ -27,15 +27,25 @@ class PhpQualityDataCollector extends AbstractDataCollector
         private readonly ?CallstackTracer $callstackTracer = null,
     ) {}
 
+    private function getDependencyTreeAnalyzer(): DependencyTreeAnalyzer
+    {
+        return new DependencyTreeAnalyzer($this->projectDir, $this->excludePaths);
+    }
+
     public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
-        // Use callstack tracer if available, otherwise fall back to all included files
-        if ($this->callstackTracer !== null) {
-            $includedFiles = $this->callstackTracer->getTracedFiles();
+        // Get controller file and analyze its dependency tree
+        $controllerFile = $this->callstackTracer?->getControllerFile();
+
+        if ($controllerFile !== null) {
+            // Analyze dependency tree from controller
+            $analyzer = $this->getDependencyTreeAnalyzer();
+            $projectFiles = $analyzer->analyze($controllerFile);
         } else {
+            // Fallback: filter all included files
             $includedFiles = get_included_files();
+            $projectFiles = $this->filterProjectFiles($includedFiles);
         }
-        $projectFiles = $this->filterProjectFiles($includedFiles);
 
         $results = [];
         $summary = [
@@ -98,8 +108,8 @@ class PhpQualityDataCollector extends AbstractDataCollector
             'controller' => $this->callstackTracer?->getControllerInfo(),
             'controllerFile' => $this->callstackTracer?->getControllerFile(),
             'debug' => [
+                'mode' => $controllerFile !== null ? 'dependency_tree' : 'all_included',
                 'projectDir' => $this->projectDir,
-                'totalIncludedFiles' => count($includedFiles),
                 'analyzedFilesCount' => count($projectFiles),
                 'excludePaths' => $this->excludePaths,
             ],
