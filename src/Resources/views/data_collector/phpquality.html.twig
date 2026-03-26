@@ -61,6 +61,17 @@
 {% block panel %}
     <h2>PHP Quality Analysis</h2>
 
+    {% if collector.data.controller %}
+    <div class="sf-tabs">
+        <div class="tab">
+            <h3 class="tab-title">Controller</h3>
+            <div class="tab-content">
+                <code>{{ collector.data.controller }}</code>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% set summary = collector.summary %}
     {% set thresholds = collector.thresholds %}
 
@@ -199,16 +210,12 @@
     <h3>Debug Information</h3>
     <table>
         <tr>
-            <th>Mode</th>
-            <td><code>{{ collector.debug.mode }}</code></td>
+            <th>Project Directory</th>
+            <td><code>{{ collector.debug.projectDir }}</code></td>
         </tr>
         <tr>
-            <th>Controller</th>
-            <td><code>{{ collector.debug.controllerFile ?? 'N/A' }}</code></td>
-        </tr>
-        <tr>
-            <th>Files loaded by controller</th>
-            <td>{{ collector.debug.filesLoadedByController }}</td>
+            <th>Total PHP files loaded</th>
+            <td>{{ collector.debug.totalIncludedFiles }}</td>
         </tr>
         <tr>
             <th>Analyzed files</th>
