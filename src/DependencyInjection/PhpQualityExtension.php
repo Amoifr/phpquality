@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpQuality\DependencyInjection;
 
 use PhpQuality\Config\ThresholdsConfig;
+use PhpQuality\DataCollector\CallstackTracer;
 use PhpQuality\DataCollector\PhpQualityDataCollector;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -59,11 +60,18 @@ class PhpQualityExtension extends Extension implements PrependExtensionInterface
 
     private function registerDataCollector(ContainerBuilder $container, array $profilerConfig): void
     {
+        // Register CallstackTracer as event subscriber
+        $tracerDefinition = new Definition(CallstackTracer::class);
+        $tracerDefinition->addTag('kernel.event_subscriber');
+        $container->setDefinition(CallstackTracer::class, $tracerDefinition);
+
+        // Register DataCollector with CallstackTracer
         $definition = new Definition(PhpQualityDataCollector::class, [
             new Reference('PhpQuality\Analyzer\FileAnalyzer'),
             new Reference(ThresholdsConfig::class),
             '%kernel.project_dir%',
             $profilerConfig['exclude_paths'],
+            new Reference(CallstackTracer::class),
         ]);
 
         $definition->setPublic(true);

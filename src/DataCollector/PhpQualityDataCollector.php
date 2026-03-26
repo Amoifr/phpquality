@@ -24,11 +24,18 @@ class PhpQualityDataCollector extends AbstractDataCollector
         private readonly ThresholdsConfig $thresholdsConfig,
         private readonly string $projectDir,
         private readonly array $excludePaths = ['vendor/', 'var/', 'cache/', 'tests/'],
+        private readonly ?CallstackTracer $callstackTracer = null,
     ) {}
 
     public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
-        $includedFiles = get_included_files();
+        // Use callstack tracer if available, otherwise fall back to all included files
+        if ($this->callstackTracer !== null) {
+            $this->callstackTracer->captureBacktrace(); // Capture final state
+            $includedFiles = $this->callstackTracer->getTracedFiles();
+        } else {
+            $includedFiles = get_included_files();
+        }
         $projectFiles = $this->filterProjectFiles($includedFiles);
 
         $results = [];
@@ -85,23 +92,17 @@ class PhpQualityDataCollector extends AbstractDataCollector
         $summary['averageCcn'] = !empty($ccnValues) ? round(array_sum($ccnValues) / count($ccnValues), 2) : 0;
         $summary['averageLcom'] = !empty($lcomValues) ? round(array_sum($lcomValues) / count($lcomValues), 4) : 0;
 
-        // Debug: filter project files without exclusions to see what's available
-        $projectDir = $this->projectDir . DIRECTORY_SEPARATOR;
-        $allProjectFiles = array_filter($includedFiles, fn($f) => str_starts_with($f, $projectDir));
-        $nonVendorFiles = array_filter($allProjectFiles, fn($f) => !str_contains($f, '/vendor/'));
-
         $this->data = [
             'files' => $results,
             'summary' => $summary,
             'thresholds' => $thresholds,
             'debug' => [
+                'mode' => $this->callstackTracer !== null ? 'callstack' : 'all_included',
                 'projectDir' => $this->projectDir,
-                'includedFilesCount' => count($includedFiles),
-                'allProjectFilesCount' => count($allProjectFiles),
-                'nonVendorFilesCount' => count($nonVendorFiles),
+                'tracedFilesCount' => count($includedFiles),
                 'projectFilesCount' => count($projectFiles),
                 'excludePaths' => $this->excludePaths,
-                'nonVendorFiles' => array_values(array_slice($nonVendorFiles, 0, 20)),
+                'projectFiles' => array_values(array_slice($projectFiles, 0, 20)),
             ],
         ];
     }

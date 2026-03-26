@@ -199,42 +199,24 @@
     <h3>Debug Information</h3>
     <table>
         <tr>
+            <th>Mode</th>
+            <td><code>{{ collector.debug.mode }}</code></td>
+        </tr>
+        <tr>
             <th>Project Directory</th>
             <td><code>{{ collector.debug.projectDir }}</code></td>
         </tr>
         <tr>
-            <th>Total Included Files (PHP)</th>
-            <td>{{ collector.debug.includedFilesCount }}</td>
+            <th>Traced Files</th>
+            <td>{{ collector.debug.tracedFilesCount }}</td>
         </tr>
         <tr>
-            <th>Files in Project Dir</th>
-            <td>{{ collector.debug.allProjectFilesCount }}</td>
-        </tr>
-        <tr>
-            <th>Files excl. vendor/</th>
-            <td>{{ collector.debug.nonVendorFilesCount }}</td>
-        </tr>
-        <tr>
-            <th>Files after all exclusions</th>
+            <th>Analyzed Files</th>
             <td>{{ collector.debug.projectFilesCount }}</td>
         </tr>
         <tr>
             <th>Exclude Paths</th>
             <td><code>{{ collector.debug.excludePaths|join(', ') }}</code></td>
-        </tr>
-        <tr>
-            <th>Non-vendor Files (first 20)</th>
-            <td>
-                {% if collector.debug.nonVendorFiles|length > 0 %}
-                <ul style="margin:0; padding-left:20px; font-size:12px;">
-                {% for file in collector.debug.nonVendorFiles %}
-                    <li><code>{{ file }}</code></li>
-                {% endfor %}
-                </ul>
-                {% else %}
-                <em>None found</em>
-                {% endif %}
-            </td>
         </tr>
     </table>
     {% endif %}
