@@ -23,7 +23,7 @@ COPY docker/app/ /build/app/
 RUN cd /build/app && \
     composer config repositories.phpquality '{"type": "path", "url": "/build/bundle", "options": {"symlink": false}}' && \
     composer config minimum-stability dev && \
-    composer require phpquality/phpquality-bundle:@dev --no-scripts --no-interaction
+    composer require amoifr/phpquality-bundle:@dev --no-scripts --no-interaction
 
 # Generate optimized autoloader
 RUN cd /build/app && composer dump-autoload --optimize --classmap-authoritative
@@ -38,7 +38,7 @@ FROM php:8.3-cli-alpine
 
 LABEL org.opencontainers.image.title="PhpQuality"
 LABEL org.opencontainers.image.description="PHP Static Code Analyzer - Metrics & Quality Reports"
-LABEL org.opencontainers.image.version="1.2.0"
+LABEL org.opencontainers.image.version="1.3.0"
 LABEL org.opencontainers.image.vendor="amoifr"
 LABEL org.opencontainers.image.source="https://github.com/amoifr/PhpQuality"
 LABEL org.opencontainers.image.authors="Pascal CESCON <pascal.cescon@gmail.com>"
