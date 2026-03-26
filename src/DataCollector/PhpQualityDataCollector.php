@@ -98,17 +98,18 @@ class PhpQualityDataCollector extends AbstractDataCollector
      */
     private function filterProjectFiles(array $includedFiles): array
     {
-        $srcDir = $this->projectDir . DIRECTORY_SEPARATOR . 'src';
+        $projectDir = $this->projectDir . DIRECTORY_SEPARATOR;
 
-        return array_filter($includedFiles, function (string $filePath) use ($srcDir): bool {
-            // Must be under project's src/ directory
-            if (!str_starts_with($filePath, $srcDir)) {
+        return array_filter($includedFiles, function (string $filePath) use ($projectDir): bool {
+            // Must be under project directory
+            if (!str_starts_with($filePath, $projectDir)) {
                 return false;
             }
 
             // Check excluded paths
             foreach ($this->excludePaths as $excludePath) {
-                if (str_contains($filePath, $excludePath)) {
+                if (str_contains($filePath, DIRECTORY_SEPARATOR . trim($excludePath, '/') . DIRECTORY_SEPARATOR) ||
+                    str_contains($filePath, DIRECTORY_SEPARATOR . trim($excludePath, '/'))) {
                     return false;
                 }
             }
