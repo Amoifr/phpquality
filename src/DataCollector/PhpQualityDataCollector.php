@@ -85,6 +85,11 @@ class PhpQualityDataCollector extends AbstractDataCollector
         $summary['averageCcn'] = !empty($ccnValues) ? round(array_sum($ccnValues) / count($ccnValues), 2) : 0;
         $summary['averageLcom'] = !empty($lcomValues) ? round(array_sum($lcomValues) / count($lcomValues), 4) : 0;
 
+        // Debug: filter project files without exclusions to see what's available
+        $projectDir = $this->projectDir . DIRECTORY_SEPARATOR;
+        $allProjectFiles = array_filter($includedFiles, fn($f) => str_starts_with($f, $projectDir));
+        $nonVendorFiles = array_filter($allProjectFiles, fn($f) => !str_contains($f, '/vendor/'));
+
         $this->data = [
             'files' => $results,
             'summary' => $summary,
@@ -92,9 +97,11 @@ class PhpQualityDataCollector extends AbstractDataCollector
             'debug' => [
                 'projectDir' => $this->projectDir,
                 'includedFilesCount' => count($includedFiles),
+                'allProjectFilesCount' => count($allProjectFiles),
+                'nonVendorFilesCount' => count($nonVendorFiles),
                 'projectFilesCount' => count($projectFiles),
                 'excludePaths' => $this->excludePaths,
-                'sampleIncludedFiles' => array_slice($includedFiles, 0, 10),
+                'nonVendorFiles' => array_values(array_slice($nonVendorFiles, 0, 20)),
             ],
         ];
     }
