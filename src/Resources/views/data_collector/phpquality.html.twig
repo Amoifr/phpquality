@@ -203,16 +203,16 @@
             <td><code>{{ collector.debug.mode }}</code></td>
         </tr>
         <tr>
-            <th>Project Directory</th>
-            <td><code>{{ collector.debug.projectDir }}</code></td>
+            <th>Controller</th>
+            <td><code>{{ collector.debug.controllerFile ?? 'N/A' }}</code></td>
         </tr>
         <tr>
-            <th>Traced Files</th>
-            <td>{{ collector.debug.tracedFilesCount }}</td>
+            <th>Files loaded by controller</th>
+            <td>{{ collector.debug.filesLoadedByController }}</td>
         </tr>
         <tr>
-            <th>Analyzed Files</th>
-            <td>{{ collector.debug.projectFilesCount }}</td>
+            <th>Analyzed files</th>
+            <td>{{ collector.debug.analyzedFilesCount }}</td>
         </tr>
         <tr>
             <th>Exclude Paths</th>
