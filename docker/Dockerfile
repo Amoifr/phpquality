@@ -38,7 +38,7 @@ FROM php:8.3-cli-alpine
 
 LABEL org.opencontainers.image.title="PhpQuality"
 LABEL org.opencontainers.image.description="PHP Static Code Analyzer - Metrics & Quality Reports"
-LABEL org.opencontainers.image.version="1.4.0"
+LABEL org.opencontainers.image.version="1.4.1"
 LABEL org.opencontainers.image.vendor="amoifr"
 LABEL org.opencontainers.image.source="https://github.com/amoifr/PhpQuality"
 LABEL org.opencontainers.image.authors="Pascal CESCON <pascal.cescon@gmail.com>"
@@ -58,6 +58,10 @@ RUN chmod +x /app/bin/console && \
 # Set production environment
 ENV APP_ENV=prod
 ENV APP_SECRET=docker-build-secret-change-in-production
+
+# PHP memory limit (default: unlimited for large project analysis)
+# Override with: docker run -e PHP_MEMORY_LIMIT=512M ...
+ENV PHP_MEMORY_LIMIT=-1
 
 # Set entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
