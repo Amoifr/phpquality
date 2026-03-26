@@ -1,0 +1,4 @@
+# Enable Profiler integration in development environment
+php_quality:
+    profiler:
+        enabled: true

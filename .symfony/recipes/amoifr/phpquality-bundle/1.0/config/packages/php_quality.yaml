@@ -1,0 +1,18 @@
+php_quality:
+    # Report language (en, fr, es, de, etc.)
+    default_lang: '%kernel.default_locale%'
+
+    # Quality thresholds (null = use framework-specific defaults)
+    thresholds:
+        ccn: ~        # Maximum cyclomatic complexity (default: 10)
+        lcom: ~       # Maximum lack of cohesion (default: 0.8)
+        mi: ~         # Minimum maintainability index (default: 20)
+
+    # Symfony Profiler integration
+    profiler:
+        enabled: false
+        exclude_paths:
+            - 'vendor/'
+            - 'var/'
+            - 'cache/'
+            - 'tests/'

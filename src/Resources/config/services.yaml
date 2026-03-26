@@ -12,6 +12,9 @@ services:
     PhpQuality\Report\:
         resource: '../../Report/'
 
+    PhpQuality\Config\:
+        resource: '../../Config/'
+
     PhpQuality\Analyzer\Ast\AstParser: ~
     PhpQuality\Analyzer\FileAnalyzer: ~
     PhpQuality\Analyzer\ProjectAnalyzer: ~
