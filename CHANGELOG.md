@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-26
+
+### Added
+- Symfony Profiler panel showing PHP quality metrics for files used during request
+- `CallstackTracer` to capture controller information
+- `DependencyTreeAnalyzer` for static analysis of controller imports and dependencies
+- Debug information in profiler panel (mode, project directory, analyzed files count)
+
+### Changed
+- Profiler now analyzes controller dependency tree via `use` statements instead of all included files
+- Improved exclude paths filtering (relative to project root)
+
+### Fixed
+- DataCollector service visibility for Symfony Profiler integration
+- FileAnalyzer service marked as public for dependency injection
+
 ## [1.5.0] - 2026-03-26
 
 ### Added
@@ -91,7 +107,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Allow running Docker container with any user (`--user` flag)
 
-[Unreleased]: https://github.com/amoifr/PhpQuality/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/amoifr/PhpQuality/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/amoifr/PhpQuality/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/amoifr/PhpQuality/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/amoifr/PhpQuality/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/amoifr/PhpQuality/compare/1.3.0...v1.4.0

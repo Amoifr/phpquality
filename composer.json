@@ -5,7 +5,7 @@
     "license": "MIT",
     "extra": {
         "branch-alias": {
-            "dev-dev": "1.5.x-dev"
+            "dev-dev": "1.6.x-dev"
         }
     },
     "keywords": [
